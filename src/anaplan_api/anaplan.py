@@ -9,7 +9,7 @@ import requests
 import json
 import os
 import logging
-from src import anaplan_auth
+from anaplan_api import anaplan_auth
 from time import sleep
 from requests.exceptions import HTTPError
 
