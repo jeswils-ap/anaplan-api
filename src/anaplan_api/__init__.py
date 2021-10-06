@@ -5,4 +5,4 @@ from .anaplan_resource_dictionary import (build_id_dict, get_id, build_name_dict
 from .AnaplanConnection import AnaplanConnection
 
 __version__ = '0.0.1'
-__author__ == 'Jesse Wilson'
+__author__ = 'Jesse Wilson'
