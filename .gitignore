@@ -26,6 +26,8 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
+setup.cfg
+pyproject.toml
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -127,4 +129,6 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+#MacOS-specific files
 .DS_Store
