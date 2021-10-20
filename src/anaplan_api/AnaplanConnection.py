@@ -21,4 +21,21 @@ class AnaplanConnection(object):
         self.authorization = authorization
         self.workspaceGuid = workspaceGuid
         self.modelGuid = modelGuid
-        
+
+    def get_auth(self):
+        return self.authorization
+
+    def get_workspace(self):
+        return self.workspaceGuid
+
+    def get_model(self):
+        return self.modelGuid
+
+    def set_auth(self, authorization):
+        self.authorization = authorization
+
+    def set_workspace(self, workspaceGuid):
+        self.workspaceGuid = workspaceGuid
+
+    def set_model(self, modelGuid):
+        self.modelGuid = modelGuid
