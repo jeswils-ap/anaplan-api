@@ -23,23 +23,7 @@ __post_body__ = {
 __BYTES__ = 1024 * 1024
 __chunk__ = 0
 
-logger = logging.getLogger
-
-#===========================================================================
-# This function sets the log level for the library.
-#===========================================================================
-def create_logger(level):
-    '''
-    :param level: Log level to report
-    :param *args: If not null, path to file save logs.
-    '''
-    logging.basicConfig(format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
-                        datefmt='%H:%M:%S',
-                        level=level)
-    logger = logging.getLogger("AnaplanPythonAPI")
-    
-    return logger
-    
+logger = logging.getLogger(__name__)
 
 #===========================================================================
 # This function reads the authentication type, Basic or Certificate, then passes
@@ -52,8 +36,6 @@ def generate_authorization(auth_type, *args):
                   Password, and private key if auth_type='basic'
     '''
     
-    anaplan_auth.logger = logger
-        
     if auth_type.lower() == 'basic':
         header_string = anaplan_auth.basic_auth_header(args[0], args[1])
         

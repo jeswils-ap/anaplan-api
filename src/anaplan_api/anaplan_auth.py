@@ -22,21 +22,6 @@ import logging
 logger = logging.getLogger(__name__)
 
 #===========================================================================
-# This function sets the log level for the library.
-#===========================================================================
-def create_logger(level):
-	'''
-    :param level: Log level to report
-    :param *args: If not null, path to file save logs.
-    '''
-	logging.basicConfig(format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
-                        datefmt='%H:%M:%S',
-                        level=level)
-	global logger
-	logger = logging.getLogger("AnaplanPythonAPI")
-
-
-#===========================================================================
 # This function reads a pseudo-randomly generated nonce and signs the text
 # with the private key.
 #===========================================================================

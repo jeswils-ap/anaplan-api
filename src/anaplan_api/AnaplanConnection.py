@@ -11,7 +11,6 @@ class AnaplanConnection(object):
     classdocs
     '''
 
-
     def __init__(self, authorization, workspaceGuid, modelGuid):
         '''
         :param authorization: Authorization header string
