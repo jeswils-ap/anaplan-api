@@ -127,7 +127,7 @@ def flat_file_upload(conn, fileId, chunkSize, file):
                     except HTTPError as e:
                         raise HTTPError(e)
                     logger.debug("Chunk %s uploaded successfully.", str(chunkNum + 1))
-                    #print("Chunk " + str(chunkNum + 1) +" uploaded, Status: " + str(file_upload.status_code))
+
                     if not file_upload.ok:
                         complete = False #If the upload fails, break the loop and prevent subsequent requests. Print error to screen
                         logger.error("Error %s\n%s", str(file_upload.status_code), file_upload.text)
@@ -192,12 +192,10 @@ def stream_upload(conn, file_id, buffer, **args):
             logger.debug("%s chunk(s) successfully uploaded to Anaplan.", __chunk__)
         else:
             logger.error("There was an error completing your upload: %s \n %s", complete_upload.status_code, complete_upload.text)
-            #return "There was an error completing your upload: " + complete_upload.status_code + '\n' + complete_upload.text     
         __chunk__ = 0
     else:
         if(len(buffer.encode()) > (__BYTES__ * 50)):
             logger.error("Buffer too large, please send less than 50mb of data.")
-            #return "Buffer too large, please send less than 50mb of data."
         else:
             if __chunk__ == 0:    
                 logger.info("Starting file upload...")    
@@ -215,12 +213,9 @@ def stream_upload(conn, file_id, buffer, **args):
                 raise HTTPError(e)
             if not stream_upload.ok:
                 logger.error("Error %s\n%s", str(stream_upload.status_code), stream_upload.text)
-                #return "Error " + str(stream_upload.status_code) + '\n' + stream_upload.text
             else:
                 __chunk__ += 1
                 logger.debug("Successfully uploaded chunk number %s", str(__chunk__))
-                #return "Uploaded chunk " + str(__chunk__) + ", Status: " + str(stream_upload.status_code)
-            
 
 #===========================================================================
 # This function reads the ID of the desired action to run, POSTs the task
@@ -423,8 +418,6 @@ def parse_task_response(results, url, taskId, post_header):
     if job_status == "Failed.":
         error_message = str(results["result"]["details"][0]["localMessageText"])
         logger.error("The task has failed to run due to an error: %s", error_message)
-        #print("The task has failed to run due to an error: " + error_message)
-        #return "The task has failed to run due to an error: " + error_message
     else:
         if failure_alert == "True":
             try:
@@ -452,20 +445,16 @@ def parse_task_response(results, url, taskId, post_header):
                             dump = requests.get(url + "/" + taskId + '/' + "dumps" + '/' + object_id,  headers=post_header)
                             dump.raise_for_status()
                         except HTTPError as e:
-                            raise HTTPError(e)
+                            logger.error(e)
                         report = "Error dump for " + object_id + '\n' + dump.text
                         anaplan_process_dump += report  
-                        failure_details = failure_details + local_message      
+                        failure_details = failure_details + local_message
             if anaplan_process_dump != "":
                 logger.info("The requested job is %s", job_status)
-                #print("The requested job is " + job_status)
                 logger.info("%s\nDeails:\n%s\nFailure dump(s):\n%s", load_detail, error_detail, anaplan_process_dump)
-                #return load_detail + '\n' + "Details:" + '\n' + error_detail + '\n' + "Failure dump(s):" + '\n' + anaplan_process_dump
             else:
                 logger.info("The requested job is %s", job_status)
-                #print("The requested job is " + job_status)
                 logger.info(load_detail)
-                #return load_detail
         else:
             if "details" in results["result"]:
                 if str(results["result"]["details"][0]["type"]) == "exportSucceeded":
@@ -479,15 +468,10 @@ def parse_task_response(results, url, taskId, post_header):
                         load_detail = load_detail + i + '\n'
                     if failure_alert == "True":
                         logger.info("The requested job is %s", job_status)
-                        #print("The requested job is " + job_status)
                         logger.error("Failure Dump Available: %s, Successful: %s\nLoad details:\n%s\n%s\nFailure dump:\n%s", failure_alert, success_report, load, load_detail, dump)
-                        #return "Failure Dump Available: " + failure_alert + ", Successful: " + success_report + '\n' + "Load details:" + '\n' + load + '\n' + load_detail + '\n' + "Failure dump:" + '\n' + dump
                     else:
                         logger.info("The requested job is %s", job_status)
-                        #print("The requested job is " + job_status)
                         logger.error("Failure Dump Available: %s, Successful: %s\nLoad details:\n%s\n%s", failure_alert, success_report, load, load_detail)
-                        #return "Failure Dump Available: " + failure_alert + ", Successful: " + success_report + '\n' + "Load details:" + '\n' + load + '\n' + load_detail
-                
 
 #===========================================================================
 # This function queries the Anaplan model for a list of the desired resources:
@@ -510,7 +494,6 @@ def get_list(conn, resource):
     url = __base_url__ + "/" + workspaceGuid + "/models/" + modelGuid + "/" + resource.lower()
     
     logger.debug("Fetching %s", resource)
-    #print("Fetching " + resource + "...")
     
     try:
         response = requests.get(url, headers=get_header)
@@ -521,7 +504,6 @@ def get_list(conn, resource):
     response = json.loads(response)
     
     logger.debug("Finished fetching %s", resource)
-    #print("Finished fetching " + resource + ".")
      
     return response[resource]
 
@@ -538,7 +520,6 @@ def parse_get_response(response):
             break
         else:
             logger.info("Name: %s\nID: %s\n", item["name"], item["id"])
-            #print("Name: " + item["name"] + '\n' + "ID: " + item["id"] + '\n')
             
 #===========================================================================
 # This function downloads a file from Anaplan to the specified path.
@@ -581,13 +562,11 @@ def get_file(conn, fileId):
             file += file_contents.text
         else:
             logger.error("There was a problem downloading %s", file_name)
-            #return "There was a problem fetching the file: " + file_name
             break
         chunk = str(int(chunk) + 1)
         
     if int(chunk) == int(chunk_count):
         logger.info("File download complete!")
-        #print("File download complete!")
         
     return file        
 
@@ -708,7 +687,6 @@ def get_models(conn, user_id):
         logger.error("Error loading models list: %s", e)
     
     logger.debug("Finished fetching models.")
-    #print("Finished fetching models.")
     
     return model_list
 
@@ -732,7 +710,6 @@ def get_workspaces(conn, user_id):
                 }
     
     logger.debug("Fetching workspaces.")
-    #print("Fetching workspaces...")
     
     try:
         workspace_list=requests.get(url, headers=get_header)
@@ -749,6 +726,5 @@ def get_workspaces(conn, user_id):
         logger.error("Error locating workspace list: %s", e)
     
     logger.debug("Finished fetching workspaces.")
-    #print("Finished fetching workspaces.")
     
     return model_list
