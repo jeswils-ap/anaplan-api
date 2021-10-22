@@ -6,7 +6,10 @@
 # Input:		Java Keystore
 # Output:		Key pair as array of strings
 #==============================================================================
-import jks
+import jks, logging
+from base64 import b64encode
+
+logger = logging.getLogger(__name__)
 
 #===============================================================================
 # This function fetches a key-pair from a Java keystore and prepares them for use
