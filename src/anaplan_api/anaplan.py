@@ -9,7 +9,7 @@ import requests
 import json
 import os
 import logging
-from anaplan_api import anaplan_auth
+from anaplan_api import anaplan_cert_auth, anaplan_basic_auth
 from time import sleep
 from requests.exceptions import HTTPError
 
@@ -34,26 +34,25 @@ def generate_authorization(auth_type, *args):
     :param auth_type: 
     :param *args: Path to public certificate, and private key if auth_type='certificate'; Anaplan Username, Anaplan 
                   Password, and private key if auth_type='basic'
+    :returns: Header Authenication value, and token expiry in epoch
     '''
     
     if auth_type.lower() == 'basic':
-        header_string = anaplan_auth.basic_auth_header(args[0], args[1])
-        
-        authorization = anaplan_auth.authenticate(anaplan_auth.auth_request(header_string, body=None))
+        header_string = anaplan_basic_auth.auth_header(args[0], args[1])
+        authorization = anaplan_basic_auth.authenticate(anaplan_auth.auth_request(header_string))
         return authorization
     elif auth_type.lower() == 'certificate':
         privKey = args[0]
         pubCert = args[1]
         
-        header_string = anaplan_auth.certificate_auth_header(pubCert)
-        post_data = anaplan_auth.generate_post_data(privKey)
+        header_string = anaplan_cert_auth.auth_header(pubCert)
+        post_data = anaplan_cert_auth.generate_post_data(privKey)
         
         authorization = anaplan_auth.authenticate(anaplan_auth.auth_request(header_string, post_data))
         if not authorization[:5] == "Error":
             return authorization   
         else:
             logger.error("Authentication Failed: %s", authorization)
-            #print("Authentication Failed: " + authorization) 
     else:
         logger.error("Please enter a valid authentication method: Basic or Certificate")
 
