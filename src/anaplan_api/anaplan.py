@@ -39,7 +39,7 @@ def generate_authorization(auth_type, *args):
     
     if auth_type.lower() == 'basic':
         header_string = anaplan_basic_auth.auth_header(args[0], args[1])
-        authorization = anaplan_basic_auth.authenticate(anaplan_auth.auth_request(header_string))
+        authorization = anaplan_basic_auth.authenticate(anaplan_basic_auth.auth_request(header_string))
         return authorization
     elif auth_type.lower() == 'certificate':
         privKey = args[0]
@@ -47,8 +47,7 @@ def generate_authorization(auth_type, *args):
         
         header_string = anaplan_cert_auth.auth_header(pubCert)
         post_data = anaplan_cert_auth.generate_post_data(privKey)
-        
-        authorization = anaplan_auth.authenticate(anaplan_auth.auth_request(header_string, post_data))
+        authorization = anaplan_cert_auth.authenticate(anaplan_cert_auth.auth_request(header_string, post_data))
         if not authorization[:5] == "Error":
             return authorization   
         else:
@@ -206,7 +205,7 @@ def stream_upload(conn, file_id, buffer, **args):
             #Confirm that the metadata update for the requested file was OK before proceeding with file upload
             try:
                 logger.debug("Attempting to upload chunk %s...", (str(__chunk__ + 1)))
-                stream_upload = requests.put(url + "/chunks/" + str(__chunk__), headers=put_header, data=buffer)
+                stream_upload = requests.put(url + "/chunks/" + str(__chunk__), headers=put_header, data=buffer.encode('utf-8'))
                 stream_upload.raise_for_status()
             except HTTPError() as e:
                 raise HTTPError(e)
