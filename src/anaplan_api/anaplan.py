@@ -227,7 +227,7 @@ def stream_upload(conn, file_id, buffer, **args):
             #Confirm that the metadata update for the requested file was OK before proceeding with file upload
             try:
                 logger.debug("Attempting to upload chunk %s...", (str(__chunk__ + 1)))
-                stream_upload = requests.put(url + "/chunks/" + str(__chunk__), headers=put_header, data=buffer)
+                stream_upload = requests.put(url + "/chunks/" + str(__chunk__), headers=put_header, data=buffer.encode('utf-8'))
                 stream_upload.raise_for_status()
             except HTTPError() as e:
                 raise HTTPError(e)
