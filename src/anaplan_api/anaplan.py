@@ -9,9 +9,8 @@ import requests
 import json
 import os
 import logging
-from anaplan_api import anaplan_cert_auth, anaplan_basic_auth
+from anaplan_api import anaplan_cert_auth, anaplan_basic_auth, import_parser, export_parser, action_parser, process_parser
 from time import sleep
-from requests.exceptions import HTTPError
 
 #===============================================================================
 # Defining global variables
@@ -47,6 +46,7 @@ def generate_authorization(auth_type, *args):
         
         header_string = anaplan_cert_auth.auth_header(pubCert)
         post_data = anaplan_cert_auth.generate_post_data(privKey)
+        
         authorization = anaplan_cert_auth.authenticate(anaplan_cert_auth.auth_request(header_string, post_data))
         if not authorization[:5] == "Error":
             return authorization   
@@ -104,8 +104,8 @@ def flat_file_upload(conn, fileId, chunkSize, file):
             start_upload_post = requests.post(url, headers=post_header, json=file_metadata_start)
             start_upload_post.raise_for_status()
             logger.debug("Complete!")
-        except HTTPError as e:
-            raise HTTPError(e)
+        except Exception as e:
+            logger.error("Error setting metadata {0}".format(e))
         #Confirm that the metadata update for the requested file was OK before proceeding with file upload
         if start_upload_post.ok:
             logger.info("Starting file upload.")
@@ -122,8 +122,8 @@ def flat_file_upload(conn, fileId, chunkSize, file):
                         logger.debug("Starting upload of chunk %s", str(chunkNum + 1))
                         file_upload = requests.put(url + "/chunks/" + str(chunkNum), headers=put_header, data=file_data.encode('utf-8'))
                         file_upload.raise_for_status()
-                    except HTTPError as e:
-                        raise HTTPError(e)
+                    except Exception as e:
+                        logger.error("Error uploading chunk {0}, {1}".format(chunkNum, e))
                     logger.debug("Chunk %s uploaded successfully.", str(chunkNum + 1))
 
                     if not file_upload.ok:
@@ -183,8 +183,8 @@ def stream_upload(conn, file_id, buffer, **args):
         try:
             complete_upload = requests.post(url=url + "/complete", headers=post_header, json=file_metadata_complete)
             complete_upload.raise_for_status()
-        except HTTPError() as e:
-            raise HTTPError(e)
+        except Exception as e:
+            logger.error("Error completing upload of file {0}, {1}".format(file_id, e))
         if complete_upload.ok:
             logger.info("File upload complete.")
             logger.debug("%s chunk(s) successfully uploaded to Anaplan.", __chunk__)
@@ -200,15 +200,15 @@ def stream_upload(conn, file_id, buffer, **args):
                 try:
                     start_upload_post = requests.post(url, headers=post_header, json=stream_metadata_start)
                     start_upload_post.raise_for_status()
-                except HTTPError() as e:
-                    raise HTTPError(e)
+                except Exception as e:
+                    logger.error("Error uploading chunk {0}, {1}".format(__chunk__, e))
             #Confirm that the metadata update for the requested file was OK before proceeding with file upload
             try:
                 logger.debug("Attempting to upload chunk %s...", (str(__chunk__ + 1)))
                 stream_upload = requests.put(url + "/chunks/" + str(__chunk__), headers=put_header, data=buffer.encode('utf-8'))
                 stream_upload.raise_for_status()
-            except HTTPError() as e:
-                raise HTTPError(e)
+            except Exception as e:
+                logger.error("Error uploading chunk {0}, {1}".format(__chunk__, e))
             if not stream_upload.ok:
                 logger.error("Error %s\n%s", str(stream_upload.status_code), stream_upload.text)
             else:
@@ -236,22 +236,21 @@ def execute_action(conn, actionId, retryCount):
             'Content-Type':'application/json'
         }
     if actionId[2] == "2" or actionId[2] == "6" or actionId[2] == "7" or actionId[2] == "8":
-        url = __base_url__ + "/" +workspaceGuid + "/models/" + modelGuid + "/imports/" + actionId + "/tasks"
+        if actionId[2] == "2":
+            url = __base_url__ + "/" +workspaceGuid + "/models/" + modelGuid + "/imports/" + actionId + "/tasks"
+        elif actionId[2] == "6":
+            url = __base_url__ + "/" +workspaceGuid + "/models/" + modelGuid + "/exports/" + actionId + "/tasks"
+        elif actionId[2] == "7":
+            url = __base_url__ + "/" +workspaceGuid + "/models/" + modelGuid + "/actions/" + actionId + "/tasks"
+        elif actionId[2] == "8":
+            url = __base_url__ + "/" +workspaceGuid + "/models/" + modelGuid + "/processes/" + actionId + "/tasks"
+
         logger.info("Running action %s", actionId)
-        if actionId[:3] == "112":
-            taskId = run_action(url, post_header, retryCount)
-            return check_status(url, taskId, post_header)
-        elif actionId[:3] == "116":
-            taskId = run_action(url, post_header, retryCount)
-            return check_status(url, taskId, post_header)
-        elif actionId[:3] == "117":
-            taskId = run_action(url, post_header, retryCount)
-            return check_status(url, taskId, post_header)
-        elif actionId[:3] == "118":
-            taskId = run_action(url, post_header, retryCount)
-            return check_status(url, taskId, post_header)
+        taskId = run_action(url, post_header, retryCount)
+        return check_status(conn, actionId, url, taskId, post_header)
     else:
         logger.error("Incorrect action ID provided!")
+        return None
 
 #===========================================================================
 # This function executes the Anaplan action, if there is a server error it
@@ -272,15 +271,14 @@ def run_action(url, post_header, retryCount):
         try:
             run_action = requests.post(url, headers=post_header, json=__post_body__)
             run_action.raise_for_status()
-        except HTTPError() as e:
-            raise HTTPError(e)
+        except Exception as e:
+            logger.error("Error running action {0}".format(e))
         if run_action.status_code != 200 and state < retryCount:
             sleep(sleepTime)
             try:
                 run_action = requests.post(url, headers=post_header, json=__post_body__)
-                run_action.raise_for_status()
-            except HTTPError() as e:
-                raise HTTPError(e)
+            except Exception as e:
+                logger.error("Error running action {0}".format(e))
             state += 1
             sleepTime = sleepTime * 1.5
         else:
@@ -330,14 +328,11 @@ def execute_action_with_parameters(conn, actionId, retryCount, **params):
     if actionId[2] == "2" or actionId[2] == "8":
         logger.info("Running action %s", actionId)
         url = __base_url__ + "/" +workspaceGuid + "/models/" + modelGuid + "/imports/" + actionId + "/tasks"
-        if actionId[:3] == "112":
-            taskId = run_action_with_parameters(url, post_header, retryCount, post_body)
-            return check_status(url, taskId, post_header)
-        elif actionId[:3] == "118":
-            taskId = run_action(url, post_header, retryCount, post_body)
-            return check_status(url, taskId, post_header)
+        taskId = run_action(url, post_header, retryCount, post_body)
+        return check_status(conn, actionId, url, taskId, post_header)
     else:
         logger.error("Incorrect action ID provided! Only imports and processes may be executed with parameters.")
+        return None
 
 #===========================================================================
 # This function executes the Anaplan import or process with mapping parameters,
@@ -358,15 +353,14 @@ def run_action_with_parameters(url, post_header, retryCount, post_body):
         try:
             run_action = requests.post(url, headers=post_header, json=post_body)
             run_action.raise_for_status()
-        except HTTPError as e:
-            raise HTTPError(e)
+        except Exception as e:
+            logger.error("Error running action {0}".format(e))
         if run_action.status_code != 200 and state < retryCount:
             sleep(sleepTime)
             try:
                 run_import = requests.post(url, headers=post_header, json=post_body)
-                run_import.raise_for_status()
-            except HTTPError as e:
-                raise HTTPError(e)
+            except Exception as e:
+                logger.error("Error running action {0}".format(e))
             state += 1
             sleepTime = sleepTime * 1.5
         else:
@@ -379,7 +373,7 @@ def run_action_with_parameters(url, post_header, retryCount, post_body):
 # This function monitors the status of Anaplan action. Once complete it returns
 # the JSON text of the response.
 #===========================================================================        
-def check_status(url, taskId, post_header):
+def check_status(conn, actionId, url, taskId, post_header):
     '''
     @param url: Anaplan task URL
     @param taskId: ID of the Anaplan task executed
@@ -390,86 +384,41 @@ def check_status(url, taskId, post_header):
         try:
             get_status = requests.get(url + "/" + taskId, headers=post_header)
             get_status.raise_for_status()
-        except HTTPError as e:
-            raise HTTPError(e)
+        except Exception as e:
+            logger.error("Error getting result for task {0}".format(e))
         status = json.loads(get_status.text)
         status = status["task"]["taskState"]
         if status == "COMPLETE":
             results = json.loads(get_status.text)
             results = results["task"]
-            break   
+            break
+        #Wait 1 seconds before continuing loop
+        sleep(1)
     
-    return parse_task_response(results, url, taskId, post_header)
+    return parse_task_response(conn, actionId, results, url, taskId, post_header)
     
 #===========================================================================
 # This function reads the JSON results of the completed Anaplan task and returns
 # the job details.
 #===========================================================================
-def parse_task_response(results, url, taskId, post_header):
+def parse_task_response(conn, actionId, results, url, taskId, post_header):
     '''
     :param results: JSON dump of the results of an Anaplan action
+    :returns: String with task details, array of error dump dataframes
     '''
     
-    job_status = results["currentStep"]
-    failure_alert = str(results["result"]["failureDumpAvailable"])
-    
-    if job_status == "Failed.":
-        error_message = str(results["result"]["details"][0]["localMessageText"])
-        logger.error("The task has failed to run due to an error: %s", error_message)
-    else:
-        if failure_alert == "True":
-            try:
-                dump = requests.get(url + "/" + taskId + '/' + "dump", headers=post_header)
-                dump.raise_for_status()
-            except HTTPError as e:
-                raise HTTPError(e)
-            dump = dump.text
-        success_report = str(results["result"]["successful"])
-        if 'details' not in results["result"]:
-            anaplan_process_dump = ""
-            error_detail = ""
-            load_detail = ""
-            failure_details = ""
-            for nestedResults in results["result"]["nestedResults"]:
-                process_subfailure = str(nestedResults["failureDumpAvailable"])
-                object_id = str(nestedResults["objectId"])
-                load_detail = load_detail + "Process action " + object_id + " completed. Failure: " + process_subfailure + '\n'
-                if process_subfailure == "True":
-                        local_message = str(nestedResults["details"][0]["localMessageText"])
-                        details = nestedResults["details"][0]["values"]
-                        for i in details:
-                            error_detail = error_detail + i + '\n'
-                        try:
-                            dump = requests.get(url + "/" + taskId + '/' + "dumps" + '/' + object_id,  headers=post_header)
-                            dump.raise_for_status()
-                        except HTTPError as e:
-                            logger.error(e)
-                        report = "Error dump for " + object_id + '\n' + dump.text
-                        anaplan_process_dump += report  
-                        failure_details = failure_details + local_message
-            if anaplan_process_dump != "":
-                logger.info("The requested job is %s", job_status)
-                logger.info("%s\nDeails:\n%s\nFailure dump(s):\n%s", load_detail, error_detail, anaplan_process_dump)
-            else:
-                logger.info("The requested job is %s", job_status)
-                logger.info(load_detail)
-        else:
-            if "details" in results["result"]:
-                if str(results["result"]["details"][0]["type"]) == "exportSucceeded":
-                    size = results["result"]["details"][0]["values"][1]
-                    name = results["result"]["details"][0]["values"][5]
-                    return "Export complete! Files size: " + str(size) + " bytes. File name: " + str(name)
-                else:
-                    load = str(results["result"]["details"][0]["localMessageText"])
-                    load_detail = ""
-                    for i in results["result"]["details"][0]["values"]:
-                        load_detail = load_detail + i + '\n'
-                    if failure_alert == "True":
-                        logger.info("The requested job is %s", job_status)
-                        logger.error("Failure Dump Available: %s, Successful: %s\nLoad details:\n%s\n%s\nFailure dump:\n%s", failure_alert, success_report, load, load_detail, dump)
-                    else:
-                        logger.info("The requested job is %s", job_status)
-                        logger.error("Failure Dump Available: %s, Successful: %s\nLoad details:\n%s\n%s", failure_alert, success_report, load, load_detail)
+    if actionId[:3] == "112":
+        #Import
+        return import_parser.parse_response(results, url, taskId, post_header)
+    elif actionId[:3] == "116":
+        #Export
+        return export_parser.parse_response(conn, results, url, taskId, post_header)
+    elif actionId[:3] == "117":
+        #Action
+        return action_parser.parse_response(results, url, taskId, post_header)
+    elif actionId[:3] == "118":
+        #Process
+        return process_parser.parse_response(conn, results, url, taskId, post_header)
 
 #===========================================================================
 # This function queries the Anaplan model for a list of the desired resources:
@@ -496,8 +445,8 @@ def get_list(conn, resource):
     try:
         response = requests.get(url, headers=get_header)
         response.raise_for_status()
-    except HTTPError as e:
-        raise HTTPError(e)
+    except Exception as e:
+        logger.error("Error fetching resource {0}, {1}".format(resource, e))
     response = response.text
     response = json.loads(response)
     
@@ -553,8 +502,8 @@ def get_file(conn, fileId):
             logger.debug("Downloading chunk %s", chunk)
             file_contents = requests.get(url + str(chunk), headers=get_header)
             file_contents.raise_for_status()
-        except HTTPError as e:
-            raise HTTPError(e)
+        except Exception as e:
+            logger.error("Error downloading chunk {0}".format(e))
         if file_contents.ok:
             logger.debug("Chunk %s downloaded successfully.", chunk)
             file += file_contents.text
@@ -566,7 +515,7 @@ def get_file(conn, fileId):
     if int(chunk) == int(chunk_count):
         logger.info("File download complete!")
         
-    return file        
+    return file
 
 #===============================================================================
 # This function queries the model for name and chunk count of a specified file
@@ -593,8 +542,8 @@ def get_file_details(conn, fileId):
     try:
         files_list = requests.get(url, headers=get_header)
         files_list.raise_for_status()
-    except HTTPError as e:
-        raise HTTPError(e)
+    except Exception as e:
+        logger.error("Error getting details for {0}, {1}".format(fileId, e))
     
     if files_list.ok:
         logger.debug("Fetching file details.")
@@ -633,8 +582,8 @@ def get_user_id(conn):
         logger.debug("Retrieving details of current user.")
         user_details=requests.get(url, headers=get_header)
         user_details.raise_for_status()
-    except HTTPError as e:
-        raise HTTPError(e)
+    except Exception as e:
+        logger.error("Error getting user details {0}".format(e))
     try:
         logger.debug("User details retrieved.")
         user_details=json.loads(user_details.text)
