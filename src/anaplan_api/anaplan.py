@@ -9,7 +9,7 @@ import requests
 import json
 import os
 import logging
-from anaplan_api import anaplan_cert_auth, anaplan_basic_auth, import_parser, export_parser, action_parser, process_parser
+from anaplan_api import anaplan_cert_auth, anaplan_basic_auth, import_parser, export_parser, action_parser, process_parser, file_upload, streaming_upload
 from time import sleep
 
 #===============================================================================
