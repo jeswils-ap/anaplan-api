@@ -5,37 +5,34 @@
 # Input:          Authorization header string, workspace ID string, and model ID string
 # Output:         None
 #===============================================================================
+from dataclasses import dataclass, field
+from anaplan_api.AuthToken import AuthToken
 
+
+@dataclass(frozen=True, eq=True)
 class AnaplanConnection(object):
-    '''
-    classdocs
-    '''
+	'''
+	Instance of connection to an Anaplan model. Only one instance may exist for a model ID.
+	Contains AuthToken for the session, Anaplan workspace and model IDs.
+	'''
+	authorization: AuthToken
+	workspaceGuid: str
+	modelGuid: str = field(compare=True)
 
-    def __init__(self, authorization, workspaceGuid, modelGuid):
-        '''
-        :param authorization: Authorization header string
-        :param workspaceGuid: ID of the Anaplan workspace
-        :param modelGuid:     ID of the Anaplan model
-        '''
-        
-        self.authorization = authorization
-        self.workspaceGuid = workspaceGuid
-        self.modelGuid = modelGuid
+	def get_auth(self):
+		return self.authorization
 
-    def get_auth(self):
-        return self.authorization
+	def get_workspace(self):
+		return self.workspaceGuid
 
-    def get_workspace(self):
-        return self.workspaceGuid
+	def get_model(self):
+		return self.modelGuid
 
-    def get_model(self):
-        return self.modelGuid
+	def set_auth(self, authorization):
+		self.authorization = authorization
 
-    def set_auth(self, authorization):
-        self.authorization = authorization
+	def set_workspace(self, workspaceGuid):
+		self.workspaceGuid = workspaceGuid
 
-    def set_workspace(self, workspaceGuid):
-        self.workspaceGuid = workspaceGuid
-
-    def set_model(self, modelGuid):
-        self.modelGuid = modelGuid
+	def set_model(self, modelGuid):
+		self.modelGuid = modelGuid

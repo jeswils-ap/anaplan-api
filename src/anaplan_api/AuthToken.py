@@ -5,29 +5,25 @@
 # Input:          Auth token value and expiry
 # Output:         None
 #===============================================================================
+from dataclasses import dataclass
 
+
+@dataclass
 class AuthToken(object):
-    '''
-    classdocs
-    '''
+	'''
+	classdocs
+	'''
+	token_value: str
+	token_expiry: str
 
-    def __init__(self, token_value, token_expiry):
-        '''
-        :param token_value: Auth token value
-        :param token_expiry: Epoch time when token expires
-        '''
-        
-        self.token_value = token_value
-        self.token_expiry = token_expiry
+	def get_auth_token(self):
+		return self.token_value
 
-    def get_auth_token(self):
-        return self.token_value
+	def set_auth_token(self, token_value):
+		self.token_value = token_value
 
-    def set_auth_token(self, token_value):
-        self.token_value = token_value
+	def get_token_expiry(self):
+		return self.token_expiry
 
-    def get_token_expiry(self):
-        return self.token_expiry
-
-    def set_token_expiry(self, token_expiry):
-        self.token_expiry = token_expiry
+	def set_token_expiry(self, token_expiry):
+		self.token_expiry = token_expiry
