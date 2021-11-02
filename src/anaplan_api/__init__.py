@@ -4,5 +4,5 @@ from .anaplan_auth import (create_logger, get_keystore_pair, insert_newlines, si
 from .anaplan_resource_dictionary import (build_id_dict, get_id, build_name_dict, get_name)
 from .AnaplanConnection import AnaplanConnection
 
-__version__ = '0.0.1'
+__version__ = '0.1.8'
 __author__ = 'Jesse Wilson'
