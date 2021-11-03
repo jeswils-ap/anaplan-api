@@ -11,10 +11,12 @@ import logging, requests
 import pandas as pd
 from io import StringIO
 from requests.exceptions import HTTPError, ConnectionError, SSLError, Timeout, ConnectTimeout, ReadTimeout
+from pandas.errors import EmptyDataError, ParserError, ParserWarning
 from anaplan_api.AnaplanConnection import AnaplanConnection
 
 
 logger = logging.getLogger(__name__)
+
 
 class Parser(object):
 	results = []
@@ -61,7 +63,9 @@ class Parser(object):
 
 		try:
 			eDf = pd.read_csv(StringIO(dump))
-		except Exception as e:
-			logger.error(f"Error loading error dumpt to dataframe {e}")
+		except EmptyDataError, ParserError as e:
+			logger.error(f"Error loading error dump to dataframe {e}")
+		except ParserError as w:
+			logger.warning(f"Wanring raised while parsing csv {e}")
 
 		return eDf

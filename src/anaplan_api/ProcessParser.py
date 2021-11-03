@@ -2,16 +2,16 @@
 # This function reads the JSON results of the completed Anaplan task and returns
 # the job details.
 #===========================================================================
-import requests, logging, re
+import logging, re
 import pandas as pd
 from io import StringIO
 from distutils.util import strtobool
-from requests.exceptions import HTTPError, ConnectionError, SSLError, Timeout, ConnectTimeout, ReadTimeout
 import anaplan_api.anaplan
 from anaplan_api.AnaplanConnection import AnaplanConnection
 from anaplan_api.Parser import Parser
 
 logger = logging.getLogger(__name__)
+
 
 class ProcessParser(Parser):
 	results = []
@@ -74,7 +74,7 @@ class ProcessParser(Parser):
 		successful = results['successful']
 
 		if failure_dump:
-			eDf = ProcessParser.get_dump(url, object_id)
+			eDf = super().get_dump(''.join([url, '/dumps/', object_id]))
 
 		#Import specific parsing
 		if 'details' in results:
@@ -100,23 +100,3 @@ class ProcessParser(Parser):
 
 		logger.debug(f"Error dump available: {failure_dump}, Sub-task {object_id} successful: {successful}")
 		return [f"Error dump available: {failure_dump}, Sub-task {object_id} successful: {successful}", '\n'.join(msg), eDf]
-
-	def get_dump(url: str, object_id: str):
-		authorization = self.authorization
-
-		post_header = {
-						'Authorization': authorization,
-						'Content-Type': 'application/json'
-				}
-				
-		eDf = pd.DataFrame()
-
-		try:
-			logger.debug("Fetching error dump")
-			dump = requests.get(''.join([url, '/dumps/', object_id]),  headers=post_header, timeout=(5,30)).text
-			eDf = pd.read_csv(StringIO(dump))
-			logger.debug("Error dump downloaded.")
-		except (HTTPError, ConnectionError, SSLError, Timeout, ConnectTimeout, ReadTimeout) as e:
-			logger.error(f"Error downloading error dump {e}")
-
-		return eDf

@@ -2,11 +2,10 @@
 # This function reads the JSON results of the completed Anaplan task and returns
 # the job details.
 #===========================================================================
-import requests, logging
+import logging
 import pandas as pd
 from io import StringIO
 from distutils.util import strtobool
-from requests.exceptions import HTTPError, ConnectionError, SSLError, Timeout, ConnectTimeout, ReadTimeout
 import anaplan_api.anaplan
 from anaplan_api.Parser import Parser
 from anaplan_api.AnaplanConnection import AnaplanConnection
@@ -41,17 +40,14 @@ class ExportParser(Parser):
 		else:
 			#IF failure dump is available download
 			if failure_dump:
-				eDf = Parser.get_dump(url)
+				eDf = Parser.get_dump(''.join([url, "/dump"]))
 
 			success_report = str(results['result']['successful'])
 			
 			#details key only present in import task results
 			if 'objectId' in results['result']:
 				object_id = results['result']['objectId']
-				try:
-					file_contents = anaplan.get_file(conn, object_id)
-				except (HTTPError, ConnectionError, SSLError, Timeout, ConnectTimeout, ReadTimeout) as e:
-					logger.error(f"Error fetching export file {e}")
+				file_contents = anaplan.get_file(conn, object_id)
 
 				logger.info(f"The requested job is {job_status}")
 				logger.error(f"Failure Dump Available: {failure_dump}, Successful: {success_report}")
