@@ -1,26 +1,25 @@
-#===============================================================================
+# ===============================================================================
 # Created:			1 Nov 2021
 # @author:			Jesse Wilson (Anaplan Asia Pte Ltd)
 # Description:		Abstract Anaplan Authentication Class
 # Input:			Username & Password, or SHA keypair
 # Output:			Anaplan JWT and token expiry time
-#===============================================================================
-import json, logging, requests, re
-from typing import List
+# ===============================================================================
+import logging
+import requests
 from requests.exceptions import HTTPError, ConnectionError, SSLError, Timeout, ConnectTimeout, ReadTimeout
-from anaplan_api.AnaplanConnection import AnaplanConnection
+from .AnaplanConnection import AnaplanConnection
+from .File import File
 
 logger = logging.getLogger(__name__)
 
 
-class Upload(object):
-
+class Upload(File):
+	base_url: str = "https://api.anaplan.com/2/0/workspaces"
+	file_id: str
 	authorization: str
 	workspace: str
 	model: str
-	file_id: str
-
-	base_url = "https://api.anaplan.com/2/0/workspaces"
 
 	def __init__(self, conn: AnaplanConnection, file_id: str):
 		self.authorization = conn.get_auth()
@@ -40,7 +39,7 @@ class Upload(object):
 	def get_file_id(self) -> str:
 		return self.file_id
 
-	def upload():
+	def upload(self, chunk_size: int, file: str):
 		pass
 
 	def file_metadata(self, url: str) -> bool:
@@ -50,18 +49,18 @@ class Upload(object):
 
 		post_header = {
 						"Authorization": authorization,
-						"Content-Type":"application/json"
+						"Content-Type": "application/json"
 			}
 
 		stream_metadata = {
 							"id": file_id,
-							"chunkCount":-1
+							"chunkCount": -1
 			}
 
 		meta_post = None
 		try:
 			logger.debug("Updating file metadata.")
-			meta_post = requests.post(url, headers=post_header, json=stream_metadata, timeout=(5,30))
+			meta_post = requests.post(url, headers=post_header, json=stream_metadata, timeout=(5, 30))
 			logger.debug("Complete!")
 		except (HTTPError, ConnectionError, SSLError, Timeout, ConnectTimeout, ReadTimeout) as e:
 			logger.error(f"Error setting metadata {e}")
@@ -77,13 +76,13 @@ class Upload(object):
 
 		put_header = {
 						"Authorization": authorization,
-						"Content-Type":"application/octet-stream"
+						"Content-Type": "application/octet-stream"
 			}
 
 		stream_upload = None
 		try:
 			logger.debug(f"Attempting to upload chunk {chunk_num + 1}")
-			stream_upload = requests.put(url, headers=put_header, data=data, timeout=(5,30))
+			stream_upload = requests.put(url, headers=put_header, data=data, timeout=(5, 30))
 			logger.debug(f"Chunk {chunk_num + 1} uploaded successfully.")
 		except (HTTPError, ConnectionError, SSLError, Timeout, ConnectTimeout, ReadTimeout) as e:
 			logger.error(f"Error uploading chunk {chunk_num + 1}, {e}")

@@ -1,46 +1,49 @@
-#===========================================================================
+# ===========================================================================
 # This function reads the JSON results of the completed Anaplan task and returns
 # the job details.
-#===========================================================================
-import logging
+# ===========================================================================
 import pandas as pd
-from io import StringIO
+import logging
 from distutils.util import strtobool
-from anaplan_api.Parser import Parser
+from .Parser import Parser
+from .ParserResponse import ParserResponse
 
 logger = logging.getLogger(__name__)
 
 
 class ActionParser(Parser):
-	results = []
+	results: ParserResponse
 
 	def __init__(self, results: dict, url: str):
-		ActionParser.results = ActionParser.parse_response(results, url).copy()
+		ActionParser.results = ActionParser.parse_response(results, url)
 
 	@staticmethod
 	def get_results():
 		return ActionParser.results
 
-	def parse_response(results: dict, url: str):
-		'''
+	@staticmethod
+	def parse_response(results: dict, url: str) -> ParserResponse:
+		"""
+		:param url:
 		:param results: JSON dump of the results of an Anaplan action
-		:returns: String with task details, action details as String, and an array of error dump dataframes
-		'''
+		:return: Array with overall task result as string, file contents in string,
+				boolean if error dump is available, and dataframe with error dump.
+		"""
 
 		job_status = results['currentStep']
 		failure_dump = bool(strtobool(str(results['result']['failureDumpAvailable']).lower()))
-		eDf = pd.DataFrame()
-		
+		edf = pd.DataFrame()
+
 		if job_status == "Failed.":
 			return Parser.failure_message(results)
 		else:
-			#IF failure dump is available download
+			# IF failure dump is available download
 			if failure_dump:
-				eDf = Parser.get_dump(''.join([url, "/dump"]))
-			
+				edf = Parser.get_dump(''.join([url, "/dump"]))
+
 			success_report = str(results['result']['successful'])
-			
-			#details key only present in import task results
+
+			# details key only present in import task results
 			if 'objectId' in results['result']:
 				object_id = results['result']['objectId']
 				action_detail = f"{object_id} completed successfully: {success_report}"
@@ -48,4 +51,4 @@ class ActionParser(Parser):
 				logger.info(f"The requested job is {job_status}")
 				logger.error(f"Failure Dump Available: {failure_dump}, Successful: {success_report}")
 
-				return [f"Failure Dump Available: {failure_dump}, Successful: {success_report}", action_detail, error_dumps]
+				return ParserResponse(action_detail, "", failure_dump, edf)

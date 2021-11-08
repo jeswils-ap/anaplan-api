@@ -1,24 +1,21 @@
-import os, logging
-from anaplan_api.Upload import Upload
+import logging
+from .Upload import Upload
 
 logger = logging.getLogger(__name__)
 
 
 class FileUpload(Upload):
 	def upload(self, chunk_size: int, file: str):
-		'''
-		:param conn: AnaplanConnection object which contains authorization string, workspace ID, and model ID
-		:param fileId: ID of the file in the Anaplan model
-		:param chunkSize: Desired size of the chunk, in megabytes
+		"""
+		:param chunk_size: Desired size of the chunk, in megabytes
 		:param file: Path to the local file to be uploaded to Anaplan
-
 		:return: None
-		'''
+		"""
 
 		url = ''.join([super().get_base_url(), "/", super().get_workspace(), "/models/", super().get_model(), "/files/", super().get_file_id()])
 
 		metadata_update = super().file_metadata(url)
-		#Confirm that the metadata update for the requested file was OK before proceeding with file upload
+		# Confirm that the metadata update for the requested file was OK before proceeding with file upload
 		if metadata_update:
 			logger.info("Starting file upload.")
 
@@ -35,6 +32,6 @@ class FileUpload(Upload):
 					chunk_num += 1
 
 			if complete:
-				complete = super().file_metadata(''.join([url, "/complete"]))
+				complete_upload = super().file_metadata(''.join([url, "/complete"]))
 				if complete_upload:
 					logger.info("File upload complete, ")
