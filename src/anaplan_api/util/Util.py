@@ -1,0 +1,2 @@
+class ResourceNotFoundError(KeyError):
+    pass
