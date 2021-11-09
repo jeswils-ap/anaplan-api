@@ -35,5 +35,6 @@ from .StreamUpload import StreamUpload
 from .TaskFactory import TaskFactory
 from .Upload import Upload
 
-__version__ = '0.1.8'
+__version__ = '0.1.11'
 __author__ = 'Jesse Wilson'
+__email__ = 'jeswils@gmail.com'
