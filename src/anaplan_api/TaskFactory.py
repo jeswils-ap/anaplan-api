@@ -12,7 +12,7 @@ class TaskFactory(ABC):
 
 	@staticmethod
 	@abstractmethod
-	def get_action(conn: AnaplanConnection, action_id: str, retry_count: int) -> Action:
+	def get_action(conn: AnaplanConnection, action_id: str, retry_count: int, mapping_params: dict = None) -> Action:
 		"""Function to request Action object"""
 
 	@staticmethod

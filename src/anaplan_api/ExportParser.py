@@ -2,10 +2,11 @@
 # This function reads the JSON results of the completed Anaplan task and returns
 # the job details.
 # ===========================================================================
-from anaplan_api import anaplan
 import pandas as pd
 import logging
+from typing import List
 from distutils.util import strtobool
+from anaplan_api import anaplan
 from .Parser import Parser
 from .AnaplanConnection import AnaplanConnection
 from .ParserResponse import ParserResponse
@@ -15,10 +16,10 @@ logger = logging.getLogger(__name__)
 
 
 class ExportParser(Parser):
-	results: ParserResponse
+	results: List[ParserResponse]
 
 	def __init__(self, conn: AnaplanConnection, results: dict, url: str):
-		ExportParser.results = ExportParser.parse_response(conn, results, url)
+		ExportParser.results.append(ExportParser.parse_response(conn, results, url))
 
 	@staticmethod
 	def get_results():

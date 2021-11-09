@@ -3,6 +3,7 @@ import requests
 import json
 from requests.exceptions import HTTPError, ConnectionError, SSLError, Timeout, ConnectTimeout, ReadTimeout
 from .AnaplanConnection import AnaplanConnection
+from .util.Util import ResourceNotFoundError
 
 logger = logging.getLogger(__name__)
 
@@ -17,10 +18,14 @@ class Resources:
 
     def __init__(self, conn: AnaplanConnection, resource: str):
         self._authorization = conn.get_auth()
-        self._resource = resource
         self._workspace = conn.get_workspace()
         self._model = conn.get_model()
         self._url = ''.join([self._base_url, self._workspace, "/models/", self._model, "/", resource])
+        valid_resources = ["imports", "exports", "actions", "processes", "files", "lists"]
+        if resource.lower() in valid_resources:
+            self._resource = resource.lower()
+        else:
+            raise ResourceNotFoundError(f"Invalid selection, resouce must be one of {', '.join(valid_resources)}")
 
     def get_resources(self) -> dict:
         authorization = self._authorization

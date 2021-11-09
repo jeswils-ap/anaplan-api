@@ -1,9 +1,13 @@
 """anaplan-api Package"""
+from .jks import util
+from .jks import jks
+from .jks import rfc2898
+from .jks import sun_crypto
 from .util.Util import ResourceNotFoundError
 from .Action import Action
 from .ActionParser import ActionParser
 from .ActionTask import ActionTask
-from anaplan_api.anaplan import (execute_action, file_upload, get_file, get_file_details, get_user_id, get_models, get_workspaces, get_list, generate_authorization, parse_task_response)
+from anaplan_api.anaplan import (execute_action, file_upload, get_file, get_user_id, get_models, get_workspaces, get_list, generate_authorization, parse_task_response)
 from .AnaplanAuthentication import AnaplanAuthentication
 from .AnaplanConnection import AnaplanConnection
 from .AnaplanResource import AnaplanResource
@@ -31,5 +35,5 @@ from .StreamUpload import StreamUpload
 from .TaskFactory import TaskFactory
 from .Upload import Upload
 
-__version__ = '0.1.10'
+__version__ = '0.1.8'
 __author__ = 'Jesse Wilson'

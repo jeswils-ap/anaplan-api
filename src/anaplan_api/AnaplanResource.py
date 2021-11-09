@@ -8,6 +8,9 @@ class AnaplanResource(ABC):
     def __init__(self, response: dict):
         """Resource initialization"""
 
+    def __str__(self):
+        """Print all elements of the resource"""
+
     @abstractmethod
     def __getitem__(self, resource_name: str):
         """Resource getter"""

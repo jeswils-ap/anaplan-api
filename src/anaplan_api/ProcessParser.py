@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 class ProcessParser(Parser):
-    results = []
+    results: List[ParserResponse]
     authorization: str
 
     def __init__(self, conn: AnaplanConnection, results: dict, url: str):

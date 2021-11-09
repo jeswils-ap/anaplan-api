@@ -4,6 +4,7 @@
 # ===========================================================================
 import pandas as pd
 import logging
+from typing import List
 from distutils.util import strtobool
 from .Parser import Parser
 from .ParserResponse import ParserResponse
@@ -12,10 +13,10 @@ logger = logging.getLogger(__name__)
 
 
 class ActionParser(Parser):
-	results: ParserResponse
+	results: List[ParserResponse]
 
 	def __init__(self, results: dict, url: str):
-		ActionParser.results = ActionParser.parse_response(results, url)
+		ActionParser.results.append(ActionParser.parse_response(results, url))
 
 	@staticmethod
 	def get_results():

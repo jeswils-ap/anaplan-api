@@ -3,6 +3,7 @@ from .AnaplanConnection import AnaplanConnection
 from .Action import Action
 from .Parser import Parser
 from .ActionParser import ActionParser
+from .util.Util import TaskParameterError
 
 
 class ActionTask(TaskFactory):
@@ -11,8 +12,11 @@ class ActionTask(TaskFactory):
 	"""
 
 	@staticmethod
-	def get_action(conn: AnaplanConnection, action_id: str, retry_count: int) -> Action:
-		return Action(conn, action_id, retry_count)
+	def get_action(conn: AnaplanConnection, action_id: str, retry_count: int, mapping_params: dict = None) -> Action:
+		if not mapping_params:
+			return Action(conn, action_id, retry_count)
+		else:
+			raise TaskParameterError("Only Anaplan imports accept mapping parameters.")
 
 	@staticmethod
 	def get_parser(conn: AnaplanConnection, results: dict, url: str) -> Parser:

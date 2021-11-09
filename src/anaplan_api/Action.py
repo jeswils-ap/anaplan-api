@@ -88,7 +88,7 @@ class Action(object):
             logger.error("Incorrect action ID provided!")
             return None
 
-    def post_task(self, url: str, post_header: dict):
+    def post_task(self, url: str, post_header: dict) -> str:
         state = 0
         sleep_time = 10
         run_action = None

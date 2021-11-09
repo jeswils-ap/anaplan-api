@@ -8,8 +8,10 @@ import json
 import logging
 import os
 import requests
+from typing import List
 from requests.exceptions import HTTPError, ConnectionError, SSLError, Timeout, ConnectTimeout, ReadTimeout
 from .AnaplanConnection import AnaplanConnection
+from .ParserResponse import ParserResponse
 from .ImportParser import ImportParser
 from .ExportParser import ExportParser
 from .ActionParser import ActionParser
@@ -19,11 +21,13 @@ from .CertificateAuthentication import CertificateAuthentication
 from .FileUpload import FileUpload
 from .FileDownload import FileDownload
 from .StreamUpload import StreamUpload
-from .ParameterAction import ParameterAction
 from .ActionTask import ActionTask
 from .ImportTask import ImportTask
 from .ExportTask import ExportTask
 from .ProcessTask import ProcessTask
+from .Resources import Resources
+from .ResourceParserList import ResourceParserList
+from .AnaplanResourceList import AnaplanResource
 
 # ===============================================================================
 # Defining global variables
@@ -91,7 +95,8 @@ def file_upload(conn: AnaplanConnection, file_id: str, chunk_size: int, data: st
         upload.upload(chunk_size, data)
 
 
-def execute_action(conn: AnaplanConnection, action_id: str, retry_count: int, mapping_params: dict = None):
+def execute_action(conn: AnaplanConnection, action_id: str, retry_count: int, mapping_params: dict = None) \
+        -> List[ParserResponse]:
     factories = {
         "117": ActionTask,
         "112": ImportTask,
@@ -99,18 +104,15 @@ def execute_action(conn: AnaplanConnection, action_id: str, retry_count: int, ma
         "118": ProcessTask
     }
 
-    if not mapping_params:
-        if action_id[:3] in factories:
-            factory = factories[action_id[:3]]
-            action = factory.get_action(conn, action_id, retry_count)
-            task = action.execute()
-            parser = factory.get_parser(conn, task[0], task[1])
-            task_results = parser.get_results()
-            return task_results
-    else:
-        task = ParameterAction(conn, action_id, retry_count, mapping_params)
-        task_details = task.execute()
-        return parse_task_response(conn, task_details[0], task_details[1], action_id)
+    if action_id[:3] in factories:
+        factory = factories[action_id[:3]]
+
+        action = factory.get_action(conn, action_id, retry_count, mapping_params)
+        task = action.execute()
+        parser = factory.get_parser(conn, task[0], task[1])
+        task_results = parser.get_results()
+
+        return task_results
 
 
 # ===========================================================================
@@ -144,32 +146,16 @@ def parse_task_response(conn, results, url, action_id):
 # This function queries the Anaplan model for a list of the desired resources:
 # files, actions, imports, exports, processes and returns the JSON response.
 # ===========================================================================
-def get_list(conn, resource):
+def get_list(conn: AnaplanConnection, resource: str) -> AnaplanResource:
     """
     :param conn: AnaplanConnection object which contains authorization string, workspace ID, and model ID
     :param resource: The Anaplan model resource to be queried and returned to the user
     """
 
-    authorization = conn.get_auth()
-    workspace_guid = conn.get_workspace()
-    model_guid = conn.get_model()
-    response = {}
-
-    get_header = {
-        'Authorization': authorization,
-        'Content-Type': 'application/json'
-    }
-
-    url = ''.join([__base_url__, "/", workspace_guid, "/models/", model_guid, "/", resource.lower()])
-
-    logger.debug(f"Fetching {resource}")
-    try:
-        response = json.loads(requests.get(url, headers=get_header, timeout=(5, 30)).text)
-    except (HTTPError, ConnectionError, SSLError, Timeout, ConnectTimeout, ReadTimeout) as e:
-        logger.error(f"Error fetching resource {resource}, {e}")
-    logger.debug(f"Finished fetching {resource}")
-
-    return response[resource]
+    resources = Resources(conn, resource)
+    resources_list = resources.get_resources()
+    resource_parser = ResourceParserList()
+    return resource_parser.get_parser(resources_list)
 
 
 # ===========================================================================
@@ -183,49 +169,6 @@ def get_file(conn, file_id):
 
     file_download = FileDownload(conn, file_id)
     return file_download.download_file()
-
-
-# ===============================================================================
-# This function queries the model for name and chunk count of a specified file
-# ===============================================================================
-def get_file_details(conn, file_id):
-    """
-    :param conn: AnaplanConnection object which contains authorization string, workspace ID, and model ID
-    :param file_id: ID of the Anaplan file to download
-    """
-
-    chunk_count = 0
-    file_name = ""
-    files_list = {}
-
-    authorization = conn.get_auth()
-    workspace_guid = conn.get_workspace()
-    model_guid = conn.get_model()
-
-    get_header = {
-        "Authorization": authorization,
-    }
-
-    url = ''.join([__base_url__, "/", workspace_guid, "/models/", model_guid, "/files/"])
-
-    try:
-        files_list = requests.get(url, headers=get_header, timeout=(5, 30))
-    except (HTTPError, ConnectionError, SSLError, Timeout, ConnectTimeout, ReadTimeout) as e:
-        logger.error(f"Error getting details for {file_id}, {e}")
-
-    if files_list.ok:
-        logger.debug("Fetching file details.")
-        files = json.loads(files_list.text)
-        files = files['files']
-        for item in files:
-            temp_id = str(item['id'])
-            chunk_count = item['chunkCount']
-            file_name = str(item['name'])
-            if temp_id == file_id:
-                logger.debug("Finished fetching file details.")
-                break
-
-    return [chunk_count, file_name]
 
 
 # ===============================================================================
