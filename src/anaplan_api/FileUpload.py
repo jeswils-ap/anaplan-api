@@ -12,7 +12,7 @@ class FileUpload(Upload):
 		:return: None
 		"""
 
-		url = ''.join([super().get_base_url(), "/", super().get_workspace(), "/models/", super().get_model(), "/files/", super().get_file_id()])
+		url = ''.join([super().get_base_url(), super().get_workspace(), "/models/", super().get_model(), "/files/", super().get_file_id()])
 
 		metadata_update = super().file_metadata(url)
 		# Confirm that the metadata update for the requested file was OK before proceeding with file upload

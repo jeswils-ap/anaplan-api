@@ -2,7 +2,7 @@ from .AnaplanConnection import AnaplanConnection
 from .Resources import Resources
 from .ResourceParserFile import ResourceParserFile
 from .AnaplanResourceFile import AnaplanResourceFile
-from util.Util import ResourceNotFoundError
+from .util.Util import ResourceNotFoundError
 
 
 class File:
@@ -85,6 +85,21 @@ class File:
             self._chunk_count = self._file_resources[self._file_id]
         except ResourceNotFoundError:
             raise ResourceNotFoundError(f"{self._file_id} not found.")
+
+    def get_base_url(self) -> str:
+        return self._base_url
+
+    def get_connection(self) -> AnaplanConnection:
+        return self._conn
+
+    def get_file_id(self) -> str:
+        return self._file_id
+
+    def get_workspace(self) -> str:
+        return self._workspace
+
+    def get_model(self) -> str:
+        return self._model
 
     def get_resource(self):
         """

@@ -8,44 +8,34 @@
 import logging
 import requests
 from requests.exceptions import HTTPError, ConnectionError, SSLError, Timeout, ConnectTimeout, ReadTimeout
-from .AnaplanConnection import AnaplanConnection
+# from .AnaplanConnection import AnaplanConnection
 from .File import File
 
 logger = logging.getLogger(__name__)
 
 
 class Upload(File):
-	base_url: str = "https://api.anaplan.com/2/0/workspaces"
-	file_id: str
-	authorization: str
-	workspace: str
-	model: str
-
-	def __init__(self, conn: AnaplanConnection, file_id: str):
-		self.authorization = conn.get_auth()
-		self.workspace = conn.get_workspace()
-		self.model = conn.get_model()
-		self.file_id = file_id
 
 	def get_base_url(self) -> str:
-		return self.base_url
+		return super().get_base_url()
 
 	def get_workspace(self) -> str:
-		return self.workspace
+		return super().get_workspace()
 
 	def get_model(self) -> str:
-		return self.model
+		return super().get_model()
 
 	def get_file_id(self) -> str:
-		return self.file_id
+		return super().get_file_id()
 
 	def upload(self, chunk_size: int, file: str):
 		pass
 
 	def file_metadata(self, url: str) -> bool:
+		authorization = super().get_connection().get_auth()
 
-		authorization = self.authorization
-		file_id = self.file_id
+		# authorization = self.authorization
+		file_id = super().get_file_id()
 
 		post_header = {
 						"Authorization": authorization,
@@ -72,7 +62,9 @@ class Upload(File):
 
 	def file_data(self, url: str, chunk_num: int, data) -> bool:
 
-		authorization = self.authorization
+		# authorization = self.authorization
+
+		authorization = super().get_connection().get_auth()
 
 		put_header = {
 						"Authorization": authorization,

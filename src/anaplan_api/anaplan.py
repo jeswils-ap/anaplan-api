@@ -171,6 +171,7 @@ def get_list(conn, resource):
 
     return response[resource]
 
+
 # ===========================================================================
 # This function downloads a file from Anaplan to the specified path.
 # ===========================================================================

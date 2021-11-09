@@ -15,7 +15,7 @@ class StreamUpload(Upload):
 
 		stream_upload = False
 
-		url = ''.join([super().get_base_url(), "/", super().get_workspace(), "/models/", super().get_model(), "/files/", super().get_file_id()])
+		url = ''.join([super().get_base_url(), super().get_workspace(), "/models/", super().get_model(), "/files/", super().get_file_id()])
 
 		io_data = StringIO(data)
 		# Find length of data stream
