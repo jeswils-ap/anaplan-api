@@ -28,16 +28,16 @@ auth = anaplan.generate_authorization('Certificate', private_key=keys.get_key(),
 conn = AnaplanConnection(auth.get_auth_token(), "workspaceId", "modelId")
 
 # Pass path to the file to be uploaded.
-anaplan.file_upload(conn=conn, file_id="113000000005", chunk_size=5, data='/Users/jessewilson/Desktop/Users.csv')
+anaplan.file_upload(conn=conn, file_id="", chunk_size=5, data='/file.csv')
 
 # Read filee into memory and pass to file_upload
-with open('file.csv', 'r') as file:
+with open('/file.csv', 'r') as file:
 	data = file.read()
-	ap.file_upload(conn=conn, file_id="113000000116", chunk_size=5, data=data)
+	ap.file_upload(conn=conn, file_id="", chunk_size=5, data=data)
 
 # Execute Anaplan action
 # Returns a strint with task results and error dumps if any
-result_arr = anaplan.execute_action(conn=conn, action_id="118000000007", retry_count=3)
+result_arr = anaplan.execute_action(conn=conn, action_id="", retry_count=3)
 
 # Loop through List[ParserResponse] and print contents of each ParserResonse object.
 # ParserResponse contains overall task details, option export file (if an export action or process with export was executed)
