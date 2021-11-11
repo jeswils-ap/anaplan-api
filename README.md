@@ -13,35 +13,35 @@ pip install anaplan_api
 ## Usage
 
 ```python
-import anaplan_api as ap
-from anaplan_api.AuthToken import AuthToken
-from anaplan_api.KeystoreManager import KeystoreManager
+from anaplan_api import anaplan
 from anaplan_api.AnaplanConnection import AnaplanConnection
+from anaplan_api.KeystoreManager import KeystoreManager
 
 # Generate Basic Auth token for API requests
-auth = ap.generate_authorization('Basic', 'user', 'password')
+keys = KeystoreManager(path='/keystore.jks', passphrase='', alias='', key_pass='')
 
-# Generate Cert Auth token for API requests
-keys = KeystoreManager('/path/to/keystore.jks', 'keystore_pass', 'key_alias', 'private_key_passphrase')
-priv_key = keys.get_key()
-pub_cert = keys.get_cert()
-auth_req = ap.generate_authorization('Certificate', pub_cert, priv_key)
-
-auth = AuthToken(authReq[0], authReq[1])
+auth = anaplan.generate_authorization('Certificate', private_key=keys.get_key(), cert=keys.get_cert())
 
 # Create connection object to interact with API
+# For now, the package expected the first object of AnaplanConnect to contain only the auth token
+# not the AuthToken object
 conn = AnaplanConnection(auth.get_auth_token(), "workspaceId", "modelId")
 
-# Uploading a file
+# Pass path to the file to be uploaded.
+anaplan.file_upload(conn=conn, file_id="113000000005", chunk_size=5, data='/Users/jessewilson/Desktop/Users.csv')
+
+# Read filee into memory and pass to file_upload
 with open('file.csv', 'r') as file:
 	data = file.read()
-	ap.file_upload(conn, "113000000116", 5, data)
+	ap.file_upload(conn=conn, file_id="113000000116", chunk_size=5, data=data)
 
 # Execute Anaplan action
 # Returns a strint with task results and error dumps if any
-result_arr = anaplan.execute_action(conn, "118000000007", 3)
+result_arr = anaplan.execute_action(conn=conn, action_id="118000000007", retry_count=3)
 
-# 
+# Loop through List[ParserResponse] and print contents of each ParserResonse object.
+# ParserResponse contains overall task details, option export file (if an export action or process with export was executed)
+# whether an error dump was generated, and and option dataframe with error dump if available.
 for item in result_arr:
 	print(item)
 ```
