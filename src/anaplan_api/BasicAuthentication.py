@@ -8,7 +8,6 @@
 # Input:		Public certificate file location, private key file location
 # Output:		Authorization header string, request body string containing a nonce and its signed value
 # ==============================================================================
-
 import logging
 from base64 import b64encode
 from typing import Dict

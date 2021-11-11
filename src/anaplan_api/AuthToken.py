@@ -18,13 +18,13 @@ class AuthToken(object):
         self.token_value = token_value
         self.token_expiry = token_expiry
 
-    def get_auth_token(self):
+    def get_auth_token(self) -> str:
         return self.token_value
 
     def set_auth_token(self, token_value):
         self.token_value = token_value
 
-    def get_token_expiry(self):
+    def get_token_expiry(self) -> float:
         return self.token_expiry
 
     def set_token_expiry(self, token_expiry):

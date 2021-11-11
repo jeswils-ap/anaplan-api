@@ -34,7 +34,6 @@ class Upload(File):
 	def file_metadata(self, url: str) -> bool:
 		authorization = super().get_connection().get_auth()
 
-		# authorization = self.authorization
 		file_id = super().get_file_id()
 
 		post_header = {

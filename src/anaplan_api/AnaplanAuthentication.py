@@ -6,11 +6,13 @@
 # Output:			Anaplan JWT and token expiry time
 # ===============================================================================
 import json
-import logging
 import requests
 import re
+import logging
 from typing import List
 from requests.exceptions import HTTPError, ConnectionError, SSLError, Timeout, ConnectTimeout, ReadTimeout
+from .AuthToken import AuthToken
+from .util.Util import AuthenticationFailedError
 
 logger = logging.getLogger(__name__)
 
@@ -43,7 +45,7 @@ class AnaplanAuthentication(object):
 		return authenticate
 
 	@staticmethod
-	def authenticate(response: str) -> List[str]:
+	def authenticate(response: str) -> AuthToken:
 		"""
 		:param response: JSON string with auth request response.
 		:return: List with auth token and expiry time
@@ -64,10 +66,10 @@ class AnaplanAuthentication(object):
 				status = AnaplanAuthentication.verify_auth(token)
 				if status == 'Token validated':
 					logger.info("User successfully authenticated.")
-					return [f"AnaplanAuthToken {token}", expires]
+					return AuthToken(f"AnaplanAuthToken {token}", expires)
 				else:
 					logger.error(f"Error {status}")
-					raise Exception(f"Error getting authentication {status}")
+					raise AuthenticationFailedError(f"Error getting authentication {status}")
 			else:
 				logger.error(f"Error {json_response['statusMessage']}")
 
