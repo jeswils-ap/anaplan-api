@@ -5,7 +5,7 @@ class AnaplanResource(ABC):
     _resource: dict
 
     @abstractmethod
-    def __init__(self, response: dict):
+    def __init__(self):
         """Resource initialization"""
 
     def __str__(self):

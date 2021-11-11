@@ -23,7 +23,7 @@ class BasicAuthentication(AnaplanAuthentication):
 	# them, then returns the basic authorization header.
 	# ===========================================================================
 	@staticmethod
-	def auth_header(username, password) -> Dict[str, str]:
+	def auth_header(username: str, password: str) -> Dict[str, str]:
 		"""
 		:param username: Anaplan username
 		:param password: Anaplan password

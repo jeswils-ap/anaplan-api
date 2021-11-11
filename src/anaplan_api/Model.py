@@ -15,7 +15,7 @@ class Model(User):
 		model_details_list = [ModelDetails]
 		model_list = {}
 		url = ''.join([super().get_url(), super().get_id(), "/models"])
-		authorization = super().get_conn().get_auth()
+		authorization = super().get_conn().get_auth().get_auth_token()
 
 		get_header = {
 			"Authorization": authorization,

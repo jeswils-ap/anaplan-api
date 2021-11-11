@@ -30,7 +30,7 @@ class FileDownload(File):
 		file_contents = {}
 
 		get_header = {
-			"Authorization": conn.get_auth(),
+			"Authorization": conn.get_auth().get_auth_token(),
 		}
 
 		while int(current_chunk) < int(self._chunk_count):

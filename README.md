@@ -13,37 +13,30 @@ pip install anaplan_api
 ## Usage
 
 ```python
+import logging
 from anaplan_api import anaplan
 from anaplan_api.AnaplanConnection import AnaplanConnection
 from anaplan_api.KeystoreManager import KeystoreManager
 
-# Generate Basic Auth token for API requests
-keys = KeystoreManager(path='/keystore.jks', passphrase='', alias='', key_pass='')
+logging.basicConfig(format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
+					datefmt='%H:%M:%S',
+					level=logging.INFO)
 
-auth = anaplan.generate_authorization('Certificate', private_key=keys.get_key(), cert=keys.get_cert())
+logger = logging.getLogger(__name__)
 
-# Create connection object to interact with API
-# For now, the package expected the first object of AnaplanConnect to contain only the auth token
-# not the AuthToken object
-conn = AnaplanConnection(auth.get_auth_token(), "workspaceId", "modelId")
+if __name__ == '__main__':
+	keys = KeystoreManager(path='/keystore.jks', passphrase='', alias='', key_pass='')
 
-# Pass path to the file to be uploaded.
-anaplan.file_upload(conn=conn, file_id="", chunk_size=5, data='/file.csv')
+	auth = anaplan.generate_authorization(auth_type='Certificate', cert=keys.get_cert(), private_key=keys.get_key())
+	conn = AnaplanConnection(authorization=auth, workspace_id='', model_id='')
 
-# Read filee into memory and pass to file_upload
-with open('/file.csv', 'r') as file:
-	data = file.read()
-	ap.file_upload(conn=conn, file_id="", chunk_size=5, data=data)
+	anaplan.file_upload(conn=conn, file_id="", chunk_size=5, data='/Users.csv')
 
-# Execute Anaplan action
-# Returns a strint with task results and error dumps if any
-result_arr = anaplan.execute_action(conn=conn, action_id="", retry_count=3)
+	results = anaplan.execute_action(conn=conn, action_id="", retry_count=3)
 
-# Loop through List[ParserResponse] and print contents of each ParserResonse object.
-# ParserResponse contains overall task details, option export file (if an export action or process with export was executed)
-# whether an error dump was generated, and and option dataframe with error dump if available.
-for item in result_arr:
-	print(item)
+	for result in results:
+		if result: # Boolean check of ParserResponse object, true if failure dump is available
+			print(result.get_error_dump())
 ```
 
 ## Requirements

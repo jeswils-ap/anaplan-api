@@ -20,16 +20,16 @@ logger = logging.getLogger(__name__)
 
 
 class Parser(object):
-	results: ParserResponse
-	authorization: str
+	_results: ParserResponse
+	_authorization: str
 
 	def __init__(self, conn: AnaplanConnection, results: dict, url: str):
-		self.authorization = conn.get_auth()
-		Parser.results = Parser.parse_response(conn, results, url)
+		self._authorization = conn.get_auth().get_auth_token()
+		Parser._results = Parser.parse_response(conn, results, url)
 
 	@staticmethod
 	def get_results():
-		return Parser.results
+		return Parser._results
 
 	@staticmethod
 	def parse_response(conn: AnaplanConnection, results: dict, url: str):
@@ -47,7 +47,7 @@ class Parser(object):
 
 	@staticmethod
 	def get_dump(url):
-		authorization = Parser.authorization
+		authorization = Parser._authorization
 
 		post_header = {
 			'Authorization': authorization,

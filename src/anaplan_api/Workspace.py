@@ -15,7 +15,7 @@ class Workspace(User):
 		workspace_details_list = [WorkspaceDetails]
 		workspace_list = {}
 		url = ''.join([super().get_url(), super().get_id(), "/workspaces"])
-		authorization = super().get_conn().get_auth()
+		authorization = super().get_conn().get_auth().get_auth_token()
 
 		get_header = {
 			"Authorization": authorization,

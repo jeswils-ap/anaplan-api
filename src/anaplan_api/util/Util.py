@@ -20,3 +20,19 @@ class RequestFailedError(ValueError):
 
 class AuthenticationFailedError(Exception):
     pass
+
+
+class InvalidAuthenticationError(ValueError):
+    pass
+
+
+class MappingParameterError(ValueError):
+    pass
+
+
+class InvalidUrlError(ValueError):
+    pass
+
+
+class InvalidTaskTypeError(ValueError):
+    pass

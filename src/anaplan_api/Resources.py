@@ -17,7 +17,7 @@ class Resources:
     _url: str
 
     def __init__(self, conn: AnaplanConnection, resource: str):
-        self._authorization = conn.get_auth()
+        self._authorization = conn.get_auth().get_auth_token()
         self._workspace = conn.get_workspace()
         self._model = conn.get_model()
         self._url = ''.join([self._base_url, self._workspace, "/models/", self._model, "/", resource])

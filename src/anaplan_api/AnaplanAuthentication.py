@@ -9,7 +9,7 @@ import json
 import requests
 import re
 import logging
-from typing import List
+from typing import List, Dict
 from requests.exceptions import HTTPError, ConnectionError, SSLError, Timeout, ConnectTimeout, ReadTimeout
 from .AuthToken import AuthToken
 from .util.Util import AuthenticationFailedError

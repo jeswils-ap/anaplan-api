@@ -16,28 +16,28 @@ class AnaplanConnection(object):
     Model ID must be unique.
     """
     _authorization: AuthToken
-    _workspace_guid: str
-    _model_guid: str = field()
+    _workspace_id: str
+    _model_id: str = field()
 
-    def __init__(self, authorization, workspace_guid, model_guid):
+    def __init__(self, authorization, workspace_id, model_id):
         self._authorization = authorization
-        self._workspace_guid = workspace_guid
-        self._model_guid = model_guid
+        self._workspace_id = workspace_id
+        self._model_id = model_id
 
     def get_auth(self):
         return self._authorization
 
     def get_workspace(self):
-        return self._workspace_guid
+        return self._workspace_id
 
     def get_model(self):
-        return self._model_guid
+        return self._model_id
 
     def set_auth(self, authorization):
         self._authorization = authorization
 
-    def set_workspace(self, workspace_guid):
-        self._workspace_guid = workspace_guid
+    def set_workspace(self, workspace_id):
+        self._workspace_id = workspace_id
 
-    def set_model(self, model_guid):
-        self._model_guid = model_guid
+    def set_model(self, model_id):
+        self._model_id = model_id

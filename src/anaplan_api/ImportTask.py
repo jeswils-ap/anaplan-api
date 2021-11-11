@@ -14,9 +14,9 @@ class ImportTask(TaskFactory):
 	@staticmethod
 	def get_action(conn: AnaplanConnection, action_id: str, retry_count: int, mapping_params: dict = None) -> Action:
 		if not mapping_params:
-			return Action(conn, action_id, retry_count)
+			return Action(conn=conn, action_id=action_id, retry_count=retry_count, mapping_params=mapping_params)
 		elif mapping_params:
-			return ParameterAction(conn, action_id, retry_count, mapping_params)
+			return ParameterAction(conn=conn, action_id=action_id, retry_count=retry_count, mapping_params=mapping_params)
 
 	@staticmethod
 	def get_parser(conn: AnaplanConnection, results: dict, url: str) -> Parser:

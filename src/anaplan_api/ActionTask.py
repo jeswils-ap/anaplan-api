@@ -14,7 +14,7 @@ class ActionTask(TaskFactory):
 	@staticmethod
 	def get_action(conn: AnaplanConnection, action_id: str, retry_count: int, mapping_params: dict = None) -> Action:
 		if not mapping_params:
-			return Action(conn, action_id, retry_count)
+			return Action(conn=conn, action_id=action_id, retry_count=retry_count, mapping_params=mapping_params)
 		else:
 			raise TaskParameterError("Only Anaplan imports accept mapping parameters.")
 

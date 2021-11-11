@@ -23,7 +23,7 @@ class User(ABC):
 		if self._user_id is None:
 			user_details = {}
 			url = ''.join([self._url, "me"])
-			authorization = self._conn.get_auth()
+			authorization = self._conn.get_auth().get_auth_token()
 
 			get_header = {
 				"Authorization": authorization
@@ -52,7 +52,7 @@ class User(ABC):
 		if self._user_id is not None:
 			user_details = {}
 			url = ''.join([self._url, self._user_id])
-			authorization = self._conn.get_auth()
+			authorization = self._conn.get_auth().get_auth_token
 
 			get_header = {
 				"Authorization": authorization

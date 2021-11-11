@@ -17,10 +17,10 @@ logger = logging.getLogger(__name__)
 
 class ProcessParser(Parser):
     results: List[ParserResponse]
-    authorization: str
+    _authorization: str
 
     def __init__(self, conn: AnaplanConnection, results: dict, url: str):
-        self.authorization = conn.get_auth()
+        self._authorization = conn.get_auth().get_auth_token()
         ProcessParser.results = ProcessParser.parse_response(conn, results, url).copy()
 
     @staticmethod
@@ -30,7 +30,6 @@ class ProcessParser(Parser):
     @staticmethod
     def parse_response(conn: AnaplanConnection, results: dict, url: str) -> List[ParserResponse]:
         """
-
         :param conn: AnaplanConnection object
         :param results: JSON dictionary of results to parse
         :param url: URL of Anaplan task

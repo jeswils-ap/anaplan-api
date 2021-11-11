@@ -12,9 +12,9 @@ from dataclasses import dataclass
 class AuthToken(object):
     """AuthToken object stores Anaplan auth header and expiry time"""
     token_value: str
-    token_expiry: str
+    token_expiry: float
 
-    def __init__(self, token_value: str, token_expiry: str):
+    def __init__(self, token_value: str, token_expiry: float):
         self.token_value = token_value
         self.token_expiry = token_expiry
 

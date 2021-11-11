@@ -8,7 +8,7 @@ from .util.Util import UnknownTaskTypeError
 
 class TaskFactoryGenerator:
 	"""Class responsible for parsing input and generating corresponding task factory"""
-	_factories = {
+	_factories: dict = {
 		"117": ActionTask,
 		"112": ImportTask,
 		"116": ExportTask,

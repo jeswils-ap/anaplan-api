@@ -4,34 +4,37 @@
 # Description:    Base class responsible for running tasks in an Anaplan model
 # ===============================================================================
 import logging
-
 import requests
 import json
 from time import sleep
+from typing import Optional
 from requests.exceptions import HTTPError, ConnectionError, SSLError, Timeout, ConnectTimeout, ReadTimeout
 from .AnaplanConnection import AnaplanConnection
+from .util.Util import MappingParameterError
 
 logger = logging.getLogger(__name__)
 
 
 class Action(object):
-    authorization: str
+    _authorization: str
     workspace: str
     model: str
     action_id: str
     retry_count: int
+    mapping_params: Optional[dict]
 
     base_url = "https://api.anaplan.com/2/0/workspaces"
     post_body = {
         "localeName": "en_US"
     }
 
-    def __init__(self, conn: AnaplanConnection, action_id: str, retry_count: int):
-        self.authorization = conn.get_auth()
+    def __init__(self, conn: AnaplanConnection, action_id: str, retry_count: int, mapping_params: Optional[dict]):
+        self._authorization = conn.get_auth().get_auth_token()
         self.workspace = conn.get_workspace()
         self.model = conn.get_model()
         self.action_id = action_id
         self.retry_count = retry_count
+        self.mapping_params = mapping_params
 
     def get_url(self) -> str:
         return self.base_url
@@ -40,7 +43,7 @@ class Action(object):
         return self.post_body
 
     def get_authorization(self) -> str:
-        return self.authorization
+        return self._authorization
 
     def get_workspace(self) -> str:
         return self.workspace
@@ -54,8 +57,14 @@ class Action(object):
     def get_retry(self) -> int:
         return self.retry_count
 
+    def get_mapping_params(self) -> dict:
+        if len(self.mapping_params) > 0:
+            return self.mapping_params
+        else:
+            raise MappingParameterError("Unable to return empty mapping parameters.")
+
     def execute(self):
-        authorization = self.authorization
+        authorization = self._authorization
 
         post_header = {
             'Authorization': authorization,
@@ -117,7 +126,7 @@ class Action(object):
         :return:
         """
 
-        authorization = self.authorization
+        authorization = self._authorization
         post_header = {
             'Authorization': authorization,
             'Content-Type': 'application/json'

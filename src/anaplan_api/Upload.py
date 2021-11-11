@@ -32,7 +32,7 @@ class Upload(File):
 		pass
 
 	def file_metadata(self, url: str) -> bool:
-		authorization = super().get_connection().get_auth()
+		authorization = super().get_connection().get_auth().get_auth_token()
 
 		file_id = super().get_file_id()
 
@@ -61,9 +61,7 @@ class Upload(File):
 
 	def file_data(self, url: str, chunk_num: int, data) -> bool:
 
-		# authorization = self.authorization
-
-		authorization = super().get_connection().get_auth()
+		authorization = super().get_connection().get_auth().get_auth_token()
 
 		put_header = {
 						"Authorization": authorization,
