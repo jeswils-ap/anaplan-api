@@ -50,6 +50,6 @@ class ActionParser(Parser):
 				action_detail = f"{object_id} completed successfully: {success_report}"
 
 				logger.info(f"The requested job is {job_status}")
-				logger.error(f"Failure Dump Available: {failure_dump}, Successful: {success_report}")
+				logger.info(f"Failure Dump Available: {failure_dump}, Successful: {success_report}")
 
 				return ParserResponse(action_detail, "", failure_dump, edf)

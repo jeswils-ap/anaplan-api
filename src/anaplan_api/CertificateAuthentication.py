@@ -91,6 +91,6 @@ class CertificateAuthentication(AnaplanAuthentication):
 				signature = key.sign(message, padding.PKCS1v15(), hashes.SHA512())
 				return b64encode(signature).decode('utf-8')
 			except ValueError as e:
-				logger.error(f"Error signing message {e}")
+				logger.error(f"Error signing message {e}", exc_info=True)
 		except ValueError as e:
-			logger.error(f"Error loading private key {e}")
+			logger.error(f"Error loading private key {e}", exc_info=True)

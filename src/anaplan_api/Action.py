@@ -106,7 +106,7 @@ class Action(object):
             try:
                 run_action = requests.post(url, headers=post_header, json=self.post_body, timeout=(5, 30))
             except (HTTPError, ConnectionError, SSLError, Timeout, ConnectTimeout, ReadTimeout) as e:
-                logger.error(f"Error running action {e}")
+                logger.error(f"Error running action {e}", exc_info=True)
             if run_action.status_code != 200 and state < self.retry_count:
                 sleep(sleep_time)
                 state += 1
@@ -139,7 +139,7 @@ class Action(object):
             try:
                 get_status = json.loads(requests.get(status_url, headers=post_header, timeout=(5, 30)).text)
             except (HTTPError, ConnectionError, SSLError, Timeout, ConnectTimeout, ReadTimeout) as e:
-                logger.error(f"Error getting result for task {e}")
+                logger.error(f"Error getting result for task {e}", exc_info=True)
             if 'task' in get_status:
                 if 'taskState' in get_status['task']:
                     status = get_status['task']['taskState']

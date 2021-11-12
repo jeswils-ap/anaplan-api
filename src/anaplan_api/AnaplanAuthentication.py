@@ -55,7 +55,7 @@ class AnaplanAuthentication(object):
 		try:
 			json_response = json.loads(response)
 		except ValueError as e:
-			logger.error(f"Error loading response JSON {e}")
+			logger.error(f"Error loading response JSON {e}", exc_info=True)
 
 		# Check that the request was successful, is so extract the AnaplanAuthToken value
 		if 'status' in json_response:
@@ -89,9 +89,9 @@ class AnaplanAuthentication(object):
 			logger.debug("Verifying auth token.")
 			validate = json.loads(requests.get(anaplan_url, headers=header, timeout=(5, 30)).text)
 		except (HTTPError, ConnectionError, SSLError, Timeout, ConnectTimeout, ReadTimeout) as e:
-			logger.error(f"Error verifying auth token {e}")
+			logger.error(f"Error verifying auth token {e}", exc_info=True)
 		except ValueError as e:
-			logger.error(f"Error loading response JSON {e}")
+			logger.error(f"Error loading response JSON {e}", exc_info=True)
 
 		if 'statusMessage' in validate:
 			return validate['statusMessage']
@@ -111,9 +111,9 @@ class AnaplanAuthentication(object):
 		try:
 			refresh = json.loads(requests.post(url, headers=header, timeout=(5, 30)).text)
 		except (HTTPError, ConnectionError, SSLError, Timeout, ConnectTimeout, ReadTimeout) as e:
-			logger.error(f"Error verifying auth token {e}")
+			logger.error(f"Error verifying auth token {e}", exc_info=True)
 		except ValueError as e:
-			logger.error(f"Error loading response JSON {e}")
+			logger.error(f"Error loading response JSON {e}", exc_info=True)
 		
 		if 'tokenInfo' in refresh:
 			if 'tokenValue' in refresh['tokenInfo']:

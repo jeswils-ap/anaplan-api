@@ -12,7 +12,7 @@ import requests
 import pandas as pd
 from io import StringIO
 from requests.exceptions import HTTPError, ConnectionError, SSLError, Timeout, ConnectTimeout, ReadTimeout
-from pandas.errors import EmptyDataError, ParserError
+from pandas.errors import EmptyDataError, ParserError, ParserWarning
 from .AnaplanConnection import AnaplanConnection
 from .ParserResponse import ParserResponse
 
@@ -62,13 +62,13 @@ class Parser(object):
 			dump = requests.get(''.join([url, "/dump"]), headers=post_header, timeout=(5, 30)).text
 			logger.debug("Error dump downloaded.")
 		except (HTTPError, ConnectionError, SSLError, Timeout, ConnectTimeout, ReadTimeout) as e:
-			logger.error(f"Error fetching error dump {e}")
+			logger.error(f"Error fetching error dump {e}", exc_info=True)
 
 		try:
 			edf = pd.read_csv(StringIO(dump))
 		except (EmptyDataError, ParserError) as e:
-			logger.error(f"Error loading error dump to dataframe {e}")
-		except ParserError as w:
-			logger.warning(f"Warning raised while parsing csv {w}")
+			logger.error(f"Error loading error dump to dataframe {e}", exc_info=True)
+		except ParserWarning as w:
+			logger.warning(f"Warning raised while parsing csv {w}", exc_info=True)
 
 		return edf

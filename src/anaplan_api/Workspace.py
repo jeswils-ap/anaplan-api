@@ -27,9 +27,9 @@ class Workspace(User):
 		try:
 			workspace_list = json.loads(requests.get(url, headers=get_header, timeout=(5, 30)).text)
 		except (HTTPError, ConnectionError, SSLError, Timeout, ConnectTimeout, ReadTimeout) as e:
-			logger.error(f"Error getting models list: {e}")
+			logger.error(f"Error getting models list: {e}", exc_info=True)
 		except ValueError as e:
-			logger.error(f"Error loading model list {e}")
+			logger.error(f"Error loading model list {e}", exc_info=True)
 
 		if 'workspaces' in workspace_list:
 			workspaces = workspace_list['workspaces']

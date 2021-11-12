@@ -52,7 +52,7 @@ class Upload(File):
 			meta_post = requests.post(url, headers=post_header, json=stream_metadata, timeout=(5, 30))
 			logger.debug("Complete!")
 		except (HTTPError, ConnectionError, SSLError, Timeout, ConnectTimeout, ReadTimeout) as e:
-			logger.error(f"Error setting metadata {e}")
+			logger.error(f"Error setting metadata {e}", exc_info=True)
 
 		if meta_post.ok:
 			return True
@@ -74,7 +74,7 @@ class Upload(File):
 			stream_upload = requests.put(url, headers=put_header, data=data, timeout=(5, 30))
 			logger.debug(f"Chunk {chunk_num + 1} uploaded successfully.")
 		except (HTTPError, ConnectionError, SSLError, Timeout, ConnectTimeout, ReadTimeout) as e:
-			logger.error(f"Error uploading chunk {chunk_num + 1}, {e}")
+			logger.error(f"Error uploading chunk {chunk_num + 1}, {e}", exc_info=True)
 
 		if stream_upload.ok:
 			return True

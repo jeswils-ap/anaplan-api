@@ -68,7 +68,7 @@ class ParameterAction(Action):
 				else:
 					break
 			except (HTTPError, ConnectionError, SSLError, Timeout, ConnectTimeout, ReadTimeout) as e:
-				logger.error(f"Error running action {e}")
+				logger.error(f"Error running action {e}", exc_info=True)
 		if state < retry_count:
 			task_id = json.loads(run_action.text)
 			if 'task' in task_id:

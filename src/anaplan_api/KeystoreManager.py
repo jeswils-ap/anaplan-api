@@ -52,7 +52,7 @@ class KeystoreManager(object):
 			logger.debug("Opening Java Keystore.")
 			pk_entry = ks.private_keys[self.alias]
 		except (BadKeystoreFormatException, UnsupportedKeystoreVersionException, KeystoreSignatureException, DuplicateAliasException) as e:
-			logger.error(f"Error opening file {e}")
+			logger.error(f"Error opening file {e}", exc_info=True)
 
 		try:
 			if not pk_entry.is_decrypted():
@@ -60,7 +60,7 @@ class KeystoreManager(object):
 				pk_entry.decrypt(self.key_pass)
 			logger.debug("Keystore decrypted.")
 		except (DecryptionFailureException, UnexpectedAlgorithmException) as e:
-			logger.error(f"Unable to load keystore {e}")
+			logger.error(f"Unable to load keystore {e}", exc_info=True)
 
 		key = KeystoreManager.insert_newlines(b64encode(pk_entry.pkey_pkcs8).decode('utf-8'))
 		cert = KeystoreManager.insert_newlines(b64encode(pk_entry.cert_chain[0][1]).decode('utf-8'))

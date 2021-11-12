@@ -22,6 +22,9 @@ class ParserResponse:
     def __bool__(self):
         return self._error_dump
 
+    def get_task_detail(self):
+        return self._task_detail
+
     def get_export_file(self):
         return self._export_file
 

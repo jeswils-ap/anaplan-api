@@ -41,7 +41,7 @@ class Resources:
         try:
             response = json.loads(requests.get(self._url, headers=get_header, timeout=(5, 30)).text)
         except (HTTPError, ConnectionError, SSLError, Timeout, ConnectTimeout, ReadTimeout) as e:
-            logger.error(f"Error fetching resource {self._resource}, {e}")
+            logger.error(f"Error fetching resource {self._resource}, {e}", exc_info=True)
         logger.debug(f"Finished fetching {self._resource}")
 
         return response[self._resource]
