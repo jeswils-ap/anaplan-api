@@ -4,6 +4,7 @@ import json
 from requests.exceptions import HTTPError, ConnectionError, SSLError, Timeout, ConnectTimeout, ReadTimeout
 from .AnaplanConnection import AnaplanConnection
 from .util.Util import ResourceNotFoundError
+from .util.AnaplanVerion import AnaplanVersion
 
 logger = logging.getLogger(__name__)
 
@@ -13,7 +14,7 @@ class Resources:
     _resource: str
     _workspace: str
     _model: str
-    _base_url: str = "https://api.anaplan.com/2/0/workspaces/"
+    _base_url = f"https://api.anaplan.com/{AnaplanVersion.major()}/{AnaplanVersion.minor()}/workspaces/"
     _url: str
 
     def __init__(self, conn: AnaplanConnection, resource: str):

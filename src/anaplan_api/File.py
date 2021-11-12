@@ -2,6 +2,7 @@ from .AnaplanConnection import AnaplanConnection
 from .Resources import Resources
 from .ResourceParserFile import ResourceParserFile
 from .AnaplanResourceFile import AnaplanResourceFile
+from .util.AnaplanVerion import AnaplanVersion
 from .util.Util import ResourceNotFoundError
 
 
@@ -44,7 +45,7 @@ class File:
 
     _conn: AnaplanConnection
     _file_resources: AnaplanResourceFile
-    _base_url: str = "https://api.anaplan.com/2/0/workspaces/"
+    _base_url = f"https://api.anaplan.com/{AnaplanVersion.major()}/{AnaplanVersion.minor()}/workspaces/"
     _file_id: str
     _workspace: str
     _model: str

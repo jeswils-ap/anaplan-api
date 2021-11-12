@@ -4,12 +4,13 @@ from requests.exceptions import HTTPError, ConnectionError, SSLError, Timeout, C
 from .File import File
 from .AnaplanConnection import AnaplanConnection
 from .AnaplanResourceFile import AnaplanResourceFile
+from .util.AnaplanVerion import AnaplanVersion
 
 logger = logging.getLogger(__name__)
 
 
 class FileDownload(File):
-	_base_url: str = "https://api.anaplan.com/2/0/workspaces/"
+	_base_url = f"https://api.anaplan.com/{AnaplanVersion.major()}/{AnaplanVersion.minor()}/workspaces/"
 	_conn: AnaplanConnection
 	_file_resources: AnaplanResourceFile
 	_file_id: str

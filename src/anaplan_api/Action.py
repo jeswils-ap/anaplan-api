@@ -10,6 +10,7 @@ from time import sleep
 from typing import Optional
 from requests.exceptions import HTTPError, ConnectionError, SSLError, Timeout, ConnectTimeout, ReadTimeout
 from .AnaplanConnection import AnaplanConnection
+from .util.AnaplanVerion import AnaplanVersion
 from .util.Util import MappingParameterError
 
 logger = logging.getLogger(__name__)
@@ -23,7 +24,7 @@ class Action(object):
     retry_count: int
     mapping_params: Optional[dict]
 
-    base_url = "https://api.anaplan.com/2/0/workspaces"
+    base_url = f"https://api.anaplan.com/{AnaplanVersion.major()}/{AnaplanVersion.minor()}/workspaces/"
     post_body = {
         "localeName": "en_US"
     }
@@ -76,16 +77,16 @@ class Action(object):
         if self.action_id[2] == "2" or self.action_id[2] == "6" or self.action_id[2] == "7" or self.action_id[2] == "8":
             if self.action_id[2] == "2":
                 url = ''.join(
-                    [self.base_url, "/", self.workspace, "/models/", self.model, "/imports/", self.action_id, "/tasks"])
+                    [self.base_url, self.workspace, "/models/", self.model, "/imports/", self.action_id, "/tasks"])
             elif self.action_id[2] == "6":
                 url = ''.join(
-                    [self.base_url, "/", self.workspace, "/models/", self.model, "/exports/", self.action_id, "/tasks"])
+                    [self.base_url, self.workspace, "/models/", self.model, "/exports/", self.action_id, "/tasks"])
             elif self.action_id[2] == "7":
                 url = ''.join(
-                    [self.base_url, "/", self.workspace, "/models/", self.model, "/actions/", self.action_id, "/tasks"])
+                    [self.base_url, self.workspace, "/models/", self.model, "/actions/", self.action_id, "/tasks"])
             elif self.action_id[2] == "8":
                 url = ''.join(
-                    [self.base_url, "/", self.workspace, "/models/", self.model, "/processes/", self.action_id,
+                    [self.base_url, self.workspace, "/models/", self.model, "/processes/", self.action_id,
                      "/tasks"])
 
             if url is not "":
