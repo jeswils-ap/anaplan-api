@@ -1,5 +1,4 @@
 import logging
-from functools import partial
 from .Upload import Upload
 
 logger = logging.getLogger(__name__)
@@ -21,10 +20,15 @@ class FileUpload(Upload):
 			logger.info("Starting file upload.")
 
 			with open(file, 'rt') as file:
+				file_data = []
 				chunk_num = 0
-
-				for block in iter(partial(file.read, chunk_size * 1024**2), ''):
-					complete = super().file_data(url, chunk_num, block.encode('utf-8'))
+				while True:
+					buf = file.readlines((1024 * 1024) * chunk_size)
+					if not buf:
+						break
+					for item in buf:
+						file_data.append(item)
+					complete = super().file_data(url, chunk_num, ''.join(file_data).encode('utf-8'))
 					chunk_num += 1
 
 			if complete:
