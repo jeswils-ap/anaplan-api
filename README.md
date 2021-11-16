@@ -39,7 +39,7 @@ if __name__ == '__main__':
 			print(result.get_error_dump())
 ```
 
-## Known limitations
+## Known Issues
 This library currently uses PyJKS library for handling Java Keystore files. This project does not appear to be actively developed, and there is a known error installing pycryptodomex and twofish - both dependencies for PyJKS. The core files required from this library are:
 
 - jks.py
