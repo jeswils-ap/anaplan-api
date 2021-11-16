@@ -9,7 +9,6 @@ import json
 import requests
 import re
 import logging
-from typing import List, Dict
 from requests.exceptions import HTTPError, ConnectionError, SSLError, Timeout, ConnectTimeout, ReadTimeout
 from .AuthToken import AuthToken
 from .util.Util import AuthenticationFailedError
@@ -97,10 +96,10 @@ class AnaplanAuthentication(object):
 			return validate['statusMessage']
 
 	@staticmethod
-	def refresh_token(token) -> List[str]:
+	def refresh_token(token: str, auth_object: AuthToken) -> None:
 		"""
 		@param token: Token value that is nearing expiry
-		@return: List of strings with renewed token value and expiry time.
+		@param auth_object: AuthToken object to be updated.
 		"""
 		refresh = {}
 		new_token = ""
@@ -121,4 +120,5 @@ class AnaplanAuthentication(object):
 			if 'expiresAt' in refresh['tokenInfo']:
 				new_expiry = refresh['tokenInfo']['expiresAt']
 
-		return [''.join(["AnaplanAuthToken ", new_token]), new_expiry]
+		auth_object.set_auth_token(''.join(["AnaplanAuthToken ", new_token]))
+		auth_object.set_token_expiry(new_expiry)

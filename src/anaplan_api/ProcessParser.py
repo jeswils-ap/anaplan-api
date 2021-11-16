@@ -20,7 +20,7 @@ class ProcessParser(Parser):
     _authorization: str
 
     def __init__(self, conn: AnaplanConnection, results: dict, url: str):
-        self._authorization = conn.get_auth().get_auth_token()
+        super().__init__(conn=conn, results=results, url=url)
         ProcessParser.results = ProcessParser.parse_response(conn, results, url).copy()
 
     @staticmethod

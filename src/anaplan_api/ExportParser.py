@@ -19,6 +19,7 @@ class ExportParser(Parser):
 	results: List[ParserResponse]
 
 	def __init__(self, conn: AnaplanConnection, results: dict, url: str):
+		super().__init__(conn=conn, results=results, url=url)
 		ExportParser.results.append(ExportParser.parse_response(conn, results, url))
 
 	@staticmethod

@@ -19,6 +19,11 @@ class AnaplanResourceList(AnaplanResource):
 	def __str__(self):
 		return json.dumps(self._resources)
 
+	def __iter__(self):
+		for key, value in self._resources.items():
+			if key:
+				yield key, value
+
 	def __getitem__(self, resource_name: str) -> str:
 		"""
 		:param resource_name: Resource name provided by user to be looked up

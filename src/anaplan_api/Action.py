@@ -11,12 +11,18 @@ from typing import Optional
 from requests.exceptions import HTTPError, ConnectionError, SSLError, Timeout, ConnectTimeout, ReadTimeout
 from .AnaplanConnection import AnaplanConnection
 from .util.AnaplanVerion import AnaplanVersion
-from .util.Util import MappingParameterError
+from .util.Util import MappingParameterError, UnknownTaskTypeError
 
 logger = logging.getLogger(__name__)
 
 
 class Action(object):
+    _action_type: dict = {
+        "112": "/imports/",
+        "116": "/exports/",
+        "117": "/actions/",
+        "118": "/processes/"
+    }
     _authorization: str
     workspace: str
     model: str
@@ -74,46 +80,33 @@ class Action(object):
 
         url = ""
 
-        if self.action_id[2] == "2" or self.action_id[2] == "6" or self.action_id[2] == "7" or self.action_id[2] == "8":
-            if self.action_id[2] == "2":
-                url = ''.join(
-                    [self.base_url, self.workspace, "/models/", self.model, "/imports/", self.action_id, "/tasks"])
-            elif self.action_id[2] == "6":
-                url = ''.join(
-                    [self.base_url, self.workspace, "/models/", self.model, "/exports/", self.action_id, "/tasks"])
-            elif self.action_id[2] == "7":
-                url = ''.join(
-                    [self.base_url, self.workspace, "/models/", self.model, "/actions/", self.action_id, "/tasks"])
-            elif self.action_id[2] == "8":
-                url = ''.join(
-                    [self.base_url, self.workspace, "/models/", self.model, "/processes/", self.action_id,
-                     "/tasks"])
+        if self.action_id[:3] in self._action_type:
+            url = ''.join(
+                [self.base_url, self.workspace, "/models/", self.model, self._action_type[self.action_id[:3]],
+                 self.action_id, "/tasks"])
 
-            if url is not "":
-                task_id = Action.post_task(self, url, post_header)
-                return Action.check_status(self, url, task_id)
-            else:
-                return None
+        if url is not "":
+            task_id = self.post_task(url, post_header)
+            return self.check_status(url, task_id)
         else:
-            logger.error("Incorrect action ID provided!")
-            return None
+            raise UnknownTaskTypeError("Provided action ID does not correspond to valid action type.")
 
     def post_task(self, url: str, post_header: dict) -> str:
         state = 0
         sleep_time = 10
         run_action = None
 
-        while True:
+        while not run_action:
             try:
                 run_action = requests.post(url, headers=post_header, json=self.post_body, timeout=(5, 30))
             except (HTTPError, ConnectionError, SSLError, Timeout, ConnectTimeout, ReadTimeout) as e:
                 logger.error(f"Error running action {e}", exc_info=True)
             if run_action.status_code != 200 and state < self.retry_count:
+                logger.debug(f"Request failed, waiting {sleep_time} seconds before retrying.")
                 sleep(sleep_time)
                 state += 1
                 sleep_time *= 1.5
-            else:
-                break
+
         if state < self.retry_count:
             task_id = json.loads(run_action.text)
             if 'task' in task_id:
@@ -147,7 +140,6 @@ class Action(object):
             if status == "COMPLETE":
                 results = get_status['task']
                 break
-            # Wait 1 seconds before continuing loop
-            sleep(1)
+            sleep(1)  # Wait 1 seconds before continuing loop
 
         return [results, status_url]

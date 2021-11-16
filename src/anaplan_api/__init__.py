@@ -4,6 +4,7 @@ from .jks import jks
 from .jks import rfc2898
 from .jks import sun_crypto
 from .util.Util import ResourceNotFoundError
+from .util.AnaplanVerion import AnaplanVersion
 from .Action import Action
 from .ActionParser import ActionParser
 from .ActionTask import ActionTask
@@ -36,7 +37,9 @@ from .ResourceParserList import ResourceParserList
 from .Resources import Resources
 from .StreamUpload import StreamUpload
 from .TaskFactory import TaskFactory
+from .TaskFactoryGenerator import TaskFactoryGenerator
 from .Upload import Upload
+from .UploadFactory import UploadFactory
 from .User import User
 from .UserDetails import UserDetails
 from .Workspace import Workspace

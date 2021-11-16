@@ -10,7 +10,6 @@ logger = logging.getLogger(__name__)
 
 
 class Workspace(User):
-
 	def get_workspaces(self) -> List[WorkspaceDetails]:
 		workspace_details_list = [WorkspaceDetails]
 		workspace_list = {}

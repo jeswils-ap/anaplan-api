@@ -8,7 +8,6 @@
 import logging
 import requests
 from requests.exceptions import HTTPError, ConnectionError, SSLError, Timeout, ConnectTimeout, ReadTimeout
-# from .AnaplanConnection import AnaplanConnection
 from .File import File
 
 logger = logging.getLogger(__name__)

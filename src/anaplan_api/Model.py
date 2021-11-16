@@ -10,7 +10,6 @@ logger = logging.getLogger(__name__)
 
 
 class Model(User):
-
 	def get_models(self) -> List[ModelDetails]:
 		model_details_list = [ModelDetails]
 		model_list = {}

@@ -16,6 +16,7 @@ class ActionParser(Parser):
 	results: List[ParserResponse]
 
 	def __init__(self, results: dict, url: str):
+		super().__init__(results=results, url=url)
 		ActionParser.results.append(ActionParser.parse_response(results, url))
 
 	@staticmethod

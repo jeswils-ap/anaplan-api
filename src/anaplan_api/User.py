@@ -2,15 +2,15 @@ import json
 import logging
 import requests
 from requests.exceptions import HTTPError, ConnectionError, SSLError, Timeout, ConnectTimeout, ReadTimeout
-from abc import ABC
 from .AnaplanConnection import AnaplanConnection
+from .util.AnaplanVerion import AnaplanVersion
 from .UserDetails import UserDetails
 
 logger = logging.getLogger(__name__)
 
 
-class User(ABC):
-	_url: str = 'https://api.anaplan.com/2/0/users/'
+class User:
+	_url: str = f"https://api.anaplan.com/{AnaplanVersion.major()}/{AnaplanVersion.minor()}/users/"
 	_conn: AnaplanConnection
 	_user_id: str
 	_user_details: UserDetails
@@ -19,7 +19,7 @@ class User(ABC):
 		self._conn = conn
 		self._user_id = user_id
 
-	def get_current_user(self):
+	def get_current_user(self) -> None:
 		if self._user_id is None:
 			user_details = {}
 			url = ''.join([self._url, "me"])
@@ -48,7 +48,7 @@ class User(ABC):
 			else:
 				raise KeyError("'user' not found in response")
 
-	def get_user_details(self):
+	def get_user_details(self) -> None:
 		if self._user_id is not None:
 			user_details = {}
 			url = ''.join([self._url, self._user_id])

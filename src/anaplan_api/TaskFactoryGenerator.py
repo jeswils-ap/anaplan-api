@@ -21,7 +21,7 @@ class TaskFactoryGenerator:
 		if action_id in self._factories:
 			self._action_id = action_id
 		else:
-			raise UnknownTaskTypeError(f"Unknown action ID, must be one of {''.join(list(self._factories.keys()))}")
+			raise UnknownTaskTypeError(f"Unknown action ID, must be one of {', '.join(list(self._factories.keys()))}")
 
 	def get_factory(self) -> Union[ActionTask, ExportTask, ImportTask, ProcessTask]:
 		return self._factories[self._action_id]

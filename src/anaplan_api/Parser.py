@@ -11,6 +11,8 @@ import logging
 import requests
 import pandas as pd
 from io import StringIO
+
+from pandas import DataFrame
 from requests.exceptions import HTTPError, ConnectionError, SSLError, Timeout, ConnectTimeout, ReadTimeout
 from pandas.errors import EmptyDataError, ParserError, ParserWarning
 from .AnaplanConnection import AnaplanConnection
@@ -36,7 +38,7 @@ class Parser(object):
 		pass
 
 	@staticmethod
-	def failure_message(results: dict):
+	def failure_message(results: dict) -> ParserResponse:
 		if 'result' in results:
 			if 'details' in results['result']:
 				for i in range(0, len(results['result']['details'])):
@@ -46,7 +48,7 @@ class Parser(object):
 						return ParserResponse(f"The task has failed to run due to an error: {error_message}", "", False, pd.DataFrame())
 
 	@staticmethod
-	def get_dump(url):
+	def get_dump(url: str) -> DataFrame:
 		authorization = Parser._authorization
 
 		post_header = {

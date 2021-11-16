@@ -16,6 +16,7 @@ class ImportParser(Parser):
 	results: List[ParserResponse]
 
 	def __init__(self, results: dict, url: str):
+		super().__init__(results=results, url=url)
 		ImportParser.results.append(ImportParser.parse_response(results, url))
 
 	@staticmethod
