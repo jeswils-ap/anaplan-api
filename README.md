@@ -39,7 +39,7 @@ if __name__ == '__main__':
 			print(result.get_error_dump())
 ```
 
-## Requirements
+## Known limitations
 This library currently uses PyJKS library for handling Java Keystore files. This project does not appear to be actively developed, and there is a known error installing pycryptodomex and twofish - both dependencies for PyJKS. The core files required from this library are:
 
 - jks.py
@@ -47,7 +47,7 @@ This library currently uses PyJKS library for handling Java Keystore files. This
 - sun_crypto.py
 - util.py
 
-You can simply download, remove extraneous files, and drop the jks folder in your site-package directory to work around the error.
+You can simply download, remove extraneous files, and drop the jks folder in your site-package directory to work around the error. PyJKS utilises javaobj, which will need to be installed separately. As of 16-11-21 the installable package 2 bugs that must be fixed: incorrect syntax in a try except block (except Exception, e), and using StringIO package instead of io for StringIO.
 
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
