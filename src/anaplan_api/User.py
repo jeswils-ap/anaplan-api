@@ -3,7 +3,7 @@ import logging
 import requests
 from requests.exceptions import HTTPError, ConnectionError, SSLError, Timeout, ConnectTimeout, ReadTimeout
 from .AnaplanConnection import AnaplanConnection
-from .util.AnaplanVerion import AnaplanVersion
+from .util.AnaplanVersion import AnaplanVersion
 from .UserDetails import UserDetails
 
 logger = logging.getLogger(__name__)

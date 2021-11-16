@@ -4,7 +4,7 @@ from requests.exceptions import HTTPError, ConnectionError, SSLError, Timeout, C
 from .File import File
 from .AnaplanConnection import AnaplanConnection
 from .AnaplanResourceFile import AnaplanResourceFile
-from .util.AnaplanVerion import AnaplanVersion
+from .util.AnaplanVersion import AnaplanVersion
 
 logger = logging.getLogger(__name__)
 

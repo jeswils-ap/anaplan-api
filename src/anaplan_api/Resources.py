@@ -4,7 +4,7 @@ import json
 from requests.exceptions import HTTPError, ConnectionError, SSLError, Timeout, ConnectTimeout, ReadTimeout
 from .AnaplanConnection import AnaplanConnection
 from .util.Util import ResourceNotFoundError
-from .util.AnaplanVerion import AnaplanVersion
+from .util.AnaplanVersion import AnaplanVersion
 
 logger = logging.getLogger(__name__)
 

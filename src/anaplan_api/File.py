@@ -2,7 +2,7 @@ from .AnaplanConnection import AnaplanConnection
 from .Resources import Resources
 from .ResourceParserFile import ResourceParserFile
 from .AnaplanResourceFile import AnaplanResourceFile
-from .util.AnaplanVerion import AnaplanVersion
+from .util.AnaplanVersion import AnaplanVersion
 from .util.Util import ResourceNotFoundError
 
 

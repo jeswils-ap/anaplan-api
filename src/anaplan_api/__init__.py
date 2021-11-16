@@ -1,4 +1,8 @@
 """anaplan-api Package"""
+from .jks import util
+from .jks import jks
+from .jks import rfc2898
+from .jks import sun_crypto
 from .util.Util import ResourceNotFoundError
 from .util.AnaplanVersion import AnaplanVersion
 from .Action import Action
@@ -42,5 +46,5 @@ from .Workspace import Workspace
 from .WorkspaceDetails import WorkspaceDetails
 
 
-__version__ = '0.1.15'
+__version__ = '0.1.14'
 __author__ = 'Jesse Wilson'
