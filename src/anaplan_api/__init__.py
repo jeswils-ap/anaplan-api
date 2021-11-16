@@ -1,6 +1,6 @@
 """anaplan-api Package"""
 from .util.Util import ResourceNotFoundError
-from .util.AnaplanVerion import AnaplanVersion
+from .util.AnaplanVersion import AnaplanVersion
 from .Action import Action
 from .ActionParser import ActionParser
 from .ActionTask import ActionTask
