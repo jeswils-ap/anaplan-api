@@ -15,7 +15,7 @@ class AuthToken(object):
     token_expiry: float
 
     def __init__(self, token_value: str, token_expiry: float):
-        self.token_value = token_value
+        self.token_value = AuthToken._token_convert(token_value)
         self.token_expiry = token_expiry
 
     def get_auth_token(self) -> str:
@@ -29,3 +29,10 @@ class AuthToken(object):
 
     def set_token_expiry(self, token_expiry):
         self.token_expiry = token_expiry
+
+    @staticmethod
+    def _token_convert(token_value: str):
+        if not token_value[:7] == "Anaplan":
+            return ''.join(['AnaplanAuthToken ', token_value])
+        else:
+            return token_value
