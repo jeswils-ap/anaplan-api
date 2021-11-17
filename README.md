@@ -52,10 +52,7 @@ This library currently uses PyJKS library for handling Java Keystore files. This
 - pyasn1
 - pyasn1_modules
 
-You can simply download, remove extraneous files, and drop the jks folder in your site-package directory to work around the error.
-```bash
-pip3 install javaobj-py3
-```
+You can simply download, remove the unnecessary files, and drop the jks folder in your site-package directory to work around the error.
 
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
