@@ -27,8 +27,10 @@ class Model(User):
 			model_list = json.loads(requests.get(url, headers=get_header, timeout=(5, 30)).text)
 		except (HTTPError, ConnectionError, SSLError, Timeout, ConnectTimeout, ReadTimeout) as e:
 			logger.error(f"Error getting models list: {e}", exc_info=True)
+			raise Exception(f"Error getting model list {e}")
 		except ValueError as e:
 			logger.error(f"Error loading model list {e}", exc_info=True)
+			raise Exception(f"Error loading model list {e}")
 
 		if 'models' in model_list:
 			models = model_list['models']

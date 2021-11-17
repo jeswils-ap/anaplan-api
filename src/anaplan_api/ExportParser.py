@@ -60,6 +60,6 @@ class ExportParser(Parser):
 				file_contents = anaplan.get_file(conn, object_id)
 
 				logger.info(f"The requested job is {job_status}")
-				logger.error(f"Failure Dump Available: {failure_dump}, Successful: {success_report}")
+				logger.info(f"Failure Dump Available: {failure_dump}, Successful: {success_report}")
 
 				return ParserResponse("File export completed.", file_contents, False, edf)

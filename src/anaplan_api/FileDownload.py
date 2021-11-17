@@ -40,6 +40,7 @@ class FileDownload(File):
 				file_contents = requests.get(''.join([url, str(current_chunk)]), headers=get_header, timeout=(5, 30)).text
 			except (HTTPError, ConnectionError, SSLError, Timeout, ConnectTimeout, ReadTimeout) as e:
 				logger.error(f"Error downloading chunk {e}", exc_info=True)
+				raise Exception(f"Error downloading chunk {e}")
 			if file_contents:
 				logger.debug(f"Chunk {current_chunk} downloaded successfully.")
 				file_data.append(file_contents)

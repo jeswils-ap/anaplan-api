@@ -52,6 +52,7 @@ class Upload(File):
 			logger.debug("Complete!")
 		except (HTTPError, ConnectionError, SSLError, Timeout, ConnectTimeout, ReadTimeout) as e:
 			logger.error(f"Error setting metadata {e}", exc_info=True)
+			raise Exception(f"Error setting metadata {e}")
 
 		if meta_post.ok:
 			return True
@@ -74,6 +75,7 @@ class Upload(File):
 			logger.debug(f"Chunk {chunk_num + 1} uploaded successfully.")
 		except (HTTPError, ConnectionError, SSLError, Timeout, ConnectTimeout, ReadTimeout) as e:
 			logger.error(f"Error uploading chunk {chunk_num + 1}, {e}", exc_info=True)
+			raise Exception(f"Error uploading chunk {chunk_num + 1}, {e}")
 
 		if stream_upload.ok:
 			return True

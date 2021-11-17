@@ -6,11 +6,11 @@
 # Input:		Java Keystore
 # Output:		Key pair as array of strings
 # ==============================================================================
-import jks
+from anaplan_api import jks
 import logging
 from base64 import b64encode
-from jks.util import BadKeystoreFormatException, UnsupportedKeystoreVersionException, KeystoreSignatureException, \
-	DuplicateAliasException, DecryptionFailureException, UnexpectedAlgorithmException
+from anaplan_api.jks.util import BadKeystoreFormatException, UnsupportedKeystoreVersionException,\
+	KeystoreSignatureException, DuplicateAliasException, DecryptionFailureException, UnexpectedAlgorithmException
 
 logger = logging.getLogger(__name__)
 
@@ -51,8 +51,10 @@ class KeystoreManager(object):
 			ks = jks.KeyStore.load(self.path, self.passphrase)
 			logger.debug("Opening Java Keystore.")
 			pk_entry = ks.private_keys[self.alias]
-		except (BadKeystoreFormatException, UnsupportedKeystoreVersionException, KeystoreSignatureException, DuplicateAliasException) as e:
+		except (BadKeystoreFormatException, UnsupportedKeystoreVersionException, KeystoreSignatureException,
+		        DuplicateAliasException) as e:
 			logger.error(f"Error opening file {e}", exc_info=True)
+			raise Exception(f"Error opening file {e}")
 
 		try:
 			if not pk_entry.is_decrypted():
@@ -61,6 +63,7 @@ class KeystoreManager(object):
 			logger.debug("Keystore decrypted.")
 		except (DecryptionFailureException, UnexpectedAlgorithmException) as e:
 			logger.error(f"Unable to load keystore {e}", exc_info=True)
+			raise Exception(f"Unable to load keystore {e}")
 
 		key = KeystoreManager.insert_newlines(b64encode(pk_entry.pkey_pkcs8).decode('utf-8'))
 		cert = KeystoreManager.insert_newlines(b64encode(pk_entry.cert_chain[0][1]).decode('utf-8'))

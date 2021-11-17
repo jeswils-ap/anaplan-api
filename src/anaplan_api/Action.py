@@ -134,6 +134,7 @@ class Action(object):
                 get_status = json.loads(requests.get(status_url, headers=post_header, timeout=(5, 30)).text)
             except (HTTPError, ConnectionError, SSLError, Timeout, ConnectTimeout, ReadTimeout) as e:
                 logger.error(f"Error getting result for task {e}", exc_info=True)
+                raise Exception(f"Error getting result for task {e}")
             if 'task' in get_status:
                 if 'taskState' in get_status['task']:
                     status = get_status['task']['taskState']

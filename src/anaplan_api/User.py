@@ -36,8 +36,10 @@ class User:
 				user_details = json.loads(requests.get(url, headers=get_header, timeout=(5, 30)).text)
 			except (HTTPError, ConnectionError, SSLError, Timeout, ConnectTimeout, ReadTimeout) as e:
 				logger.error(f"Error fetching user details {e}", exc_info=True)
+				raise Exception(f"Error fetching user details {e}")
 			except ValueError as e:
 				logger.error(f"Error loading model list {e}", exc_info=True)
+				raise ValueError(f"Error loading model list {e}")
 
 			if 'user' in user_details:
 				if 'id' in user_details['user']:
@@ -65,8 +67,10 @@ class User:
 				user_details = json.loads(requests.get(url, headers=get_header, timeout=(5, 30)).text)
 			except (HTTPError, ConnectionError, SSLError, Timeout, ConnectTimeout, ReadTimeout) as e:
 				logger.error(f"Error fetching user details {e}", exc_info=True)
+				raise Exception(f"Error fetching user details {e}")
 			except ValueError as e:
 				logger.error(f"Error loading model list {e}", exc_info=True)
+				raise ValueError(f"Error loading model list {e}")
 
 			if 'user' in user_details:
 				if 'id' in user_details['user']:

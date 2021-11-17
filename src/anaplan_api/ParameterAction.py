@@ -25,7 +25,8 @@ class ParameterAction(Action):
 				}
 
 		if action_id[2] == "2":
-			url = ''.join([super().get_url(), "/", super().get_workspace(), "/models/", super().get_model(), "/imports/", super().get_action(), "/tasks"])
+			url = ''.join([super().get_url(), "/", super().get_workspace(), "/models/", super().get_model(),
+			               "/imports/", super().get_action(), "/tasks"])
 
 			if url is not "":
 				task_id = ParameterAction.post_task(self, url, post_header, ParameterAction.build_request_body(self))
@@ -34,14 +35,14 @@ class ParameterAction(Action):
 				raise InvalidUrlError("URL must not be empty.")
 		else:
 			logger.error("Incorrect action ID provided!")
-			raise InvalidTaskTypeError("")
+			raise InvalidTaskTypeError("Incorrect action ID provided!")
 
 	def build_request_body(self) -> dict:
 		body = ""
 		body_value = ""
 
 		params = super().get_mapping_params()
-		
+
 		if len(params) > 1:
 			for key, value in params.items():
 				body.join(["\"entityType:\"", key, "\"", ",\"entityType:\"", value, "\"", ","])
@@ -57,7 +58,7 @@ class ParameterAction(Action):
 		retry_count = super().get_retry()
 		state = 0
 		sleep_time = 10
-			
+
 		while True:
 			try:
 				run_action = requests.post(url, headers=post_header, json=post_body, timeout=(5, 30))
@@ -69,8 +70,13 @@ class ParameterAction(Action):
 					break
 			except (HTTPError, ConnectionError, SSLError, Timeout, ConnectTimeout, ReadTimeout) as e:
 				logger.error(f"Error running action {e}", exc_info=True)
+				raise Exception(f"Error running action {e}")
 		if state < retry_count:
 			task_id = json.loads(run_action.text)
 			if 'task' in task_id:
 				if 'taskId' in task_id['task']:
 					return task_id['task']['taskId']
+				else:
+					raise ValueError("taskId not found in response")
+			else:
+				raise ValueError("task not found in response")
