@@ -7,7 +7,7 @@ Anaplan-API is a Python library wrapper for [Anaplan Bulk API](https://anaplanbu
 Use the package manager [pip](https://pypi.org/project/anaplan-api/) to install Anaplan-API.
 
 ```bash
-pip install anaplan_api
+pip3 install anaplan_api
 ```
 
 ## Usage
@@ -47,7 +47,10 @@ This library currently uses PyJKS library for handling Java Keystore files. This
 - sun_crypto.py
 - util.py
 
-You can simply download, remove extraneous files, and drop the jks folder in your site-package directory to work around the error. PyJKS utilises javaobj, which will need to be installed separately. As of 16-11-21 the installable package 2 bugs that must be fixed: incorrect syntax in a try except block (except Exception, e), and using StringIO package instead of io for StringIO.
+You can simply download, remove extraneous files, and drop the jks folder in your site-package directory to work around the error. PyJKS utilises javaobj-py3, which will need to be installed separately.
+```bash
+pip3 install javaobj-py3
+```
 
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
