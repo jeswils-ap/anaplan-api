@@ -47,7 +47,12 @@ This library currently uses PyJKS library for handling Java Keystore files. This
 - sun_crypto.py
 - util.py
 
-You can simply download, remove extraneous files, and drop the jks folder in your site-package directory to work around the error. PyJKS utilises javaobj-py3, which will need to be installed separately.
+### PyJKS Requirements
+- javaobj-py3
+- pyasn1
+- pyasn1_modules
+
+You can simply download, remove extraneous files, and drop the jks folder in your site-package directory to work around the error.
 ```bash
 pip3 install javaobj-py3
 ```
