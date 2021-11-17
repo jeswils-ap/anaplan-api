@@ -1,6 +1,8 @@
 """anaplan-api Package"""
-from .util.Util import ResourceNotFoundError
 from .util.AnaplanVersion import AnaplanVersion
+from .util.Util import ResourceNotFoundError, UnknownTaskTypeError, TaskParameterError, InvalidTokenError,\
+	RequestFailedError, AuthenticationFailedError, InvalidAuthenticationError, MappingParameterError,\
+	InvalidUrlError, InvalidTaskTypeError
 from .Action import Action
 from .ActionParser import ActionParser
 from .ActionTask import ActionTask
@@ -10,6 +12,7 @@ from .AnaplanConnection import AnaplanConnection
 from .AnaplanResource import AnaplanResource
 from .AnaplanResourceFile import AnaplanResourceFile
 from .AnaplanResourceList import AnaplanResourceList
+from .AuthFactory import AuthFactory
 from .AuthToken import AuthToken
 from .BasicAuthentication import BasicAuthentication
 from .CertificateAuthentication import CertificateAuthentication
@@ -42,5 +45,6 @@ from .Workspace import Workspace
 from .WorkspaceDetails import WorkspaceDetails
 
 
-__version__ = '0.1.20'
+__version__ = '0.1.22'
 __author__ = 'Jesse Wilson'
+
