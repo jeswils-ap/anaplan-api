@@ -3,7 +3,7 @@ import requests
 import json
 from requests.exceptions import HTTPError, ConnectionError, SSLError, Timeout, ConnectTimeout, ReadTimeout
 from .AnaplanConnection import AnaplanConnection
-from .util.Util import ResourceNotFoundError
+from .util.Util import ResourceNotFoundError, RequestFailedError
 from .util.AnaplanVersion import AnaplanVersion
 
 logger = logging.getLogger(__name__)
@@ -26,7 +26,7 @@ class Resources:
         if resource.lower() in valid_resources:
             self._resource = resource.lower()
         else:
-            raise ResourceNotFoundError(f"Invalid selection, resouce must be one of {', '.join(valid_resources)}")
+            raise ResourceNotFoundError(f"Invalid selection, resource must be one of {', '.join(valid_resources)}")
 
     def get_resources(self) -> dict:
         authorization = self._authorization
@@ -45,4 +45,14 @@ class Resources:
             logger.error(f"Error fetching resource {self._resource}, {e}", exc_info=True)
         logger.debug(f"Finished fetching {self._resource}")
 
-        return response[self._resource]
+        if 'status' in response:
+            if 'code' in response['status']:
+                if response['status']['code'] == 200:
+                    if self._resource in response:
+                        return response[self._resource]
+                else:
+                    raise RequestFailedError(f"Request was unsuccessful, code: {response['status']['code']}")
+            else:
+                raise KeyError("code not found in response")
+        else:
+            raise KeyError("status not found in response")
