@@ -71,6 +71,7 @@ class AnaplanAuthentication(object):
 					raise AuthenticationFailedError(f"Error getting authentication {status}")
 			else:
 				logger.error(f"Error {json_response['statusMessage']}")
+				raise AuthenticationFailedError(f"Error logging in {json_response['statusMessage']}")
 
 	@staticmethod
 	def verify_auth(token: str) -> str:
