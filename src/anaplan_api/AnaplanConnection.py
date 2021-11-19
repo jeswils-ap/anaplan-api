@@ -5,7 +5,7 @@
 # Input:          Authorization header string, workspace ID string, and model ID string
 # Output:         None
 # ===============================================================================
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from .AuthToken import AuthToken
 
 
@@ -17,20 +17,20 @@ class AnaplanConnection(object):
     """
     _authorization: AuthToken
     _workspace_id: str
-    _model_id: str = field()
+    _model_id: str
 
     def __init__(self, authorization, workspace_id, model_id):
         self._authorization = authorization
         self._workspace_id = workspace_id
         self._model_id = model_id
 
-    def get_auth(self):
+    def get_auth(self) -> AuthToken:
         return self._authorization
 
-    def get_workspace(self):
+    def get_workspace(self) -> str:
         return self._workspace_id
 
-    def get_model(self):
+    def get_model(self) -> str:
         return self._model_id
 
     def set_auth(self, authorization):

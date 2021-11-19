@@ -22,11 +22,11 @@ class ParserResponse:
     def __bool__(self):
         return self._error_dump
 
-    def get_task_detail(self):
+    def get_task_detail(self) -> str:
         return self._task_detail
 
-    def get_export_file(self):
+    def get_export_file(self) -> Optional[str]:
         return self._export_file
 
-    def get_error_dump(self):
+    def get_error_dump(self) -> Optional[DataFrame]:
         return self._error_dump_file

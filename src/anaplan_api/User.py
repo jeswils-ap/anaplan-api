@@ -19,9 +19,8 @@ class User:
 		self._conn = conn
 		self._user_id = user_id
 
-	def get_current_user(self) -> None:
+	def get_current_user(self):
 		if self._user_id is None:
-			user_details = {}
 			url = ''.join([self._url, "me"])
 			authorization = self._conn.get_auth().get_auth_token()
 
@@ -50,9 +49,8 @@ class User:
 			else:
 				raise KeyError("'user' not found in response")
 
-	def get_user_details(self) -> None:
+	def get_user_details(self):
 		if self._user_id is not None:
-			user_details = {}
 			url = ''.join([self._url, self._user_id])
 			authorization = self._conn.get_auth().get_auth_token
 

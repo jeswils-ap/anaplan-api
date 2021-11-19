@@ -31,10 +31,10 @@ class KeystoreManager(object):
 
 		self.get_keystore_pair()
 
-	def get_key(self):
+	def get_key(self) -> bytes:
 		return self.key
 
-	def get_cert(self):
+	def get_cert(self) -> str:
 		return self.cert
 
 	# ===============================================================================

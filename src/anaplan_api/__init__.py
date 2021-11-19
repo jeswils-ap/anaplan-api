@@ -37,6 +37,7 @@ from .Resources import Resources
 from .StreamUpload import StreamUpload
 from .TaskFactory import TaskFactory
 from .TaskFactoryGenerator import TaskFactoryGenerator
+from .TaskResponse import TaskResponse
 from .Upload import Upload
 from .UploadFactory import UploadFactory
 from .User import User
@@ -45,6 +46,5 @@ from .Workspace import Workspace
 from .WorkspaceDetails import WorkspaceDetails
 
 
-__version__ = '0.1.22'
+__version__ = '0.1.23'
 __author__ = 'Jesse Wilson'
-

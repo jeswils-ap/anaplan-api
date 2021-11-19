@@ -14,7 +14,8 @@ class StreamUpload(Upload):
 		"""
 
 		stream_upload = False
-		url = ''.join([super().get_base_url(), super().get_workspace(), "/models/", super().get_model(), "/files/", super().get_file_id()])
+		url = ''.join([super().get_base_url(), super().get_workspace(), "/models/", super().get_model(), "/files/",
+		               super().get_file_id()])
 		io_data = StringIO(data)
 		metadata_update = super().file_metadata(url)
 
@@ -23,7 +24,8 @@ class StreamUpload(Upload):
 			chunk_num = 0
 
 			for data in iter(partial(io_data.read, chunk_size * (1024 ** 2)), ''):
-				stream_upload = super().file_data(''.join([url, "/chunks/", str(chunk_num)]), chunk_num, data.encode('utf-8'))
+				stream_upload = super().file_data(''.join([url, "/chunks/", str(chunk_num)]), chunk_num,
+				                                  data.encode('utf-8'))
 				chunk_num += 1
 
 			if stream_upload:

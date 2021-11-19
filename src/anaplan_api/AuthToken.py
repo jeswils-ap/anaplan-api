@@ -31,7 +31,7 @@ class AuthToken(object):
         self.token_expiry = token_expiry
 
     @staticmethod
-    def _token_convert(token_value: str):
+    def _token_convert(token_value: str) -> str:
         if not token_value[:7] == "Anaplan":
             return ''.join(['AnaplanAuthToken ', token_value])
         else:

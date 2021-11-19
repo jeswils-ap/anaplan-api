@@ -11,7 +11,7 @@ import logging
 import requests
 import pandas as pd
 from io import StringIO
-
+from typing import List
 from pandas import DataFrame
 from requests.exceptions import HTTPError, ConnectionError, SSLError, Timeout, ConnectTimeout, ReadTimeout
 from pandas.errors import EmptyDataError, ParserError, ParserWarning
@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 
 class Parser(object):
-	_results: ParserResponse
+	_results: List[ParserResponse]
 	_authorization: str
 
 	def __init__(self, conn: AnaplanConnection, results: dict, url: str):
@@ -30,7 +30,7 @@ class Parser(object):
 		Parser._results = Parser.parse_response(conn, results, url)
 
 	@staticmethod
-	def get_results():
+	def get_results() -> List[ParserResponse]:
 		return Parser._results
 
 	@staticmethod

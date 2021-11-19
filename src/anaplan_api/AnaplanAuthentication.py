@@ -97,7 +97,7 @@ class AnaplanAuthentication(object):
 			return validate['statusMessage']
 
 	@staticmethod
-	def refresh_token(token: str, auth_object: AuthToken) -> None:
+	def refresh_token(token: str, auth_object: AuthToken):
 		"""
 		@param token: Token value that is nearing expiry
 		@param auth_object: AuthToken object to be updated.

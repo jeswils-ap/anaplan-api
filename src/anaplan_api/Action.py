@@ -10,6 +10,7 @@ from time import sleep
 from typing import Optional
 from requests.exceptions import HTTPError, ConnectionError, SSLError, Timeout, ConnectTimeout, ReadTimeout
 from .AnaplanConnection import AnaplanConnection
+from .TaskResponse import TaskResponse
 from .util.AnaplanVersion import AnaplanVersion
 from .util.Util import MappingParameterError, UnknownTaskTypeError
 
@@ -70,7 +71,7 @@ class Action(object):
         else:
             raise MappingParameterError("Unable to return empty mapping parameters.")
 
-    def execute(self):
+    def execute(self) -> TaskResponse:
         authorization = self._authorization
 
         post_header = {
@@ -113,7 +114,7 @@ class Action(object):
                 if 'taskId' in task_id['task']:
                     return task_id['task']['taskId']
 
-    def check_status(self, url: str, task_id: str):
+    def check_status(self, url: str, task_id: str) -> TaskResponse:
         """
         :param url: URL of Anaplan action
         :param task_id: Anaplan task ID for executed action
@@ -127,7 +128,6 @@ class Action(object):
         }
         status = ""
         status_url = ''.join([url, "/", task_id])
-        get_status = None
 
         while True:
             try:
@@ -143,4 +143,4 @@ class Action(object):
                 break
             sleep(1)  # Wait 1 seconds before continuing loop
 
-        return [results, status_url]
+        return TaskResponse(results=results, url=status_url)

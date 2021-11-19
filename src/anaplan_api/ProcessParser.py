@@ -40,7 +40,8 @@ class ProcessParser(Parser):
 
         if job_status == "Failed.":
             logger.error("The task has failed to run due to an error, please check process definition in Anaplan")
-            return [ParserResponse("The task has failed, check process definition in Anaplan", "", False, pd.DataFrame())]
+            return [ParserResponse("The task has failed, check process definition in Anaplan", "",
+                                   False, pd.DataFrame())]
         else:
             logger.info("Process completed.")
             # nestedResults key only present in process task results

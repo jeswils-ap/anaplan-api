@@ -20,7 +20,7 @@ class ActionParser(Parser):
 		ActionParser.results.append(ActionParser.parse_response(results, url))
 
 	@staticmethod
-	def get_results():
+	def get_results() -> List[ParserResponse]:
 		return ActionParser.results
 
 	@staticmethod

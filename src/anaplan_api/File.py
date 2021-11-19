@@ -102,19 +102,19 @@ class File:
     def get_model(self) -> str:
         return self._model
 
-    def get_resource(self):
+    def get_resource(self) -> AnaplanResourceFile:
         """
         :return: AnaplanResource object with files in specified Anaplan model
         """
         return self._file_resources
 
-    def get_chunk_count(self):
+    def get_chunk_count(self) -> int:
         """
         :return: Chunk count of specified file.
         """
         return self._chunk_count
 
-    def get_url(self):
+    def get_url(self) -> str:
         """
         :return: API URL of specified file
         """

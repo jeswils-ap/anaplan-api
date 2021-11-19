@@ -20,7 +20,7 @@ class ImportParser(Parser):
 		ImportParser.results.append(ImportParser.parse_response(results, url))
 
 	@staticmethod
-	def get_results():
+	def get_results() -> List[ParserResponse]:
 		return ImportParser.results
 
 	@staticmethod

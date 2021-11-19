@@ -23,7 +23,7 @@ class ExportParser(Parser):
 		ExportParser.results.append(ExportParser.parse_response(conn, results, url))
 
 	@staticmethod
-	def get_results():
+	def get_results() -> List[ParserResponse]:
 		return ExportParser.results
 
 	@staticmethod
@@ -46,7 +46,7 @@ class ExportParser(Parser):
 
 		if job_status == "Failed.":
 			'''Should Never happen for Export type tasks'''
-			return Parser.get_dump(results)
+			return Parser.failure_message(results)
 		else:
 			# IF failure dump is available download
 			if failure_dump:

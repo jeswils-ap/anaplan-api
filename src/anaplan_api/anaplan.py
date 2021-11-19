@@ -72,7 +72,7 @@ def execute_action(conn: AnaplanConnection, action_id: str, retry_count: int, ma
 
     action = factory.get_action(conn=conn, action_id=action_id, retry_count=retry_count, mapping_params=mapping_params)
     task = action.execute()
-    parser = factory.get_parser(conn=conn, results=task[0], url=task[1])
+    parser = factory.get_parser(conn=conn, results=task.get_results(), url=task.get_url())
     task_results = parser.get_results()
 
     return task_results
