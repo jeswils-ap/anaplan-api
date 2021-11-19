@@ -35,10 +35,24 @@ class AnaplanAuthentication(object):
 
 		if body is None:
 			logger.info("Authenticating via Basic.")
-			authenticate = requests.post(anaplan_url, headers=header, timeout=(5, 30)).text
+			try:
+				authenticate = requests.post(anaplan_url, headers=header, timeout=(5, 30)).text
+			except (HTTPError, ConnectionError, SSLError, Timeout, ConnectTimeout, ReadTimeout) as e:
+				logger.error(f"Error fetching auth token {e}", exc_info=True)
+				raise Exception(f"Error fetching auth token {e}")
+			except ValueError as e:
+				logger.error(f"Error loading response JSON {e}", exc_info=True)
+				raise ValueError(f"Error loading response JSON {e}")
 		else:
 			logger.info("Authenticating via Certificate.")
-			authenticate = requests.post(anaplan_url, headers=header, data=json.dumps(body), timeout=(5, 30)).text
+			try:
+				authenticate = requests.post(anaplan_url, headers=header, data=json.dumps(body), timeout=(5, 30)).text
+			except (HTTPError, ConnectionError, SSLError, Timeout, ConnectTimeout, ReadTimeout) as e:
+				logger.error(f"Error fetching auth token {e}", exc_info=True)
+				raise Exception(f"Error fetching auth token {e}")
+			except ValueError as e:
+				logger.error(f"Error loading response JSON {e}", exc_info=True)
+				raise ValueError(f"Error loading response JSON {e}")
 
 		# Return the JSON array containing the authentication response, including AnaplanAuthToken
 		return authenticate
@@ -49,12 +63,11 @@ class AnaplanAuthentication(object):
 		:param response: JSON string with auth request response.
 		:return: List with auth token and expiry time
 		"""
-		json_response = {}
-
 		try:
 			json_response = json.loads(response)
 		except ValueError as e:
 			logger.error(f"Error loading response JSON {e}", exc_info=True)
+			raise ValueError(f"Error loading JSON {response}")
 
 		# Check that the request was successful, is so extract the AnaplanAuthToken value
 		if 'status' in json_response:
@@ -80,8 +93,6 @@ class AnaplanAuthentication(object):
 		:return: JSON string with authentication validation.
 		"""
 
-		validate = {}
-
 		anaplan_url = "https://auth.anaplan.com/token/validate"
 		header = {"Authorization": ''.join(["AnaplanAuthToken ", token])}
 
@@ -90,8 +101,10 @@ class AnaplanAuthentication(object):
 			validate = json.loads(requests.get(anaplan_url, headers=header, timeout=(5, 30)).text)
 		except (HTTPError, ConnectionError, SSLError, Timeout, ConnectTimeout, ReadTimeout) as e:
 			logger.error(f"Error verifying auth token {e}", exc_info=True)
+			raise Exception(f"Error verifying auth token {e}")
 		except ValueError as e:
 			logger.error(f"Error loading response JSON {e}", exc_info=True)
+			raise ValueError(f"Error loading response JSON {e}")
 
 		if 'statusMessage' in validate:
 			return validate['statusMessage']
@@ -102,7 +115,6 @@ class AnaplanAuthentication(object):
 		@param token: Token value that is nearing expiry
 		@param auth_object: AuthToken object to be updated.
 		"""
-		refresh = {}
 		new_token = ""
 		new_expiry = ""
 
@@ -112,8 +124,10 @@ class AnaplanAuthentication(object):
 			refresh = json.loads(requests.post(url, headers=header, timeout=(5, 30)).text)
 		except (HTTPError, ConnectionError, SSLError, Timeout, ConnectTimeout, ReadTimeout) as e:
 			logger.error(f"Error verifying auth token {e}", exc_info=True)
+			raise Exception(f"Error verifying auth token {e}")
 		except ValueError as e:
 			logger.error(f"Error loading response JSON {e}", exc_info=True)
+			raise ValueError(f"Error loading response JSON {e}")
 		
 		if 'tokenInfo' in refresh:
 			if 'tokenValue' in refresh['tokenInfo']:
