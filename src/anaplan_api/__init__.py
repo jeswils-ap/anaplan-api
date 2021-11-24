@@ -12,7 +12,6 @@ from .AnaplanConnection import AnaplanConnection
 from .AnaplanResource import AnaplanResource
 from .AnaplanResourceFile import AnaplanResourceFile
 from .AnaplanResourceList import AnaplanResourceList
-from .AuthFactory import AuthFactory
 from .AuthToken import AuthToken
 from .BasicAuthentication import BasicAuthentication
 from .CertificateAuthentication import CertificateAuthentication
