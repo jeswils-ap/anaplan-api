@@ -20,15 +20,12 @@ class StreamUpload(Upload):
 		metadata_update = super().file_metadata(url)
 
 		if metadata_update:
-			logger.info("Starting file upload...")
-			chunk_num = 0
-
-			for data in iter(partial(io_data.read, chunk_size * (1024 ** 2)), ''):
+			logger.info(f"Starting upload of file {super().get_file_id()}.")
+			for chunk_num, data in enumerate(iter(partial(io_data.read, chunk_size * (1024 ** 2)), '')):
 				stream_upload = super().file_data(''.join([url, "/chunks/", str(chunk_num)]), chunk_num,
 				                                  data.encode('utf-8'))
-				chunk_num += 1
 
 			if stream_upload:
 				complete_upload = super().file_metadata(''.join([url, "/complete"]))
 				if complete_upload:
-					logger.info("File upload complete.")
+					logger.info(f"Upload of file {super().get_file_id()} complete.")

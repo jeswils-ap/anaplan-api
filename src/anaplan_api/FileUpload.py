@@ -19,17 +19,14 @@ class FileUpload(Upload):
 		metadata_update = super().file_metadata(url)
 		# Confirm that the metadata update for the requested file was OK before proceeding with file upload
 		if metadata_update:
-			logger.info("Starting file upload.")
+			logger.info(f"Starting upload of file {super().get_file_id()}.")
 
 			with open(file, 'rt') as file:
-				chunk_num = 0
-
-				for data in iter(partial(file.read, chunk_size * (1024 ** 2)), ''):
+				for chunk_num, data in enumerate(iter(partial(file.read, chunk_size * (1024 ** 2)), '')):
 					complete = super().file_data(''.join([url, "/chunks/", str(chunk_num)]), chunk_num,
 					                             data.encode('utf-8'))
-					chunk_num += 1
 
 			if complete:
 				complete_upload = super().file_metadata(''.join([url, "/complete"]))
 				if complete_upload:
-					logger.info("File upload complete, ")
+					logger.info(f"Upload of file {super().get_file_id()} complete.")

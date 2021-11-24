@@ -17,6 +17,7 @@ from .ResourceParserList import ResourceParserList
 from .AnaplanResourceList import AnaplanResource
 from .AuthToken import AuthToken
 from .UploadFactory import UploadFactory
+from .util.Util import InvalidAuthenticationError
 
 logger = logging.getLogger(__name__)
 
@@ -46,13 +47,17 @@ def generate_authorization(auth_type: str = "Basic", email: str = None, password
         post_data = cert_auth.generate_post_data(private_key)
         return cert_auth.authenticate(cert_auth.auth_request(header_string, post_data))
     else:
-        logger.error(f"Invalid authentication method: {auth_type}")
-        raise ValueError(f"Invalid authentication method: {auth_type}")
+        if (email and password) or (cert and private_key):
+            logger.error(f"Invalid authentication method: {auth_type}")
+            raise InvalidAuthenticationError(f"Invalid authentication method: {auth_type}")
+        else:
+            logger.error("Email address and password or certificate and key must not be blank")
+            raise InvalidAuthenticationError("Email address and password or certificate and key must not be blank")
 
 
 def file_upload(conn: AnaplanConnection, file_id: str, chunk_size: int, data: str) -> None:
     """
-    :param conn: AnaplanConnection object which contains authorization string, workspace ID, and model ID
+    :param conn: AnaplanConnection object which contains AuthToken object, workspace ID, and model ID
     :param file_id: ID of the file in Anaplan
     :param chunk_size: Desired chunk size of the upload request between 1-50
     :param data: Data to load, either path to local file or string
@@ -66,6 +71,13 @@ def file_upload(conn: AnaplanConnection, file_id: str, chunk_size: int, data: st
 
 def execute_action(conn: AnaplanConnection, action_id: str, retry_count: int, mapping_params: dict = None) \
         -> List[ParserResponse]:
+    """
+    :param conn: AnaplanConnection object which contains AuthToken object, workspace ID, and model ID
+    :param action_id: ID of the Anaplan action to execute
+    :param retry_count: Number of times to attempt to retry if an error occurs executing an action
+    :param mapping_params: Optional dictionary of import mapping parameters
+    :return: Array of ParameterResponse objects with task execution details
+    """
 
     generator = TaskFactoryGenerator(action_id[:3])
     factory = generator.get_factory()
@@ -84,11 +96,11 @@ def execute_action(conn: AnaplanConnection, action_id: str, retry_count: int, ma
 # ===========================================================================
 def get_list(conn: AnaplanConnection, resource: str) -> AnaplanResource:
     """
-    :param conn: AnaplanConnection object which contains authorization string, workspace ID, and model ID
+    :param conn: AnaplanConnection object which contains AuthToken object, workspace ID, and model ID
     :param resource: The Anaplan model resource to be queried and returned to the user
     """
 
-    resources = Resources(conn, resource)
+    resources = Resources(conn=conn, resource=resource)
     resources_list = resources.get_resources()
     resource_parser = ResourceParserList()
     return resource_parser.get_parser(resources_list)
@@ -99,9 +111,9 @@ def get_list(conn: AnaplanConnection, resource: str) -> AnaplanResource:
 # ===========================================================================
 def get_file(conn: AnaplanConnection, file_id: str) -> str:
     """
-    :param conn: AnaplanConnection object which contains authorization string, workspace ID, and model ID
+    :param conn: AnaplanConnection object which contains AuthToken object, workspace ID, and model ID
     :param file_id: ID of the Anaplan file to download
     """
 
-    file_download = FileDownload(conn, file_id)
+    file_download = FileDownload(conn=conn, file_id=file_id)
     return file_download.download_file()
