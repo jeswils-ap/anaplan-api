@@ -12,6 +12,9 @@ class WorkspaceDetails(object):
 	_current_size: float
 
 	def __init__(self, details: dict):
+		"""
+		:param details: JSON workspace details
+		"""
 		self._model_details = details
 		self._id = details['id']
 		self._name = details['name']
@@ -19,6 +22,10 @@ class WorkspaceDetails(object):
 		self._allowance = float(details['sizeAllowance']) / (1024 ** 2)
 		self._current_size = float(details['currentSize']) / (1024 ** 2)
 
-	def __str__(self):
+	def __str__(self) -> str:
+		"""
+		:return: Friendly workspace details
+		:rtype: str
+		"""
 		return f"Workspace name: {self._name}, ID: {self._id}, Model state: {self._active}, " \
 			f"workspace size: {self._current_size}, workspace allowance: {self._allowance}"

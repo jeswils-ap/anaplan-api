@@ -28,13 +28,15 @@ logger = logging.getLogger(__name__)
 # ===========================================================================
 def generate_authorization(auth_type: str = "Basic", email: str = None, password: str = None,
                            private_key: Union[bytes, str] = None, cert: Union[bytes, str] = None) -> AuthToken:
-    """
+    """Generate an Anaplan AuthToken object
+
     :param auth_type: Basic or Certificate authentication
     :param email: Anaplan email address for Basic auth
     :param password: Anaplan password for Basic auth
     :param private_key: Private key string or path to key file
     :param cert: Public certificate string or path to file
-    :return:
+    :return: AnaplanAuthToken value and expiry time in epoch
+    :rtype: AuthToken
     """
 
     if auth_type.lower() == 'basic' and email and password:
@@ -56,12 +58,12 @@ def generate_authorization(auth_type: str = "Basic", email: str = None, password
 
 
 def file_upload(conn: AnaplanConnection, file_id: str, chunk_size: int, data: str) -> None:
-    """
+    """Upload a file to Anaplan model
+
     :param conn: AnaplanConnection object which contains AuthToken object, workspace ID, and model ID
     :param file_id: ID of the file in Anaplan
     :param chunk_size: Desired chunk size of the upload request between 1-50
     :param data: Data to load, either path to local file or string
-    :return: None
     """
 
     file = UploadFactory(data)
@@ -71,12 +73,14 @@ def file_upload(conn: AnaplanConnection, file_id: str, chunk_size: int, data: st
 
 def execute_action(conn: AnaplanConnection, action_id: str, retry_count: int, mapping_params: dict = None) \
         -> List[ParserResponse]:
-    """
+    """Execute a specified Anaplan action
+
     :param conn: AnaplanConnection object which contains AuthToken object, workspace ID, and model ID
     :param action_id: ID of the Anaplan action to execute
     :param retry_count: Number of times to attempt to retry if an error occurs executing an action
     :param mapping_params: Optional dictionary of import mapping parameters
-    :return: Array of ParameterResponse objects with task execution details
+    :return: Detailed results of the requested action task.
+    :rtype: List[ParserResponse]
     """
 
     generator = TaskFactoryGenerator(action_id[:3])
@@ -95,9 +99,14 @@ def execute_action(conn: AnaplanConnection, action_id: str, retry_count: int, ma
 # files, actions, imports, exports, processes and returns the JSON response.
 # ===========================================================================
 def get_list(conn: AnaplanConnection, resource: str) -> AnaplanResource:
-    """
+    """Get list of the specified resource in the Anaplan model
+
     :param conn: AnaplanConnection object which contains AuthToken object, workspace ID, and model ID
+    :type conn: AnaplanConnection
     :param resource: The Anaplan model resource to be queried and returned to the user
+    :type resource: str
+    :return: Detailed list of the requested resource
+    :rtype: AnaplanResource
     """
 
     resources = Resources(conn=conn, resource=resource)
@@ -110,9 +119,14 @@ def get_list(conn: AnaplanConnection, resource: str) -> AnaplanResource:
 # This function downloads a file from Anaplan to the specified path.
 # ===========================================================================
 def get_file(conn: AnaplanConnection, file_id: str) -> str:
-    """
+    """Download the specified file from the Anaplan model
+
     :param conn: AnaplanConnection object which contains AuthToken object, workspace ID, and model ID
+    :type conn: AnaplanConnection
     :param file_id: ID of the Anaplan file to download
+    :type file_id: str
+    :return: File data from anaplan
+    :rtype: str
     """
 
     file_download = FileDownload(conn=conn, file_id=file_id)

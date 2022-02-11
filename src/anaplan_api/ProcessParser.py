@@ -25,19 +25,30 @@ class ProcessParser(Parser):
 
     @staticmethod
     def get_results() -> List[ParserResponse]:
+        """Get task results
+
+        :return: Process task results
+        :rtype: List[ParserResponse]
+        """
         return ProcessParser.results
 
     @staticmethod
     def parse_response(conn: AnaplanConnection, results: dict, url: str) -> List[ParserResponse]:
-        """
-        :param conn: AnaplanConnection object
+        """Parse process task results to friendly format
+
+        :param conn: Object with authentication, workspace, and model details
+        :type conn: AnaplanConnection
         :param results: JSON dictionary of results to parse
+        :type results: dict
         :param url: URL of Anaplan task
-        :return: ParserResponse object
+        :type url: str
+        :return: Friendly process task results
+        :rtype: List[ParserResponse]
         """
 
         job_status = results['currentStep']
 
+        # If process failed, return generic failure response.
         if job_status == "Failed.":
             logger.error("The task has failed to run due to an error, please check process definition in Anaplan")
             return [ParserResponse("The task has failed, check process definition in Anaplan", "",
@@ -59,6 +70,19 @@ class ProcessParser(Parser):
 
     @staticmethod
     def sub_process_parser(conn: AnaplanConnection, object_id: str, results: dict, url: str) -> ParserResponse:
+        """Parser for sub-tasks that occur when executing an Anaplan process
+
+        :param conn: Object with authentication, workspace, and model details
+        :type conn: AnaplanConnection
+        :param object_id: ID of the action within the Anaplan process
+        :type object_id: str
+        :param results: JSON for action results
+        :type results: dict
+        :param url: URL of the Anaplan process task
+        :type url: str
+        :return: Friendly details of sub-task
+        :rtype: ParserResponse
+        """
         # Create placeholders objects
         edf = pd.DataFrame()
         msg = []
@@ -67,13 +91,13 @@ class ProcessParser(Parser):
         # Regex pattern for hierarchy parsing
         regex = re.compile('hierarchyRows.+')
 
+        # Check whether the sub-task generated a failure dump
         failure_dump = bool(strtobool(str(results['failureDumpAvailable']).lower()))
-        successful = results['successful']
+        successful = results['successful']  # Sub-task successful status
 
         if failure_dump:
             edf = super().get_dump(''.join([url, '/dumps/', object_id]))
 
-        # Import specific parsing
         if 'details' in results:
             for i in range(0, len(results['details'])):
                 # Import specific parsing

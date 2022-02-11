@@ -21,13 +21,20 @@ logger = logging.getLogger(__name__)
 
 
 class CertificateAuthentication(AnaplanAuthentication):
+	"""
+	Represents a certificate authentication request
+	"""
 	# ===========================================================================
 	# This function reads a user's public certificate as a string, base64
 	# encodes that value, then returns the certificate authorization header.
 	# ===========================================================================
 	def auth_header(self, pub_cert: str) -> Dict[str, str]:
-		"""
-		:param pub_cert: Path to public certificate
+		"""Create the Auth API request header
+
+		:param pub_cert: Path to public certificate or public certificate as a string
+		:type pub_cert: str
+		:return: Auth-API request authorization header
+		:rtype: dict
 		"""
 
 		if not os.path.isfile(pub_cert):
@@ -47,8 +54,10 @@ class CertificateAuthentication(AnaplanAuthentication):
 	# ===========================================================================
 	@staticmethod
 	def generate_post_data(priv_key: bytes) -> str:
-		"""
+		"""Create the body of the Auth-API request
+
 		:param priv_key: Private key text or path to key
+		:type priv_key: bytes
 		"""
 
 		unsigned_nonce = CertificateAuthentication.create_nonce()
@@ -64,6 +73,11 @@ class CertificateAuthentication(AnaplanAuthentication):
 	# ===========================================================================
 	@staticmethod
 	def create_nonce() -> bytes:
+		"""Create a random 150-character byte array
+
+		:return: Bytes object containing 150 characters
+		:rtype: bytes
+		"""
 		rand_arr = os.urandom(150)
 
 		return rand_arr
@@ -74,10 +88,15 @@ class CertificateAuthentication(AnaplanAuthentication):
 	# ===========================================================================
 	@staticmethod
 	def sign_string(message: bytes, priv_key: bytes) -> str:
-		"""
+		"""Signs a string with a private key
+
 		:param message: 150-character pseudo-random byte-array of characters
+		:type message: bytes
 		:param priv_key: Private key text, used to sign the message.
-		:returns: B64 encoded signed nonce
+		:type priv_key: bytes
+		:raises ValueError: Error loading the private or signing the message.
+		:return: Base64 encoded signed string value
+		:rtype: str
 		"""
 
 		backend = default_backend()

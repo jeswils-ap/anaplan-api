@@ -11,6 +11,20 @@ logger = logging.getLogger(__name__)
 
 class Model(User):
 	def get_models(self) -> List[ModelDetails]:
+		"""Get list of all Anaplan model for the specified user.
+
+		:raises HTTPError: HTTP error code
+		:raises ConnectionError: Network-related errors
+		:raises SSLError: Server-side SSL certificate errors
+		:raises Timeout: Request timeout errors
+		:raises ConnectTimeout: Timeout error when attempting to connect
+		:raises ReadTimeout: Timeout error waiting for server response
+		:raises ValueError: Error parsing JSON response from server
+		:raises AttributeError: No models available for specified user.
+		:return: Details for all models the user can access.
+		:rtype: List[ModelDetails]
+		"""
+
 		model_details_list = [ModelDetails]
 		model_list = {}
 		url = ''.join([super().get_url(), super().get_id(), "/models"])
@@ -30,7 +44,7 @@ class Model(User):
 			raise Exception(f"Error getting model list {e}")
 		except ValueError as e:
 			logger.error(f"Error loading model list {e}", exc_info=True)
-			raise Exception(f"Error loading model list {e}")
+			raise ValueError(f"Error loading model list {e}")
 
 		if 'models' in model_list:
 			models = model_list['models']

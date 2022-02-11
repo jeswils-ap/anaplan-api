@@ -20,9 +20,21 @@ class FileDownload(File):
 	_chunk_count: int
 
 	def set_chunk_count(self):
+		"""Sets the chunk count of the specified file to download based on Anaplan metadata"""
 		_chunk_count = super().get_chunk_count()
 
-	def download_file(self):
+	def download_file(self) -> str:
+		"""Download all chunks of the specified file from Anaplan
+
+		:raises HTTPError: HTTP error code
+		:raises ConnectionError: Network-related errors
+		:raises SSLError: Server-side SSL certificate errors
+		:raises Timeout: Request timeout errors
+		:raises ConnectTimeout: Timeout error when attempting to connect
+		:raises ReadTimeout: Timeout error waiting for server response
+		:return: Contents of the specified file.
+		:rtype: str
+		"""
 		conn = self._conn
 		url = ''.join([super().get_url(), "/chunks/"])
 		current_chunk = 0

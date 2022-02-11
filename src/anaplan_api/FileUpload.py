@@ -7,10 +7,12 @@ logger = logging.getLogger(__name__)
 
 class FileUpload(Upload):
 	def upload(self, chunk_size: int, file: str):
-		"""
+		"""Upload a local file to Anaplan model
+
 		:param chunk_size: Desired size of the chunk, in megabytes
+		:type chunk_size: int
 		:param file: Path to the local file to be uploaded to Anaplan
-		:return: None
+		:type file: str
 		"""
 
 		url = ''.join([super().get_base_url(), super().get_workspace(), "/models/", super().get_model(), "/files/",
@@ -22,6 +24,7 @@ class FileUpload(Upload):
 			logger.info(f"Starting upload of file {super().get_file_id()}.")
 
 			with open(file, 'rt') as file:
+				# Enumerate the file contents in specified chunk size
 				for chunk_num, data in enumerate(iter(partial(file.read, chunk_size * (1024 ** 2)), '')):
 					complete = super().file_data(''.join([url, "/chunks/", str(chunk_num)]), chunk_num,
 					                             data.encode('utf-8'))

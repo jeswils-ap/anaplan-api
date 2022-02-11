@@ -8,6 +8,8 @@ import json
 import logging
 from time import sleep
 from requests.exceptions import HTTPError, ConnectionError, SSLError, Timeout, ConnectTimeout, ReadTimeout
+
+from . import TaskResponse
 from .Action import Action
 from .util.Util import InvalidUrlError, InvalidTaskTypeError
 
@@ -16,7 +18,14 @@ logger = logging.getLogger(__name__)
 
 class ParameterAction(Action):
 
-	def execute(self) -> str:
+	def execute(self) -> TaskResponse:
+		"""Execute the requested import task
+
+		:raises InvalidTaskTypeError: Task ID does not match the expected format for imports
+		:raises InvalidUrlError: Provided URL is empty
+		:return: Results of the requested import task
+		:rtype: TaskResponse
+		"""
 		action_id = super().get_action()
 		authorization = super().get_authorization()
 		post_header = {
@@ -38,6 +47,11 @@ class ParameterAction(Action):
 			raise InvalidTaskTypeError("Incorrect action ID provided!")
 
 	def build_request_body(self) -> dict:
+		"""Generate the API request body for parametrised import task.
+
+		:return: JSON dict with runtime mapping parameters for import task
+		:rtype: dict
+		"""
 		body = ""
 		body_value = ""
 
@@ -55,6 +69,24 @@ class ParameterAction(Action):
 		return json.loads(body_value)
 
 	def post_task(self, url: str, post_header: dict, post_body: dict) -> str:
+		"""Overrides parent method to send mapping parameters when executing the specified import
+
+		:param url: URL to trigger specified import action
+		:type url: str
+		:param post_header: Authorization and Content-Type header headers
+		:type post_header: dict
+		:param post_body: JSON-formatted Mapping parameters
+		:type post_body: dict
+		:raises HTTPError: HTTP error code
+		:raises ConnectionError: Network-related errors
+		:raises SSLError: Server-side SSL certificate errors
+		:raises Timeout: Request timeout errors
+		:raises ConnectTimeout: Timeout error when attempting to connect
+		:raises ReadTimeout: Timeout error waiting for server response
+		:raises ValueError: Error locating the task ID
+		:return: Import action task ID
+		:rtype: str
+		"""
 		retry_count = super().get_retry()
 		state = 0
 		sleep_time = 10

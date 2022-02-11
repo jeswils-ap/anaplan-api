@@ -17,6 +17,9 @@ logger = logging.getLogger(__name__)
 
 
 class AnaplanAuthentication(object):
+	"""
+	Represents an authentication attempt for Anaplan API
+	"""
 
 	def __init__(self):
 		pass
@@ -26,10 +29,14 @@ class AnaplanAuthentication(object):
 
 	@staticmethod
 	def auth_request(header: dict, body: str = None) -> str:
-		"""
+		"""Sends authentication request to Anaplan auth server
+
 		:param header: Authorization header for request to auth server
+		:type header: dict
 		:param body: JSON body of auth request
+		:type body: str
 		:return: JSON string with auth token details
+		:rtype: str
 		"""
 		anaplan_url = 'https://auth.anaplan.com/token/authenticate'
 
@@ -59,9 +66,12 @@ class AnaplanAuthentication(object):
 
 	@staticmethod
 	def authenticate(response: str) -> AuthToken:
-		"""
+		"""Parses the authentication response
+
 		:param response: JSON string with auth request response.
-		:return: List with auth token and expiry time
+		:type response: str
+		:return: AnaplanAuthToken and expiry in epoch
+		:rtype: AuthToken
 		"""
 		try:
 			json_response = json.loads(response)
@@ -88,9 +98,12 @@ class AnaplanAuthentication(object):
 
 	@staticmethod
 	def verify_auth(token: str) -> str:
-		"""
+		"""Verifies the authentication request
+
 		:param token: AnaplanAuthToken from authentication request.
+		:type token: str
 		:return: JSON string with authentication validation.
+		:rtype: str
 		"""
 
 		anaplan_url = "https://auth.anaplan.com/token/validate"
@@ -111,9 +124,12 @@ class AnaplanAuthentication(object):
 
 	@staticmethod
 	def refresh_token(token: str, auth_object: AuthToken):
-		"""
-		@param token: Token value that is nearing expiry
-		@param auth_object: AuthToken object to be updated.
+		"""Refreshes the authentication token and updates the token expiry time
+
+		:param token: Token value that is nearing expiry
+		:type token: str
+		:param auth_object: AuthToken object to be updated.
+		:type auth_object: AuthToken
 		"""
 		new_token = ""
 		new_expiry = ""

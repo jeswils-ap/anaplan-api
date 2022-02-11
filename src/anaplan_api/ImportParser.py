@@ -21,15 +21,24 @@ class ImportParser(Parser):
 
 	@staticmethod
 	def get_results() -> List[ParserResponse]:
+		"""Fetch parsed results for the specified task
+
+		:return: Object containing parsed task results and related data
+		:rtype: List[ParserResponse]
+		"""
 		return ImportParser.results
 
 	@staticmethod
 	def parse_response(results: dict, url: str) -> ParserResponse:
-		"""
+		"""Convert JSON response into uniform task result, with error details and related data
+
 		:param results: JSON dictionary of task results
+		:type results: dict
 		:param url: URL of Anaplan task
-		:return: Array with overall task result as string, file contents in string,
-				boolean if error dump is available, and dataframe with error dump.
+		:type url: str
+		:return: Object containing overall task result as string, file contents in string if applicable,
+				 boolean if error dump is available, and dataframe with error dump.
+		:rtype: ParserResponse
 		"""
 
 		# Create placeholder objects

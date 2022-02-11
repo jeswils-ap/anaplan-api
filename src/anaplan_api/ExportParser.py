@@ -24,21 +24,27 @@ class ExportParser(Parser):
 
 	@staticmethod
 	def get_results() -> List[ParserResponse]:
+		"""Get the list of task result details
+
+		:return: Formatted export task results
+		:rtype: List[ParserResponse]
+		"""
 		return ExportParser.results
 
 	@staticmethod
 	def parse_response(conn, results, url) -> ParserResponse:
-		"""
-		:param conn: AnaplanConnection
+		"""Parse the JSON response for a task into an object with standardized format.
+
+		:param conn: AnaplanConnection object with authentication, workspace and model IDs
+		:type conn: AnaplanConnection
 		:param results: JSON dict with task results.
+		:type results: dict
 		:param url: URL of Anaplan task
+		:type url: str
 		:return: Array with overall task result as string, file contents in string,
 				boolean if error dump is available, and dataframe with error dump.
+		:rtype: ParserResponse
 		"""
-		'''
-		:param results: JSON dump of the results of an Anaplan action
-		:returns: String with task details, file contents as String, and an array of error dump dataframes
-		'''
 
 		job_status = results['currentStep']
 		failure_dump = bool(strtobool(str(results['result']['failureDumpAvailable']).lower()))

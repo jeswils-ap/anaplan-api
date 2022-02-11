@@ -27,6 +27,7 @@ from .Model import Model
 from .ModelDetails import ModelDetails
 from .ParameterAction import ParameterAction
 from .Parser import Parser
+from .ParserResponse import ParserResponse
 from .ProcessParser import ProcessParser
 from .ProcessTask import ProcessTask
 from .ResourceParserFactory import ResourceParserFactory
@@ -45,5 +46,5 @@ from .Workspace import Workspace
 from .WorkspaceDetails import WorkspaceDetails
 
 
-__version__ = '0.1.26'
+__version__ = '0.1.27'
 __author__ = 'Jesse Wilson'
