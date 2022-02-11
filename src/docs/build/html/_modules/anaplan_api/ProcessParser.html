@@ -1,0 +1,222 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>anaplan_api.ProcessParser &#8212; anaplan-api 0.1.26 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for anaplan_api.ProcessParser</h1><div class="highlight"><pre>
+<span></span><span class="c1"># ===========================================================================</span>
+<span class="c1"># This function reads the JSON results of the completed Anaplan task and returns</span>
+<span class="c1"># the job details.</span>
+<span class="c1"># ===========================================================================</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">distutils.util</span> <span class="kn">import</span> <span class="n">strtobool</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+<span class="kn">from</span> <span class="nn">anaplan_api</span> <span class="kn">import</span> <span class="n">anaplan</span>
+<span class="kn">from</span> <span class="nn">.AnaplanConnection</span> <span class="kn">import</span> <span class="n">AnaplanConnection</span>
+<span class="kn">from</span> <span class="nn">.Parser</span> <span class="kn">import</span> <span class="n">Parser</span>
+<span class="kn">from</span> <span class="nn">.ParserResponse</span> <span class="kn">import</span> <span class="n">ParserResponse</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="ProcessParser"><a class="viewcode-back" href="../../anaplan_api.html#anaplan_api.ProcessParser.ProcessParser">[docs]</a><span class="k">class</span> <span class="nc">ProcessParser</span><span class="p">(</span><span class="n">Parser</span><span class="p">):</span>
+    <span class="n">results</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">ParserResponse</span><span class="p">]</span>
+    <span class="n">_authorization</span><span class="p">:</span> <span class="nb">str</span>
+
+<div class="viewcode-block" id="ProcessParser.__init__"><a class="viewcode-back" href="../../anaplan_api.html#anaplan_api.ProcessParser.ProcessParser.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">conn</span><span class="p">:</span> <span class="n">AnaplanConnection</span><span class="p">,</span> <span class="n">results</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">conn</span><span class="o">=</span><span class="n">conn</span><span class="p">,</span> <span class="n">results</span><span class="o">=</span><span class="n">results</span><span class="p">,</span> <span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">)</span>
+        <span class="n">ProcessParser</span><span class="o">.</span><span class="n">results</span> <span class="o">=</span> <span class="n">ProcessParser</span><span class="o">.</span><span class="n">parse_response</span><span class="p">(</span><span class="n">conn</span><span class="p">,</span> <span class="n">results</span><span class="p">,</span> <span class="n">url</span><span class="p">)</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="ProcessParser.get_results"><a class="viewcode-back" href="../../anaplan_api.html#anaplan_api.ProcessParser.ProcessParser.get_results">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get_results</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">ParserResponse</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Get task results</span>
+
+<span class="sd">        :return: Process task results</span>
+<span class="sd">        :rtype: List[ParserResponse]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">ProcessParser</span><span class="o">.</span><span class="n">results</span></div>
+
+<div class="viewcode-block" id="ProcessParser.parse_response"><a class="viewcode-back" href="../../anaplan_api.html#anaplan_api.ProcessParser.ProcessParser.parse_response">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">parse_response</span><span class="p">(</span><span class="n">conn</span><span class="p">:</span> <span class="n">AnaplanConnection</span><span class="p">,</span> <span class="n">results</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">ParserResponse</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Parse process task results to friendly format</span>
+
+<span class="sd">        :param conn: Object with authentication, workspace, and model details</span>
+<span class="sd">        :type conn: AnaplanConnection</span>
+<span class="sd">        :param results: JSON dictionary of results to parse</span>
+<span class="sd">        :type results: dict</span>
+<span class="sd">        :param url: URL of Anaplan task</span>
+<span class="sd">        :type url: str</span>
+<span class="sd">        :return: Friendly process task results</span>
+<span class="sd">        :rtype: List[ParserResponse]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">job_status</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="s1">&#39;currentStep&#39;</span><span class="p">]</span>
+
+        <span class="c1"># If process failed, return generic failure response.</span>
+        <span class="k">if</span> <span class="n">job_status</span> <span class="o">==</span> <span class="s2">&quot;Failed.&quot;</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;The task has failed to run due to an error, please check process definition in Anaplan&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">ParserResponse</span><span class="p">(</span><span class="s2">&quot;The task has failed, check process definition in Anaplan&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+                                   <span class="kc">False</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">())]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Process completed.&quot;</span><span class="p">)</span>
+            <span class="c1"># nestedResults key only present in process task results</span>
+            <span class="k">if</span> <span class="s1">&#39;nestedResults&#39;</span> <span class="ow">in</span> <span class="n">results</span><span class="p">[</span><span class="s1">&#39;result&#39;</span><span class="p">]:</span>
+                <span class="n">nested_details</span> <span class="o">=</span> <span class="p">[</span><span class="n">ParserResponse</span><span class="p">]</span>
+
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Parsing nested results.&quot;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">nestedResults</span> <span class="ow">in</span> <span class="n">results</span><span class="p">[</span><span class="s1">&#39;result&#39;</span><span class="p">][</span><span class="s1">&#39;nestedResults&#39;</span><span class="p">]:</span>
+                    <span class="n">object_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">nestedResults</span><span class="p">[</span><span class="s1">&#39;objectId&#39;</span><span class="p">])</span>
+
+                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Fetching details for object </span><span class="si">{</span><span class="n">object_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="n">nested_details</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ProcessParser</span><span class="o">.</span><span class="n">sub_process_parser</span><span class="p">(</span><span class="n">conn</span><span class="p">,</span> <span class="n">object_id</span><span class="p">,</span> <span class="n">nestedResults</span><span class="p">,</span> <span class="n">url</span><span class="p">))</span>
+
+                <span class="k">return</span> <span class="n">nested_details</span></div>
+
+<div class="viewcode-block" id="ProcessParser.sub_process_parser"><a class="viewcode-back" href="../../anaplan_api.html#anaplan_api.ProcessParser.ProcessParser.sub_process_parser">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">sub_process_parser</span><span class="p">(</span><span class="n">conn</span><span class="p">:</span> <span class="n">AnaplanConnection</span><span class="p">,</span> <span class="n">object_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">results</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ParserResponse</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Parser for sub-tasks that occur when executing an Anaplan process</span>
+
+<span class="sd">        :param conn: Object with authentication, workspace, and model details</span>
+<span class="sd">        :type conn: AnaplanConnection</span>
+<span class="sd">        :param object_id: ID of the action within the Anaplan process</span>
+<span class="sd">        :type object_id: str</span>
+<span class="sd">        :param results: JSON for action results</span>
+<span class="sd">        :type results: dict</span>
+<span class="sd">        :param url: URL of the Anaplan process task</span>
+<span class="sd">        :type url: str</span>
+<span class="sd">        :return: Friendly details of sub-task</span>
+<span class="sd">        :rtype: ParserResponse</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Create placeholders objects</span>
+        <span class="n">edf</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">export_file</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+        <span class="c1"># Regex pattern for hierarchy parsing</span>
+        <span class="n">regex</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s1">&#39;hierarchyRows.+&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Check whether the sub-task generated a failure dump</span>
+        <span class="n">failure_dump</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">strtobool</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">results</span><span class="p">[</span><span class="s1">&#39;failureDumpAvailable&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">lower</span><span class="p">()))</span>
+        <span class="n">successful</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="s1">&#39;successful&#39;</span><span class="p">]</span>  <span class="c1"># Sub-task successful status</span>
+
+        <span class="k">if</span> <span class="n">failure_dump</span><span class="p">:</span>
+            <span class="n">edf</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">get_dump</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">url</span><span class="p">,</span> <span class="s1">&#39;/dumps/&#39;</span><span class="p">,</span> <span class="n">object_id</span><span class="p">]))</span>
+
+        <span class="k">if</span> <span class="s1">&#39;details&#39;</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">results</span><span class="p">[</span><span class="s1">&#39;details&#39;</span><span class="p">])):</span>
+                <span class="c1"># Import specific parsing</span>
+                <span class="k">if</span> <span class="s1">&#39;localMessageText&#39;</span> <span class="ow">in</span> <span class="n">results</span><span class="p">[</span><span class="s1">&#39;details&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]:</span>
+                    <span class="n">msg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">results</span><span class="p">[</span><span class="s1">&#39;details&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;localMessageText&#39;</span><span class="p">])</span>
+                    <span class="c1"># Parsing module imports with failures</span>
+                    <span class="k">if</span> <span class="s1">&#39;values&#39;</span> <span class="ow">in</span> <span class="n">results</span><span class="p">[</span><span class="s1">&#39;details&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]:</span>
+                        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">results</span><span class="p">[</span><span class="s1">&#39;details&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;values&#39;</span><span class="p">])):</span>
+                            <span class="n">msg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">results</span><span class="p">[</span><span class="s1">&#39;details&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;values&#39;</span><span class="p">][</span><span class="n">j</span><span class="p">])</span>
+                <span class="k">if</span> <span class="s1">&#39;type&#39;</span> <span class="ow">in</span> <span class="n">results</span><span class="p">[</span><span class="s1">&#39;details&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]:</span>
+                    <span class="c1"># Parsing hierarchy import nested details</span>
+                    <span class="k">if</span> <span class="nb">bool</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">regex</span><span class="p">,</span> <span class="n">results</span><span class="p">[</span><span class="s1">&#39;details&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;type&#39;</span><span class="p">])):</span>
+                        <span class="k">if</span> <span class="s1">&#39;values&#39;</span> <span class="ow">in</span> <span class="n">results</span><span class="p">[</span><span class="s1">&#39;details&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]:</span>
+                            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">results</span><span class="p">[</span><span class="s1">&#39;details&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;values&#39;</span><span class="p">])):</span>
+                                <span class="n">msg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">results</span><span class="p">[</span><span class="s1">&#39;details&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;values&#39;</span><span class="p">][</span><span class="n">j</span><span class="p">])</span>
+                    <span class="c1"># Export specific parsing</span>
+                    <span class="k">if</span> <span class="n">results</span><span class="p">[</span><span class="s1">&#39;details&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;exportSucceeded&quot;</span><span class="p">:</span>
+                        <span class="n">export_file</span> <span class="o">=</span> <span class="n">anaplan</span><span class="o">.</span><span class="n">get_file</span><span class="p">(</span><span class="n">conn</span><span class="p">,</span> <span class="n">object_id</span><span class="p">)</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error dump available: </span><span class="si">{</span><span class="n">failure_dump</span><span class="si">}</span><span class="s2">, Sub-task </span><span class="si">{</span><span class="n">object_id</span><span class="si">}</span><span class="s2"> successful: </span><span class="si">{</span><span class="n">successful</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ParserResponse</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">msg</span><span class="p">),</span> <span class="n">export_file</span><span class="p">,</span> <span class="n">failure_dump</span><span class="p">,</span> <span class="n">edf</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">anaplan-api</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../anaplan_api.html">anaplan_api package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">anaplan_api</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2021, Jesse Wilson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

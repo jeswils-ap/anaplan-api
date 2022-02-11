@@ -1,0 +1,149 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>anaplan_api.ExportTask &#8212; anaplan-api 0.1.26 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for anaplan_api.ExportTask</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">.TaskFactory</span> <span class="kn">import</span> <span class="n">TaskFactory</span>
+<span class="kn">from</span> <span class="nn">.AnaplanConnection</span> <span class="kn">import</span> <span class="n">AnaplanConnection</span>
+<span class="kn">from</span> <span class="nn">.Action</span> <span class="kn">import</span> <span class="n">Action</span>
+<span class="kn">from</span> <span class="nn">.Parser</span> <span class="kn">import</span> <span class="n">Parser</span>
+<span class="kn">from</span> <span class="nn">.ExportParser</span> <span class="kn">import</span> <span class="n">ExportParser</span>
+<span class="kn">from</span> <span class="nn">.util.Util</span> <span class="kn">import</span> <span class="n">TaskParameterError</span>
+
+
+<div class="viewcode-block" id="ExportTask"><a class="viewcode-back" href="../../anaplan_api.html#anaplan_api.ExportTask.ExportTask">[docs]</a><span class="k">class</span> <span class="nc">ExportTask</span><span class="p">(</span><span class="n">TaskFactory</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	Factory to generate an Anaplan import task</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="ExportTask.get_action"><a class="viewcode-back" href="../../anaplan_api.html#anaplan_api.ExportTask.ExportTask.get_action">[docs]</a>	<span class="nd">@staticmethod</span>
+	<span class="k">def</span> <span class="nf">get_action</span><span class="p">(</span><span class="n">conn</span><span class="p">:</span> <span class="n">AnaplanConnection</span><span class="p">,</span> <span class="n">action_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">retry_count</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">mapping_params</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Action</span><span class="p">:</span>
+		<span class="sd">&quot;&quot;&quot;Create an initialized Action object for a requested Anaplan export</span>
+
+<span class="sd">		:param conn: Contains authorization, workspace and model IDs</span>
+<span class="sd">		:type conn: AnaplanConnection</span>
+<span class="sd">		:param action_id: ID of the requested Anaplan export</span>
+<span class="sd">		:type action_id:  str</span>
+<span class="sd">		:param retry_count: Number of times to attempt to trigger the action in case of server error.</span>
+<span class="sd">		:type retry_count: int</span>
+<span class="sd">		:param mapping_params: Should always be None type for Export Tasks</span>
+<span class="sd">		:type mapping_params: dict</span>
+<span class="sd">		:raises TaskParameterError: Error when attempting to set mapping parameters for actions other than imports.</span>
+<span class="sd">		:return: Initialized Export Action object</span>
+<span class="sd">		:rtype: Action</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="n">mapping_params</span><span class="p">:</span>
+			<span class="k">return</span> <span class="n">Action</span><span class="p">(</span><span class="n">conn</span><span class="o">=</span><span class="n">conn</span><span class="p">,</span> <span class="n">action_id</span><span class="o">=</span><span class="n">action_id</span><span class="p">,</span> <span class="n">retry_count</span><span class="o">=</span><span class="n">retry_count</span><span class="p">,</span> <span class="n">mapping_params</span><span class="o">=</span><span class="n">mapping_params</span><span class="p">)</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="k">raise</span> <span class="n">TaskParameterError</span><span class="p">(</span><span class="s2">&quot;Only Anaplan imports accept mapping parameters.&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ExportTask.get_parser"><a class="viewcode-back" href="../../anaplan_api.html#anaplan_api.ExportTask.ExportTask.get_parser">[docs]</a>	<span class="nd">@staticmethod</span>
+	<span class="k">def</span> <span class="nf">get_parser</span><span class="p">(</span><span class="n">conn</span><span class="p">:</span> <span class="n">AnaplanConnection</span><span class="p">,</span> <span class="n">results</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Parser</span><span class="p">:</span>
+		<span class="sd">&quot;&quot;&quot;Creates a Parser object which contains the results of the requested export task.</span>
+
+<span class="sd">		:param conn: Contains authorization, workspace and model IDs</span>
+<span class="sd">		:type conn: AnaplanConnection</span>
+<span class="sd">		:param results: JSON array of export task results</span>
+<span class="sd">		:type results: dict</span>
+<span class="sd">		:param url: URL of the export task.</span>
+<span class="sd">		:type url: str</span>
+<span class="sd">		:return: ExportParser object with results of the export task</span>
+<span class="sd">		:rtype: Parser</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">return</span> <span class="n">ExportParser</span><span class="p">(</span><span class="n">conn</span><span class="p">,</span> <span class="n">results</span><span class="p">,</span> <span class="n">url</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">anaplan-api</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../anaplan_api.html">anaplan_api package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">anaplan_api</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2021, Jesse Wilson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

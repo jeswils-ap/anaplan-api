@@ -1,0 +1,172 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>anaplan_api.ExportParser &#8212; anaplan-api 0.1.26 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for anaplan_api.ExportParser</h1><div class="highlight"><pre>
+<span></span><span class="c1"># ===========================================================================</span>
+<span class="c1"># This function reads the JSON results of the completed Anaplan task and returns</span>
+<span class="c1"># the job details.</span>
+<span class="c1"># ===========================================================================</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+<span class="kn">from</span> <span class="nn">distutils.util</span> <span class="kn">import</span> <span class="n">strtobool</span>
+<span class="kn">from</span> <span class="nn">anaplan_api</span> <span class="kn">import</span> <span class="n">anaplan</span>
+<span class="kn">from</span> <span class="nn">.Parser</span> <span class="kn">import</span> <span class="n">Parser</span>
+<span class="kn">from</span> <span class="nn">.AnaplanConnection</span> <span class="kn">import</span> <span class="n">AnaplanConnection</span>
+<span class="kn">from</span> <span class="nn">.ParserResponse</span> <span class="kn">import</span> <span class="n">ParserResponse</span>
+
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="ExportParser"><a class="viewcode-back" href="../../anaplan_api.html#anaplan_api.ExportParser.ExportParser">[docs]</a><span class="k">class</span> <span class="nc">ExportParser</span><span class="p">(</span><span class="n">Parser</span><span class="p">):</span>
+	<span class="n">results</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">ParserResponse</span><span class="p">]</span>
+
+<div class="viewcode-block" id="ExportParser.__init__"><a class="viewcode-back" href="../../anaplan_api.html#anaplan_api.ExportParser.ExportParser.__init__">[docs]</a>	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">conn</span><span class="p">:</span> <span class="n">AnaplanConnection</span><span class="p">,</span> <span class="n">results</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+		<span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">conn</span><span class="o">=</span><span class="n">conn</span><span class="p">,</span> <span class="n">results</span><span class="o">=</span><span class="n">results</span><span class="p">,</span> <span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">)</span>
+		<span class="n">ExportParser</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ExportParser</span><span class="o">.</span><span class="n">parse_response</span><span class="p">(</span><span class="n">conn</span><span class="p">,</span> <span class="n">results</span><span class="p">,</span> <span class="n">url</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="ExportParser.get_results"><a class="viewcode-back" href="../../anaplan_api.html#anaplan_api.ExportParser.ExportParser.get_results">[docs]</a>	<span class="nd">@staticmethod</span>
+	<span class="k">def</span> <span class="nf">get_results</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">ParserResponse</span><span class="p">]:</span>
+		<span class="sd">&quot;&quot;&quot;Get the list of task result details</span>
+
+<span class="sd">		:return: Formatted export task results</span>
+<span class="sd">		:rtype: List[ParserResponse]</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">return</span> <span class="n">ExportParser</span><span class="o">.</span><span class="n">results</span></div>
+
+<div class="viewcode-block" id="ExportParser.parse_response"><a class="viewcode-back" href="../../anaplan_api.html#anaplan_api.ExportParser.ExportParser.parse_response">[docs]</a>	<span class="nd">@staticmethod</span>
+	<span class="k">def</span> <span class="nf">parse_response</span><span class="p">(</span><span class="n">conn</span><span class="p">,</span> <span class="n">results</span><span class="p">,</span> <span class="n">url</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ParserResponse</span><span class="p">:</span>
+		<span class="sd">&quot;&quot;&quot;Parse the JSON response for a task into an object with standardized format.</span>
+
+<span class="sd">		:param conn: AnaplanConnection object with authentication, workspace and model IDs</span>
+<span class="sd">		:type conn: AnaplanConnection</span>
+<span class="sd">		:param results: JSON dict with task results.</span>
+<span class="sd">		:type results: dict</span>
+<span class="sd">		:param url: URL of Anaplan task</span>
+<span class="sd">		:type url: str</span>
+<span class="sd">		:return: Array with overall task result as string, file contents in string,</span>
+<span class="sd">				boolean if error dump is available, and dataframe with error dump.</span>
+<span class="sd">		:rtype: ParserResponse</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+
+		<span class="n">job_status</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="s1">&#39;currentStep&#39;</span><span class="p">]</span>
+		<span class="n">failure_dump</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">strtobool</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">results</span><span class="p">[</span><span class="s1">&#39;result&#39;</span><span class="p">][</span><span class="s1">&#39;failureDumpAvailable&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">lower</span><span class="p">()))</span>
+		<span class="n">edf</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+
+		<span class="k">if</span> <span class="n">job_status</span> <span class="o">==</span> <span class="s2">&quot;Failed.&quot;</span><span class="p">:</span>
+			<span class="sd">&#39;&#39;&#39;Should Never happen for Export type tasks&#39;&#39;&#39;</span>
+			<span class="k">return</span> <span class="n">Parser</span><span class="o">.</span><span class="n">failure_message</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="c1"># IF failure dump is available download</span>
+			<span class="k">if</span> <span class="n">failure_dump</span><span class="p">:</span>
+				<span class="n">edf</span> <span class="o">=</span> <span class="n">Parser</span><span class="o">.</span><span class="n">get_dump</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">url</span><span class="p">,</span> <span class="s2">&quot;/dump&quot;</span><span class="p">]))</span>
+
+			<span class="n">success_report</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">results</span><span class="p">[</span><span class="s1">&#39;result&#39;</span><span class="p">][</span><span class="s1">&#39;successful&#39;</span><span class="p">])</span>
+
+			<span class="c1"># details key only present in import task results</span>
+			<span class="k">if</span> <span class="s1">&#39;objectId&#39;</span> <span class="ow">in</span> <span class="n">results</span><span class="p">[</span><span class="s1">&#39;result&#39;</span><span class="p">]:</span>
+				<span class="n">object_id</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="s1">&#39;result&#39;</span><span class="p">][</span><span class="s1">&#39;objectId&#39;</span><span class="p">]</span>
+				<span class="n">file_contents</span> <span class="o">=</span> <span class="n">anaplan</span><span class="o">.</span><span class="n">get_file</span><span class="p">(</span><span class="n">conn</span><span class="p">,</span> <span class="n">object_id</span><span class="p">)</span>
+
+				<span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The requested job is </span><span class="si">{</span><span class="n">job_status</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+				<span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failure Dump Available: </span><span class="si">{</span><span class="n">failure_dump</span><span class="si">}</span><span class="s2">, Successful: </span><span class="si">{</span><span class="n">success_report</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+				<span class="k">return</span> <span class="n">ParserResponse</span><span class="p">(</span><span class="s2">&quot;File export completed.&quot;</span><span class="p">,</span> <span class="n">file_contents</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">edf</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">anaplan-api</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../anaplan_api.html">anaplan_api package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">anaplan_api</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2021, Jesse Wilson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

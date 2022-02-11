@@ -1,0 +1,234 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>anaplan_api.anaplan &#8212; anaplan-api 0.1.26 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for anaplan_api.anaplan</h1><div class="highlight"><pre>
+<span></span><span class="c1"># ===============================================================================</span>
+<span class="c1"># Created:        11 Sep 2018</span>
+<span class="c1"># @author:        Jesse Wilson (Anaplan Asia Pte Ltd)</span>
+<span class="c1"># Description:    Library to implement Anaplan API to get lists of model resources, upload files to Anaplan server,</span>
+<span class="c1">#                 download files from Anaplan server, and execute actions.</span>
+<span class="c1"># ===============================================================================</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">.AnaplanConnection</span> <span class="kn">import</span> <span class="n">AnaplanConnection</span>
+<span class="kn">from</span> <span class="nn">.ParserResponse</span> <span class="kn">import</span> <span class="n">ParserResponse</span>
+<span class="kn">from</span> <span class="nn">.BasicAuthentication</span> <span class="kn">import</span> <span class="n">BasicAuthentication</span>
+<span class="kn">from</span> <span class="nn">.CertificateAuthentication</span> <span class="kn">import</span> <span class="n">CertificateAuthentication</span>
+<span class="kn">from</span> <span class="nn">.FileDownload</span> <span class="kn">import</span> <span class="n">FileDownload</span>
+<span class="kn">from</span> <span class="nn">.TaskFactoryGenerator</span> <span class="kn">import</span> <span class="n">TaskFactoryGenerator</span>
+<span class="kn">from</span> <span class="nn">.Resources</span> <span class="kn">import</span> <span class="n">Resources</span>
+<span class="kn">from</span> <span class="nn">.ResourceParserList</span> <span class="kn">import</span> <span class="n">ResourceParserList</span>
+<span class="kn">from</span> <span class="nn">.AnaplanResourceList</span> <span class="kn">import</span> <span class="n">AnaplanResource</span>
+<span class="kn">from</span> <span class="nn">.AuthToken</span> <span class="kn">import</span> <span class="n">AuthToken</span>
+<span class="kn">from</span> <span class="nn">.UploadFactory</span> <span class="kn">import</span> <span class="n">UploadFactory</span>
+<span class="kn">from</span> <span class="nn">.util.Util</span> <span class="kn">import</span> <span class="n">InvalidAuthenticationError</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<span class="c1"># ===========================================================================</span>
+<span class="c1"># This function reads the authentication type, Basic or Certificate, then passes</span>
+<span class="c1"># the remaining variables to anaplan_auth to generate the authorization for Anaplan API</span>
+<span class="c1"># ===========================================================================</span>
+<div class="viewcode-block" id="generate_authorization"><a class="viewcode-back" href="../../anaplan_api.html#anaplan_api.anaplan.generate_authorization">[docs]</a><span class="k">def</span> <span class="nf">generate_authorization</span><span class="p">(</span><span class="n">auth_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Basic&quot;</span><span class="p">,</span> <span class="n">email</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">password</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                           <span class="n">private_key</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bytes</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">cert</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bytes</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AuthToken</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Generate an Anaplan AuthToken object</span>
+
+<span class="sd">    :param auth_type: Basic or Certificate authentication</span>
+<span class="sd">    :param email: Anaplan email address for Basic auth</span>
+<span class="sd">    :param password: Anaplan password for Basic auth</span>
+<span class="sd">    :param private_key: Private key string or path to key file</span>
+<span class="sd">    :param cert: Public certificate string or path to file</span>
+<span class="sd">    :return: AnaplanAuthToken value and expiry time in epoch</span>
+<span class="sd">    :rtype: AuthToken</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">auth_type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;basic&#39;</span> <span class="ow">and</span> <span class="n">email</span> <span class="ow">and</span> <span class="n">password</span><span class="p">:</span>
+        <span class="n">basic</span> <span class="o">=</span> <span class="n">BasicAuthentication</span><span class="p">()</span>
+        <span class="n">header_string</span> <span class="o">=</span> <span class="n">basic</span><span class="o">.</span><span class="n">auth_header</span><span class="p">(</span><span class="n">email</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">basic</span><span class="o">.</span><span class="n">authenticate</span><span class="p">(</span><span class="n">basic</span><span class="o">.</span><span class="n">auth_request</span><span class="p">(</span><span class="n">header_string</span><span class="p">))</span>
+    <span class="k">elif</span> <span class="n">auth_type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;certificate&#39;</span> <span class="ow">and</span> <span class="n">cert</span> <span class="ow">and</span> <span class="n">private_key</span><span class="p">:</span>
+        <span class="n">cert_auth</span> <span class="o">=</span> <span class="n">CertificateAuthentication</span><span class="p">()</span>
+        <span class="n">header_string</span> <span class="o">=</span> <span class="n">cert_auth</span><span class="o">.</span><span class="n">auth_header</span><span class="p">(</span><span class="n">cert</span><span class="p">)</span>
+        <span class="n">post_data</span> <span class="o">=</span> <span class="n">cert_auth</span><span class="o">.</span><span class="n">generate_post_data</span><span class="p">(</span><span class="n">private_key</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">cert_auth</span><span class="o">.</span><span class="n">authenticate</span><span class="p">(</span><span class="n">cert_auth</span><span class="o">.</span><span class="n">auth_request</span><span class="p">(</span><span class="n">header_string</span><span class="p">,</span> <span class="n">post_data</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">email</span> <span class="ow">and</span> <span class="n">password</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">cert</span> <span class="ow">and</span> <span class="n">private_key</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid authentication method: </span><span class="si">{</span><span class="n">auth_type</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">InvalidAuthenticationError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid authentication method: </span><span class="si">{</span><span class="n">auth_type</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Email address and password or certificate and key must not be blank&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">InvalidAuthenticationError</span><span class="p">(</span><span class="s2">&quot;Email address and password or certificate and key must not be blank&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="file_upload"><a class="viewcode-back" href="../../anaplan_api.html#anaplan_api.anaplan.file_upload">[docs]</a><span class="k">def</span> <span class="nf">file_upload</span><span class="p">(</span><span class="n">conn</span><span class="p">:</span> <span class="n">AnaplanConnection</span><span class="p">,</span> <span class="n">file_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">chunk_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Upload a file to Anaplan model</span>
+
+<span class="sd">    :param conn: AnaplanConnection object which contains AuthToken object, workspace ID, and model ID</span>
+<span class="sd">    :param file_id: ID of the file in Anaplan</span>
+<span class="sd">    :param chunk_size: Desired chunk size of the upload request between 1-50</span>
+<span class="sd">    :param data: Data to load, either path to local file or string</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">file</span> <span class="o">=</span> <span class="n">UploadFactory</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">uploader</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">get_uploader</span><span class="p">(</span><span class="n">conn</span><span class="p">,</span> <span class="n">file_id</span><span class="p">)</span>
+    <span class="n">uploader</span><span class="o">.</span><span class="n">upload</span><span class="p">(</span><span class="n">chunk_size</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="execute_action"><a class="viewcode-back" href="../../anaplan_api.html#anaplan_api.anaplan.execute_action">[docs]</a><span class="k">def</span> <span class="nf">execute_action</span><span class="p">(</span><span class="n">conn</span><span class="p">:</span> <span class="n">AnaplanConnection</span><span class="p">,</span> <span class="n">action_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">retry_count</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">mapping_params</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> \
+        <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">ParserResponse</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Execute a specified Anaplan action</span>
+
+<span class="sd">    :param conn: AnaplanConnection object which contains AuthToken object, workspace ID, and model ID</span>
+<span class="sd">    :param action_id: ID of the Anaplan action to execute</span>
+<span class="sd">    :param retry_count: Number of times to attempt to retry if an error occurs executing an action</span>
+<span class="sd">    :param mapping_params: Optional dictionary of import mapping parameters</span>
+<span class="sd">    :return: Detailed results of the requested action task.</span>
+<span class="sd">    :rtype: List[ParserResponse]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">generator</span> <span class="o">=</span> <span class="n">TaskFactoryGenerator</span><span class="p">(</span><span class="n">action_id</span><span class="p">[:</span><span class="mi">3</span><span class="p">])</span>
+    <span class="n">factory</span> <span class="o">=</span> <span class="n">generator</span><span class="o">.</span><span class="n">get_factory</span><span class="p">()</span>
+
+    <span class="n">action</span> <span class="o">=</span> <span class="n">factory</span><span class="o">.</span><span class="n">get_action</span><span class="p">(</span><span class="n">conn</span><span class="o">=</span><span class="n">conn</span><span class="p">,</span> <span class="n">action_id</span><span class="o">=</span><span class="n">action_id</span><span class="p">,</span> <span class="n">retry_count</span><span class="o">=</span><span class="n">retry_count</span><span class="p">,</span> <span class="n">mapping_params</span><span class="o">=</span><span class="n">mapping_params</span><span class="p">)</span>
+    <span class="n">task</span> <span class="o">=</span> <span class="n">action</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">factory</span><span class="o">.</span><span class="n">get_parser</span><span class="p">(</span><span class="n">conn</span><span class="o">=</span><span class="n">conn</span><span class="p">,</span> <span class="n">results</span><span class="o">=</span><span class="n">task</span><span class="o">.</span><span class="n">get_results</span><span class="p">(),</span> <span class="n">url</span><span class="o">=</span><span class="n">task</span><span class="o">.</span><span class="n">get_url</span><span class="p">())</span>
+    <span class="n">task_results</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">get_results</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">task_results</span></div>
+
+
+<span class="c1"># ===========================================================================</span>
+<span class="c1"># This function queries the Anaplan model for a list of the desired resources:</span>
+<span class="c1"># files, actions, imports, exports, processes and returns the JSON response.</span>
+<span class="c1"># ===========================================================================</span>
+<div class="viewcode-block" id="get_list"><a class="viewcode-back" href="../../anaplan_api.html#anaplan_api.anaplan.get_list">[docs]</a><span class="k">def</span> <span class="nf">get_list</span><span class="p">(</span><span class="n">conn</span><span class="p">:</span> <span class="n">AnaplanConnection</span><span class="p">,</span> <span class="n">resource</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AnaplanResource</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Get list of the specified resource in the Anaplan model</span>
+
+<span class="sd">    :param conn: AnaplanConnection object which contains AuthToken object, workspace ID, and model ID</span>
+<span class="sd">    :type conn: AnaplanConnection</span>
+<span class="sd">    :param resource: The Anaplan model resource to be queried and returned to the user</span>
+<span class="sd">    :type resource: str</span>
+<span class="sd">    :return: Detailed list of the requested resource</span>
+<span class="sd">    :rtype: AnaplanResource</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">resources</span> <span class="o">=</span> <span class="n">Resources</span><span class="p">(</span><span class="n">conn</span><span class="o">=</span><span class="n">conn</span><span class="p">,</span> <span class="n">resource</span><span class="o">=</span><span class="n">resource</span><span class="p">)</span>
+    <span class="n">resources_list</span> <span class="o">=</span> <span class="n">resources</span><span class="o">.</span><span class="n">get_resources</span><span class="p">()</span>
+    <span class="n">resource_parser</span> <span class="o">=</span> <span class="n">ResourceParserList</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">resource_parser</span><span class="o">.</span><span class="n">get_parser</span><span class="p">(</span><span class="n">resources_list</span><span class="p">)</span></div>
+
+
+<span class="c1"># ===========================================================================</span>
+<span class="c1"># This function downloads a file from Anaplan to the specified path.</span>
+<span class="c1"># ===========================================================================</span>
+<div class="viewcode-block" id="get_file"><a class="viewcode-back" href="../../anaplan_api.html#anaplan_api.anaplan.get_file">[docs]</a><span class="k">def</span> <span class="nf">get_file</span><span class="p">(</span><span class="n">conn</span><span class="p">:</span> <span class="n">AnaplanConnection</span><span class="p">,</span> <span class="n">file_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Download the specified file from the Anaplan model</span>
+
+<span class="sd">    :param conn: AnaplanConnection object which contains AuthToken object, workspace ID, and model ID</span>
+<span class="sd">    :type conn: AnaplanConnection</span>
+<span class="sd">    :param file_id: ID of the Anaplan file to download</span>
+<span class="sd">    :type file_id: str</span>
+<span class="sd">    :return: File data from anaplan</span>
+<span class="sd">    :rtype: str</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">file_download</span> <span class="o">=</span> <span class="n">FileDownload</span><span class="p">(</span><span class="n">conn</span><span class="o">=</span><span class="n">conn</span><span class="p">,</span> <span class="n">file_id</span><span class="o">=</span><span class="n">file_id</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">file_download</span><span class="o">.</span><span class="n">download_file</span><span class="p">()</span></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">anaplan-api</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../anaplan_api.html">anaplan_api package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">anaplan_api</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2021, Jesse Wilson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
