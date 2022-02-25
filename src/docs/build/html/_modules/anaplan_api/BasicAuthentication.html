@@ -1,0 +1,142 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>anaplan_api.BasicAuthentication &#8212; anaplan-api 0.1.26 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for anaplan_api.BasicAuthentication</h1><div class="highlight"><pre>
+<span></span><span class="c1"># ==============================================================================</span>
+<span class="c1"># Created:		28 June 2018</span>
+<span class="c1"># @author:		Jesse Wilson  (Anaplan Asia Pte Ltd)</span>
+<span class="c1"># Description:	This script reads a user&#39;s public and private keys in order to</span>
+<span class="c1"># 				sign a cryptographic nonce. It then generates a request to</span>
+<span class="c1"># 				authenticate with Anaplan, passing the signed and unsigned</span>
+<span class="c1"># 				nonce in the body of the request.</span>
+<span class="c1"># Input:		Public certificate file location, private key file location</span>
+<span class="c1"># Output:		Authorization header string, request body string containing a nonce and its signed value</span>
+<span class="c1"># ==============================================================================</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">base64</span> <span class="kn">import</span> <span class="n">b64encode</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span>
+<span class="kn">from</span> <span class="nn">.AnaplanAuthentication</span> <span class="kn">import</span> <span class="n">AnaplanAuthentication</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="BasicAuthentication"><a class="viewcode-back" href="../../anaplan_api.html#anaplan_api.BasicAuthentication.BasicAuthentication">[docs]</a><span class="k">class</span> <span class="nc">BasicAuthentication</span><span class="p">(</span><span class="n">AnaplanAuthentication</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	Represents a basic authentication header request</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="c1"># ===========================================================================</span>
+	<span class="c1"># This function takes in the Anaplan username and password, base64 encodes</span>
+	<span class="c1"># them, then returns the basic authorization header.</span>
+	<span class="c1"># ===========================================================================</span>
+<div class="viewcode-block" id="BasicAuthentication.auth_header"><a class="viewcode-back" href="../../anaplan_api.html#anaplan_api.BasicAuthentication.BasicAuthentication.auth_header">[docs]</a>	<span class="nd">@staticmethod</span>
+	<span class="k">def</span> <span class="nf">auth_header</span><span class="p">(</span><span class="n">username</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">password</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+		<span class="sd">&quot;&quot;&quot;Takes an Anaplan username and password, encodes in base64 and creates an auth request header</span>
+
+<span class="sd">		:param username: Anaplan username</span>
+<span class="sd">		:type username: str</span>
+<span class="sd">		:param password: Anaplan password</span>
+<span class="sd">		:type password: str</span>
+<span class="sd">		:return: Auth-API request authorization header</span>
+<span class="sd">		:rtype: dict</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+
+		<span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Generating Authorization header&quot;</span><span class="p">)</span>
+		<span class="k">return</span> <span class="p">{</span><span class="s1">&#39;Authorization&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39;Basic &#39;</span><span class="p">,</span> <span class="n">b64encode</span><span class="p">((</span><span class="n">username</span> <span class="o">+</span> <span class="s2">&quot;:&quot;</span> <span class="o">+</span> <span class="n">password</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">))</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)])}</span></div></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">anaplan-api</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../anaplan_api.html">anaplan_api package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">anaplan_api</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2021, Jesse Wilson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

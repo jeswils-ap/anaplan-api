@@ -1,0 +1,218 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>anaplan_api.CertificateAuthentication &#8212; anaplan-api 0.1.26 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for anaplan_api.CertificateAuthentication</h1><div class="highlight"><pre>
+<span></span><span class="c1"># ==============================================================================</span>
+<span class="c1"># Created:		28 June 2018</span>
+<span class="c1"># @author:		Jesse Wilson  (Anaplan Asia Pte Ltd)</span>
+<span class="c1"># Description:	This script reads a user&#39;s public and private keys in order to</span>
+<span class="c1"># 				sign a cryptographic nonce. It then generates a request to</span>
+<span class="c1"># 				authenticate with Anaplan, passing the signed and unsigned</span>
+<span class="c1"># 				nonce in the body of the request.</span>
+<span class="c1"># Input:		Public certificate file location, private key file location</span>
+<span class="c1"># Output:		Authorization header string, request body string containing a nonce and its signed value</span>
+<span class="c1"># ==============================================================================</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">cryptography.hazmat.primitives</span> <span class="kn">import</span> <span class="n">hashes</span><span class="p">,</span> <span class="n">serialization</span>
+<span class="kn">from</span> <span class="nn">cryptography.hazmat.primitives.asymmetric</span> <span class="kn">import</span> <span class="n">padding</span>
+<span class="kn">from</span> <span class="nn">cryptography.hazmat.backends</span> <span class="kn">import</span> <span class="n">default_backend</span>
+<span class="kn">from</span> <span class="nn">base64</span> <span class="kn">import</span> <span class="n">b64encode</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span>
+<span class="kn">from</span> <span class="nn">.AnaplanAuthentication</span> <span class="kn">import</span> <span class="n">AnaplanAuthentication</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="CertificateAuthentication"><a class="viewcode-back" href="../../anaplan_api.html#anaplan_api.CertificateAuthentication.CertificateAuthentication">[docs]</a><span class="k">class</span> <span class="nc">CertificateAuthentication</span><span class="p">(</span><span class="n">AnaplanAuthentication</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	Represents a certificate authentication request</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="c1"># ===========================================================================</span>
+	<span class="c1"># This function reads a user&#39;s public certificate as a string, base64</span>
+	<span class="c1"># encodes that value, then returns the certificate authorization header.</span>
+	<span class="c1"># ===========================================================================</span>
+<div class="viewcode-block" id="CertificateAuthentication.auth_header"><a class="viewcode-back" href="../../anaplan_api.html#anaplan_api.CertificateAuthentication.CertificateAuthentication.auth_header">[docs]</a>	<span class="k">def</span> <span class="nf">auth_header</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pub_cert</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+		<span class="sd">&quot;&quot;&quot;Create the Auth API request header</span>
+
+<span class="sd">		:param pub_cert: Path to public certificate or public certificate as a string</span>
+<span class="sd">		:type pub_cert: str</span>
+<span class="sd">		:return: Auth-API request authorization header</span>
+<span class="sd">		:rtype: dict</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+
+		<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">pub_cert</span><span class="p">):</span>
+			<span class="n">my_pem_text</span> <span class="o">=</span> <span class="n">pub_cert</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">pub_cert</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">my_pem_file</span><span class="p">:</span>
+				<span class="n">my_pem_text</span> <span class="o">=</span> <span class="n">my_pem_file</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+
+		<span class="n">header_string</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;Authorization&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39;CACertificate &#39;</span><span class="p">,</span> <span class="n">b64encode</span><span class="p">(</span><span class="n">my_pem_text</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">))</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)])}</span>
+
+		<span class="k">return</span> <span class="n">header_string</span></div>
+
+	<span class="c1"># ===========================================================================</span>
+	<span class="c1"># This function takes a private key, calls the function to generate the nonce,</span>
+	<span class="c1"># then the function to sign the nonce, and finally returns the Anaplan authentication</span>
+	<span class="c1"># POST body value</span>
+	<span class="c1"># ===========================================================================</span>
+<div class="viewcode-block" id="CertificateAuthentication.generate_post_data"><a class="viewcode-back" href="../../anaplan_api.html#anaplan_api.CertificateAuthentication.CertificateAuthentication.generate_post_data">[docs]</a>	<span class="nd">@staticmethod</span>
+	<span class="k">def</span> <span class="nf">generate_post_data</span><span class="p">(</span><span class="n">priv_key</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+		<span class="sd">&quot;&quot;&quot;Create the body of the Auth-API request</span>
+
+<span class="sd">		:param priv_key: Private key text or path to key</span>
+<span class="sd">		:type priv_key: bytes</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+
+		<span class="n">unsigned_nonce</span> <span class="o">=</span> <span class="n">CertificateAuthentication</span><span class="o">.</span><span class="n">create_nonce</span><span class="p">()</span>
+		<span class="n">signed_nonce</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">CertificateAuthentication</span><span class="o">.</span><span class="n">sign_string</span><span class="p">(</span><span class="n">unsigned_nonce</span><span class="p">,</span> <span class="n">priv_key</span><span class="p">))</span>
+
+		<span class="n">json_string</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39;{ &quot;encodedData&quot;:&quot;&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">b64encode</span><span class="p">(</span><span class="n">unsigned_nonce</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)),</span> <span class="s1">&#39;&quot;, &quot;encodedSignedData&quot;:&quot;&#39;</span><span class="p">,</span> <span class="n">signed_nonce</span><span class="p">,</span> <span class="s1">&#39;&quot;}&#39;</span><span class="p">])</span>
+
+		<span class="k">return</span> <span class="n">json_string</span></div>
+
+	<span class="c1"># ===========================================================================</span>
+	<span class="c1"># The function generates a pseudo-random alpha-numeric 150 character nonce</span>
+	<span class="c1"># and returns the value</span>
+	<span class="c1"># ===========================================================================</span>
+<div class="viewcode-block" id="CertificateAuthentication.create_nonce"><a class="viewcode-back" href="../../anaplan_api.html#anaplan_api.CertificateAuthentication.CertificateAuthentication.create_nonce">[docs]</a>	<span class="nd">@staticmethod</span>
+	<span class="k">def</span> <span class="nf">create_nonce</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">bytes</span><span class="p">:</span>
+		<span class="sd">&quot;&quot;&quot;Create a random 150-character byte array</span>
+
+<span class="sd">		:return: Bytes object containing 150 characters</span>
+<span class="sd">		:rtype: bytes</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">rand_arr</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">urandom</span><span class="p">(</span><span class="mi">150</span><span class="p">)</span>
+
+		<span class="k">return</span> <span class="n">rand_arr</span></div>
+
+	<span class="c1"># ===========================================================================</span>
+	<span class="c1"># This function reads a pseudo-randomly generated nonce and signs the text</span>
+	<span class="c1"># with the private key.</span>
+	<span class="c1"># ===========================================================================</span>
+<div class="viewcode-block" id="CertificateAuthentication.sign_string"><a class="viewcode-back" href="../../anaplan_api.html#anaplan_api.CertificateAuthentication.CertificateAuthentication.sign_string">[docs]</a>	<span class="nd">@staticmethod</span>
+	<span class="k">def</span> <span class="nf">sign_string</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">priv_key</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+		<span class="sd">&quot;&quot;&quot;Signs a string with a private key</span>
+
+<span class="sd">		:param message: 150-character pseudo-random byte-array of characters</span>
+<span class="sd">		:type message: bytes</span>
+<span class="sd">		:param priv_key: Private key text, used to sign the message.</span>
+<span class="sd">		:type priv_key: bytes</span>
+<span class="sd">		:raises ValueError: Error loading the private or signing the message.</span>
+<span class="sd">		:return: Base64 encoded signed string value</span>
+<span class="sd">		:rtype: str</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+
+		<span class="n">backend</span> <span class="o">=</span> <span class="n">default_backend</span><span class="p">()</span>
+		<span class="k">try</span><span class="p">:</span>
+			<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">priv_key</span><span class="p">):</span>
+				<span class="n">key</span> <span class="o">=</span> <span class="n">serialization</span><span class="o">.</span><span class="n">load_pem_private_key</span><span class="p">(</span><span class="n">priv_key</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="n">backend</span><span class="p">)</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">priv_key</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">key_file</span><span class="p">:</span>
+					<span class="n">key</span> <span class="o">=</span> <span class="n">serialization</span><span class="o">.</span><span class="n">load_pem_private_key</span><span class="p">(</span><span class="n">key_file</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">),</span> <span class="kc">None</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="n">backend</span><span class="p">)</span>
+			<span class="k">try</span><span class="p">:</span>
+				<span class="n">signature</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">padding</span><span class="o">.</span><span class="n">PKCS1v15</span><span class="p">(),</span> <span class="n">hashes</span><span class="o">.</span><span class="n">SHA512</span><span class="p">())</span>
+				<span class="k">return</span> <span class="n">b64encode</span><span class="p">(</span><span class="n">signature</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+			<span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+				<span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error signing message </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">exc_info</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+				<span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error signing message </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+		<span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+			<span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error loading private key </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">exc_info</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+			<span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error loading private key </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">anaplan-api</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../anaplan_api.html">anaplan_api package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">anaplan_api</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2021, Jesse Wilson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

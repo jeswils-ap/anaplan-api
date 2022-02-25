@@ -1,0 +1,251 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>anaplan_api.File &#8212; anaplan-api 0.1.26 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for anaplan_api.File</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">.AnaplanConnection</span> <span class="kn">import</span> <span class="n">AnaplanConnection</span>
+<span class="kn">from</span> <span class="nn">.Resources</span> <span class="kn">import</span> <span class="n">Resources</span>
+<span class="kn">from</span> <span class="nn">.ResourceParserFile</span> <span class="kn">import</span> <span class="n">ResourceParserFile</span>
+<span class="kn">from</span> <span class="nn">.AnaplanResourceFile</span> <span class="kn">import</span> <span class="n">AnaplanResourceFile</span>
+<span class="kn">from</span> <span class="nn">.util.AnaplanVersion</span> <span class="kn">import</span> <span class="n">AnaplanVersion</span>
+<span class="kn">from</span> <span class="nn">.util.Util</span> <span class="kn">import</span> <span class="n">ResourceNotFoundError</span>
+
+
+<div class="viewcode-block" id="File"><a class="viewcode-back" href="../../anaplan_api.html#anaplan_api.File.File">[docs]</a><span class="k">class</span> <span class="nc">File</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;A class representing an Anaplan file.</span>
+
+<span class="sd">    :param _conn: Object with authentication, workspace, and model details.</span>
+<span class="sd">    :type _conn: AnaplanConnection</span>
+<span class="sd">    :param _file_resources: Object with file metadata</span>
+<span class="sd">    :type _file_resources: AnaplanResourceFile</span>
+<span class="sd">    :param _base_url: Anaplan API URL</span>
+<span class="sd">    :type _base_url: str</span>
+<span class="sd">    :param _file_id: ID of file in Anaplan</span>
+<span class="sd">    :type _file_id: str</span>
+<span class="sd">    :param _workspace: ID of workspace that contains the specified Anaplan model</span>
+<span class="sd">    :type _workspace: str</span>
+<span class="sd">    :param _model: ID of the Anaplan model hosting specified file.</span>
+<span class="sd">    :type _model: str</span>
+<span class="sd">    :param _url: Appended _base_url to interact with the specified file.</span>
+<span class="sd">    :type _url: str</span>
+<span class="sd">    :param _chunk_count: Number of chunk segments of the specified file.</span>
+<span class="sd">    :type _chunk_count: int</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_conn</span><span class="p">:</span> <span class="n">AnaplanConnection</span>
+    <span class="n">_file_resources</span><span class="p">:</span> <span class="n">AnaplanResourceFile</span>
+    <span class="n">_base_url</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;https://api.anaplan.com/</span><span class="si">{</span><span class="n">AnaplanVersion</span><span class="o">.</span><span class="n">major</span><span class="p">()</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">AnaplanVersion</span><span class="o">.</span><span class="n">minor</span><span class="p">()</span><span class="si">}</span><span class="s2">/workspaces/&quot;</span>
+    <span class="n">_file_id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">_workspace</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">_model</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">_url</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">_chunk_count</span><span class="p">:</span> <span class="nb">int</span>
+
+<div class="viewcode-block" id="File.__init__"><a class="viewcode-back" href="../../anaplan_api.html#anaplan_api.File.File.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">conn</span><span class="p">:</span> <span class="n">AnaplanConnection</span><span class="p">,</span> <span class="n">file_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param conn: Object with authentication, workspace, and model details</span>
+<span class="sd">        :type conn: AnaplanConnection</span>
+<span class="sd">        :param file_id: ID of the specified file in the Anaplan model</span>
+<span class="sd">        :type file_id: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_conn</span> <span class="o">=</span> <span class="n">conn</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_file_id</span> <span class="o">=</span> <span class="n">file_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_workspace</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">get_workspace</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_model</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">get_model</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_url</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_base_url</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_workspace</span><span class="p">,</span> <span class="s2">&quot;/models/&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="p">,</span> <span class="s2">&quot;/files/&quot;</span><span class="p">,</span> <span class="n">file_id</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">get_metadata</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_file_details</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="File.get_metadata"><a class="viewcode-back" href="../../anaplan_api.html#anaplan_api.File.File.get_metadata">[docs]</a>    <span class="k">def</span> <span class="nf">get_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Instantiates Resources class to fetch files list from Anaplan, then parses to build an AnaplanResource object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">conn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_conn</span>  <span class="c1"># Reading class variable to pass to external class</span>
+        <span class="n">get_files</span> <span class="o">=</span> <span class="n">Resources</span><span class="p">(</span><span class="n">conn</span><span class="p">,</span> <span class="s2">&quot;files&quot;</span><span class="p">)</span>
+        <span class="n">file_list</span> <span class="o">=</span> <span class="n">get_files</span><span class="o">.</span><span class="n">get_resources</span><span class="p">()</span>
+        <span class="n">file_parser</span> <span class="o">=</span> <span class="n">ResourceParserFile</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_file_resources</span> <span class="o">=</span> <span class="n">file_parser</span><span class="o">.</span><span class="n">get_parser</span><span class="p">(</span><span class="n">file_list</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="File.set_file_details"><a class="viewcode-back" href="../../anaplan_api.html#anaplan_api.File.File.set_file_details">[docs]</a>    <span class="k">def</span> <span class="nf">set_file_details</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Sets _chunk_count corresponding to the matching Anaplan file in the AnaplanResource object.</span>
+
+<span class="sd">        :raises ResourceNotFoundError: If specified file ID is not found in AnaplanResource object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_chunk_count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file_resources</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_file_id</span><span class="p">]</span>
+        <span class="k">except</span> <span class="n">ResourceNotFoundError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ResourceNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_file_id</span><span class="si">}</span><span class="s2"> not found.&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="File.get_base_url"><a class="viewcode-back" href="../../anaplan_api.html#anaplan_api.File.File.get_base_url">[docs]</a>    <span class="k">def</span> <span class="nf">get_base_url</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Return the base URL for Anaplan API.</span>
+
+<span class="sd">        :return: Base URL for Anaplan API.</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_base_url</span></div>
+
+<div class="viewcode-block" id="File.get_connection"><a class="viewcode-back" href="../../anaplan_api.html#anaplan_api.File.File.get_connection">[docs]</a>    <span class="k">def</span> <span class="nf">get_connection</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AnaplanConnection</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Returns the AnaplanConnection object.</span>
+
+<span class="sd">        :return: Object with connection details for a specified model</span>
+<span class="sd">        :rtype: AnaplanConnection</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_conn</span></div>
+
+<div class="viewcode-block" id="File.get_file_id"><a class="viewcode-back" href="../../anaplan_api.html#anaplan_api.File.File.get_file_id">[docs]</a>    <span class="k">def</span> <span class="nf">get_file_id</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Returns the ID of the specified Anaplan file.</span>
+
+<span class="sd">        :return: Anaplan file file_id</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file_id</span></div>
+
+<div class="viewcode-block" id="File.get_workspace"><a class="viewcode-back" href="../../anaplan_api.html#anaplan_api.File.File.get_workspace">[docs]</a>    <span class="k">def</span> <span class="nf">get_workspace</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Returns the AnaplanResource object.</span>
+
+<span class="sd">        :return: Workspace ID</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_workspace</span></div>
+
+<div class="viewcode-block" id="File.get_model"><a class="viewcode-back" href="../../anaplan_api.html#anaplan_api.File.File.get_model">[docs]</a>    <span class="k">def</span> <span class="nf">get_model</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Returns the AnaplanResource object.</span>
+
+<span class="sd">        :return: Anaplan model ID</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span></div>
+
+<div class="viewcode-block" id="File.get_resource"><a class="viewcode-back" href="../../anaplan_api.html#anaplan_api.File.File.get_resource">[docs]</a>    <span class="k">def</span> <span class="nf">get_resource</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AnaplanResourceFile</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Returns the AnaplanResource object.</span>
+
+<span class="sd">        :return: AnaplanResource object with files in specified Anaplan model</span>
+<span class="sd">        :rtype: AnaplanResourceFile</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file_resources</span></div>
+
+<div class="viewcode-block" id="File.get_chunk_count"><a class="viewcode-back" href="../../anaplan_api.html#anaplan_api.File.File.get_chunk_count">[docs]</a>    <span class="k">def</span> <span class="nf">get_chunk_count</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Returns _chunk_count of the specified file.</span>
+
+<span class="sd">        :return: Chunk count of specified file.</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_chunk_count</span></div>
+
+<div class="viewcode-block" id="File.get_url"><a class="viewcode-back" href="../../anaplan_api.html#anaplan_api.File.File.get_url">[docs]</a>    <span class="k">def</span> <span class="nf">get_url</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Returns the URL of the specified Anaplan file.</span>
+
+<span class="sd">        :return: API URL of specified file</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_url</span></div>
+
+<div class="viewcode-block" id="File.set_file_id"><a class="viewcode-back" href="../../anaplan_api.html#anaplan_api.File.File.set_file_id">[docs]</a>    <span class="k">def</span> <span class="nf">set_file_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Updates the specified file ID and updates _chunk_count to match.</span>
+
+<span class="sd">        :param file_id: ID of file in Anaplan.</span>
+<span class="sd">        :type file_id: str</span>
+<span class="sd">        :raises ResourceNotFoundError: If specified file ID is not found in AnaplanResource object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_file_id</span> <span class="o">=</span> <span class="n">file_id</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_chunk_count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file_resources</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_file_id</span><span class="p">]</span>
+        <span class="k">except</span> <span class="n">ResourceNotFoundError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ResourceNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_file_id</span><span class="si">}</span><span class="s2"> not found.&quot;</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">anaplan-api</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../anaplan_api.html">anaplan_api package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">anaplan_api</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2021, Jesse Wilson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,167 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>anaplan_api.AnaplanResourceFile &#8212; anaplan-api 0.1.26 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for anaplan_api.AnaplanResourceFile</h1><div class="highlight"><pre>
+<span></span><span class="c1"># ===============================================================================</span>
+<span class="c1"># Created:        12 Sep 2018</span>
+<span class="c1"># @author:        Jesse Wilson (Anaplan Asia Pte Ltd)</span>
+<span class="c1"># Description:    This library takes a JSON response and builds a key-value dictionary for easy traversal.</span>
+<span class="c1"># Input:          A JSON dictionary object</span>
+<span class="c1"># Output:         Key-value dictionary object, resource name, or resource ID</span>
+<span class="c1"># ===============================================================================</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">from</span> <span class="nn">.AnaplanResource</span> <span class="kn">import</span> <span class="n">AnaplanResource</span>
+<span class="kn">from</span> <span class="nn">.util.Util</span> <span class="kn">import</span> <span class="n">ResourceNotFoundError</span>
+
+
+<div class="viewcode-block" id="AnaplanResourceFile"><a class="viewcode-back" href="../../anaplan_api.html#anaplan_api.AnaplanResourceFile.AnaplanResourceFile">[docs]</a><span class="k">class</span> <span class="nc">AnaplanResourceFile</span><span class="p">(</span><span class="n">AnaplanResource</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Represents a dictionary of Anaplan files by ID and corresponding number of chunks that make up the file</span>
+
+<span class="sd">    :param _resource: List of items for a requested Anaplan resource</span>
+<span class="sd">    :type _resource: dict</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+	<span class="n">_resources</span><span class="p">:</span> <span class="nb">dict</span>
+
+<div class="viewcode-block" id="AnaplanResourceFile.__init__"><a class="viewcode-back" href="../../anaplan_api.html#anaplan_api.AnaplanResourceFile.AnaplanResourceFile.__init__">[docs]</a>	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">response</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;Build dictionary of files with ID as key and chunk count as value.</span>
+
+<span class="sd">		:param response: JSON response containing all files in the Anaplan model</span>
+<span class="sd">		:type response: dict</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_resources</span> <span class="o">=</span> <span class="p">{</span><span class="n">item</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]:</span> <span class="n">item</span><span class="p">[</span><span class="s1">&#39;chunkCount&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">response</span><span class="p">}</span></div>
+
+<div class="viewcode-block" id="AnaplanResourceFile.__str__"><a class="viewcode-back" href="../../anaplan_api.html#anaplan_api.AnaplanResourceFile.AnaplanResourceFile.__str__">[docs]</a>	<span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+		<span class="sd">&quot;&quot;&quot; Get all values from the dictionary</span>
+
+<span class="sd">		:return: JSON dictionary in string format.</span>
+<span class="sd">		:rtype: str</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_resources</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="AnaplanResourceFile.__getitem__"><a class="viewcode-back" href="../../anaplan_api.html#anaplan_api.AnaplanResourceFile.AnaplanResourceFile.__getitem__">[docs]</a>	<span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resource_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		:param resource_id: ID of the file</span>
+<span class="sd">		:type resource_id: str</span>
+<span class="sd">		:raises ResourceNotFoundError: Error if the requested key does not exist</span>
+<span class="sd">		:return: Number of chunks for the requested file</span>
+<span class="sd">		:rtype: int</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">try</span><span class="p">:</span>
+			<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resources</span><span class="p">[</span><span class="n">resource_id</span><span class="p">]</span>
+		<span class="k">except</span> <span class="n">ResourceNotFoundError</span><span class="p">:</span>
+			<span class="k">raise</span> <span class="n">ResourceNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">resource_id</span><span class="si">}</span><span class="s2"> not found in dictionary&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="AnaplanResourceFile.__len__"><a class="viewcode-back" href="../../anaplan_api.html#anaplan_api.AnaplanResourceFile.AnaplanResourceFile.__len__">[docs]</a>	<span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+		<span class="sd">&quot;&quot;&quot;Get number of items in the dictionary</span>
+
+<span class="sd">		:return: Number of items in the dictionary</span>
+<span class="sd">		:rtype: int</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_resources</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="AnaplanResourceFile.__contains__"><a class="viewcode-back" href="../../anaplan_api.html#anaplan_api.AnaplanResourceFile.AnaplanResourceFile.__contains__">[docs]</a>	<span class="k">def</span> <span class="fm">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resource_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+		<span class="sd">&quot;&quot;&quot;Check if the dictionary contains the specified ID</span>
+
+<span class="sd">		:param resource_id: ID of the resource to look for</span>
+<span class="sd">		:type resource_id: str</span>
+<span class="sd">		:return: True if requested resource ID exists in dictionary</span>
+<span class="sd">		:rtype: bool</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">return</span> <span class="kc">True</span> <span class="k">if</span> <span class="n">resource_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resources</span> <span class="k">else</span> <span class="kc">False</span></div></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">anaplan-api</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../anaplan_api.html">anaplan_api package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">anaplan_api</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2021, Jesse Wilson.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
