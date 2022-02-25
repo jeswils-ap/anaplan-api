@@ -9,7 +9,6 @@ class WorkspaceDetails(object):
 	_name: str
 	_active: bool
 	_allowance: float
-	_current_size: float
 
 	def __init__(self, details: dict):
 		"""
@@ -28,4 +27,4 @@ class WorkspaceDetails(object):
 		:rtype: str
 		"""
 		return f"Workspace name: {self._name}, ID: {self._id}, Model state: {self._active}, " \
-			f"workspace size: {self._current_size}, workspace allowance: {self._allowance}"
+			f"workspace allowance: {self._allowance}"
