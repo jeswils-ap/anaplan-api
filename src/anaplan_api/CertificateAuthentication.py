@@ -105,7 +105,7 @@ class CertificateAuthentication(AnaplanAuthentication):
 				key = serialization.load_pem_private_key(priv_key, None, backend=backend)
 			else:
 				with open(priv_key, 'r') as key_file:
-					key = serialization.load_pem_private_key(key_file.read().encode('utf-8'), None, backend=backend)
+					serialization.load_pem_private_key(open(priv_key, 'r').read().encode('utf-8'), None, backend=backend)
 			try:
 				signature = key.sign(message, padding.PKCS1v15(), hashes.SHA512())
 				return b64encode(signature).decode('utf-8')
