@@ -44,6 +44,8 @@ from .User import User
 from .UserDetails import UserDetails
 from .Workspace import Workspace
 from .WorkspaceDetails import WorkspaceDetails
+from .util.RequestHandler import RequestHandler
+from .util.strtobool import strtobool
 
 
 __version__ = '0.1.28'

@@ -6,10 +6,10 @@
 # Input:		Java Keystore
 # Output:		Key pair as array of strings
 # ==============================================================================
-from anaplan_api import jks
+from pyjks.jks import jks
 import logging
 from base64 import b64encode
-from anaplan_api.jks.util import BadKeystoreFormatException, UnsupportedKeystoreVersionException,\
+from pyjks.jks.util import BadKeystoreFormatException, UnsupportedKeystoreVersionException, \
 	KeystoreSignatureException, DuplicateAliasException, DecryptionFailureException, UnexpectedAlgorithmException
 
 logger = logging.getLogger(__name__)
@@ -30,8 +30,8 @@ class KeystoreManager(object):
 	:type alias: str
 	:param key_pass: Passphrase to read the private key
 	:type key_pass: str
-	:param key: Byte array of the specified key in base64 format
-	:type key: bytes
+	:param _key: Byte array of the specified key in base64 format
+	:type _key: bytes
 	:param cert: String containing the certificate text in base64 format
 	:type cert: str
 	"""
@@ -97,8 +97,11 @@ class KeystoreManager(object):
 			ks = jks.KeyStore.load(self.path, self._passphrase)
 			logger.debug("Opening Java Keystore.")
 			pk_entry = ks.private_keys[self.alias]
-		except (BadKeystoreFormatException, UnsupportedKeystoreVersionException, KeystoreSignatureException,
-		        DuplicateAliasException) as e:
+		except (
+				BadKeystoreFormatException,
+				UnsupportedKeystoreVersionException,
+				KeystoreSignatureException,
+				DuplicateAliasException) as e:
 			logger.error(f"Error opening file {e}", exc_info=True)
 			raise Exception(f"Error opening file {e}")
 
@@ -122,7 +125,7 @@ class KeystoreManager(object):
 
 	# ===========================================================================
 	# This function converts base64 encoded private key and public certificate
-	# strings and splits them into 64-character lines so they can be read and
+	# strings and splits them into 64-character lines so that they can be read and
 	# handled correctly.
 	# ===========================================================================
 	@staticmethod

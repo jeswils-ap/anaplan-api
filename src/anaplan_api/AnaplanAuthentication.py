@@ -21,7 +21,7 @@ class AnaplanAuthentication(object):
 	Represents an authentication attempt for Anaplan API
 	"""
 
-	def __init__(self):
+	def __init__(self, **kwargs):
 		pass
 
 	def auth_header(self, username: str, password: str):

@@ -28,7 +28,7 @@ class CertificateAuthentication(AnaplanAuthentication):
 	# This function reads a user's public certificate as a string, base64
 	# encodes that value, then returns the certificate authorization header.
 	# ===========================================================================
-	def auth_header(self, pub_cert: str) -> Dict[str, str]:
+	def auth_header(self, pub_cert: str, **kwargs) -> Dict[str, str]:
 		"""Create the Auth API request header
 
 		:param pub_cert: Path to public certificate or public certificate as a string

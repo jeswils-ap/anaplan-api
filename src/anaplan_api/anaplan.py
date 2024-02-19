@@ -17,6 +17,7 @@ from .ResourceParserList import ResourceParserList
 from .AnaplanResourceList import AnaplanResource
 from .AuthToken import AuthToken
 from .UploadFactory import UploadFactory
+
 from .util.Util import InvalidAuthenticationError
 
 logger = logging.getLogger(__name__)
@@ -26,8 +27,13 @@ logger = logging.getLogger(__name__)
 # This function reads the authentication type, Basic or Certificate, then passes
 # the remaining variables to anaplan_auth to generate the authorization for Anaplan API
 # ===========================================================================
-def generate_authorization(auth_type: str = "Basic", email: str = None, password: str = None,
-                           private_key: Union[bytes, str] = None, cert: Union[bytes, str] = None) -> AuthToken:
+def generate_authorization(
+        auth_type: str = "Basic",
+        email: str = None,
+        password: str = None,
+        private_key: Union[bytes, str] = None,
+        cert: Union[bytes, str] = None
+) -> AuthToken:
     """Generate an Anaplan AuthToken object
 
     :param auth_type: Basic or Certificate authentication
