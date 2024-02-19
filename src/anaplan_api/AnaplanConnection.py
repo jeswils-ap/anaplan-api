@@ -1,6 +1,6 @@
 # ===============================================================================
 # Created:        13 Sep 2018
-# @author:        Jesse Wilson (Anaplan Asia Pte Ltd)
+# @author:        Jesse Wilson
 # Description:    Class to contain Anaplan connection details required for all API calls
 # Input:          Authorization header string, workspace ID string, and model ID string
 # Output:         None
@@ -19,12 +19,8 @@ class AnaplanConnection(object):
     _workspace_id: str
     _model_id: str
 
-    def __init__(self, authorization, workspace_id, model_id):
-        self._authorization = authorization
-        self._workspace_id = workspace_id
-        self._model_id = model_id
-
-    def get_auth(self) -> AuthToken:
+    @property
+    def authorization(self) -> AuthToken:
         """Fetch the AuthToken object.
 
         :return: Object with authorization and token expiry time.
@@ -32,7 +28,17 @@ class AnaplanConnection(object):
         """
         return self._authorization
 
-    def get_workspace(self) -> str:
+    @authorization.setter
+    def authorization(self, new_authorization: AuthToken) -> None:
+        """Set a new model ID
+
+        :param new_authorization: Object with authorization and token expiry time.
+        :type new_authorization: AuthToken
+        """
+        self.authorization = new_authorization
+
+    @property
+    def workspace(self) -> str:
         """Fetch the workspace ID
 
         :return: A 32-character string hexadecimal workspace ID.
@@ -40,7 +46,17 @@ class AnaplanConnection(object):
         """
         return self._workspace_id
 
-    def get_model(self) -> str:
+    @workspace.setter
+    def workspace(self, new_workspace_id: str) -> None:
+        """Set a new workspace ID
+
+        :param new_workspace_id: A 32-character string hexadecimal workspace ID.
+        :type new_workspace_id: str
+        """
+        self._workspace_id = new_workspace_id
+
+    @property
+    def model(self) -> str:
         """Fetch the model ID
 
         :return: A 32-character string hexadecimal model ID.
@@ -48,26 +64,11 @@ class AnaplanConnection(object):
         """
         return self._model_id
 
-    def set_auth(self, authorization: AuthToken):
-        """Set a new AuthToken to overwrite the object set at creation.
-
-        :param authorization: Object with authorization and token expiry time
-        :type authorization: AuthToken
-        """
-        self._authorization = authorization
-
-    def set_workspace(self, workspace_id: str):
-        """Set a new workspace ID
-
-        :param workspace_id: A 32-character string hexadecimal workspace ID.
-        :type workspace_id: str
-        """
-        self._workspace_id = workspace_id
-
-    def set_model(self, model_id: str):
+    @model.setter
+    def model(self, new_model_id) -> None:
         """Set a new model ID
 
-        :param model_id: A 32-character string hexadecimal model ID.
-        :type model_id: str
+        :param new_model_id: A 32-character string hexadecimal model ID.
+        :type new_model_id: str
         """
-        self._model_id = model_id
+        self._model_id = new_model_id

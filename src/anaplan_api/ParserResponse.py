@@ -43,7 +43,8 @@ class ParserResponse:
         """
         return self._error_dump
 
-    def get_task_detail(self) -> str:
+    @property
+    def task_detail(self) -> str:
         """Get overall task results
 
         :return: Task details
@@ -51,6 +52,7 @@ class ParserResponse:
         """
         return self._task_detail
 
+    @property
     def file_exists(self) -> bool:
         """Check whether Anaplan export file has data
 
@@ -59,7 +61,8 @@ class ParserResponse:
         """
         return True if self._export_file is not None else False
 
-    def get_export_file(self) -> Optional[str]:
+    @property
+    def export_file(self) -> Optional[str]:
         """Get downloaded file
 
         :return: Exported Anaplan file
@@ -67,7 +70,8 @@ class ParserResponse:
         """
         return self._export_file
 
-    def get_error_dump(self) -> Optional[DataFrame]:
+    @property
+    def error_dump(self) -> Optional[DataFrame]:
         """Get error dump
 
         :return: Error dump

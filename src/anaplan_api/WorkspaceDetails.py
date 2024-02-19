@@ -1,5 +1,6 @@
-from distutils.util import strtobool
 from dataclasses import dataclass
+
+from util.strtobool import strtobool
 
 
 @dataclass()
@@ -17,7 +18,7 @@ class WorkspaceDetails(object):
 		self._model_details = details
 		self._id = details['id']
 		self._name = details['name']
-		self._active = bool(strtobool(str(details['active']).lower()))
+		self._active = strtobool(str(details['active']))
 		self._allowance = float(details['sizeAllowance']) / (1024 ** 2)
 		self._current_size = float(details['currentSize']) / (1024 ** 2)
 

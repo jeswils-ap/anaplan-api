@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from datetime import datetime
-from distutils.util import strtobool
+
+from util.strtobool import strtobool
 
 
 @dataclass()
@@ -20,8 +21,8 @@ class UserDetails(object):
 		self._user_details = details
 		self._id = details['id']
 		self._email = details['email']
-		self._active = bool(strtobool(str(details['active']).lower()))
-		self._email_opt_in = bool(strtobool(str(details['emailOptIn']).lower()))
+		self._active = strtobool(str(details['active']))
+		self._email_opt_in = strtobool(str(details['emailOptIn']))
 		self._last_login = datetime.strptime(str(details['lastLoginDate']), '%Y-%m-%dT%H:%M:%S.%f%z')
 
 	def __str__(self) -> str:
