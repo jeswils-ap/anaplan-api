@@ -5,7 +5,7 @@
 import pandas as pd
 import logging
 from typing import List
-from distutils.util import strtobool
+from .util.strtobool import strtobool
 from .Parser import Parser
 from .ParserResponse import ParserResponse
 

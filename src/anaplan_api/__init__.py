@@ -6,7 +6,7 @@ from .util.Util import ResourceNotFoundError, UnknownTaskTypeError, TaskParamete
 from .Action import Action
 from .ActionParser import ActionParser
 from .ActionTask import ActionTask
-from anaplan_api.anaplan import (execute_action, file_upload, get_file, get_list, generate_authorization)
+from ..anaplan_api.anaplan import (execute_action, file_upload, get_file, get_list, generate_authorization)
 from .AnaplanAuthentication import AnaplanAuthentication
 from .AnaplanConnection import AnaplanConnection
 from .AnaplanResource import AnaplanResource

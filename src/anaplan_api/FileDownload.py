@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 class FileDownload(File):
-	_base_url = f"https://api.anaplan.com/{AnaplanVersion.major()}/{AnaplanVersion.minor()}/workspaces/"
+	_base_url = f"https://api.anaplan.com/{AnaplanVersion.major}/{AnaplanVersion.minor}/workspaces/"
 	_conn: AnaplanConnection
 	_file_resources: AnaplanResourceFile
 	_file_id: str

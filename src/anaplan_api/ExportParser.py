@@ -5,8 +5,8 @@
 import pandas as pd
 import logging
 from typing import List
-from distutils.util import strtobool
-from anaplan_api import anaplan
+from .util.strtobool import strtobool
+from ..anaplan_api import anaplan
 from .Parser import Parser
 from .AnaplanConnection import AnaplanConnection
 from .ParserResponse import ParserResponse

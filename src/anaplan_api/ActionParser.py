@@ -5,7 +5,7 @@
 import pandas as pd
 import logging
 from typing import List
-from distutils.util import strtobool
+from .util.strtobool import strtobool
 from .Parser import Parser
 from .ParserResponse import ParserResponse
 
@@ -52,7 +52,7 @@ class ActionParser(Parser):
 		"""
 
 		job_status = results['currentStep']
-		failure_dump = bool(strtobool(str(results['result']['failureDumpAvailable']).lower()))
+		failure_dump = strtobool(str(results['result']['failureDumpAvailable']).lower())
 		edf = pd.DataFrame()
 
 		if job_status == "Failed.":

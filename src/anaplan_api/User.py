@@ -13,7 +13,7 @@ class User:
 	"""
 	Class representing an Anaplan user
 	"""
-	_url: str = f"https://api.anaplan.com/{AnaplanVersion.major()}/{AnaplanVersion.minor()}/users/"
+	_url: str = f"https://api.anaplan.com/{AnaplanVersion.major}/{AnaplanVersion.minor}/users/"
 	_conn: AnaplanConnection
 	_user_id: str
 	_user_details: UserDetails

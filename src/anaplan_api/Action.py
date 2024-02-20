@@ -51,7 +51,7 @@ class Action(object):
     retry_count: int
     mapping_params: Optional[dict]
 
-    base_url = f"https://api.anaplan.com/{AnaplanVersion.major()}/{AnaplanVersion.minor()}/workspaces/"
+    base_url = f"https://api.anaplan.com/{AnaplanVersion.major}/{AnaplanVersion.minor}/workspaces/"
     post_body = {
         "localeName": "en_US"
     }

@@ -15,5 +15,5 @@ class AnaplanVersion:
 		return self._api_minor_version
 
 	@property
-	def base_url(self):
+	def base_url(self) -> str:
 		return f"https://api.anaplan.com/{self._api_major_version}/{self._api_minor_version}/"

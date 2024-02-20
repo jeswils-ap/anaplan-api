@@ -14,7 +14,7 @@ class RequestHandler:
 
     def make_request(self, endpoint: str, method: str = 'GET', data=None, headers=None) -> requests.Response:
         url: str = self._base_url + endpoint
-        response: Union[requests.Response|None] = None
+        response: Union[requests.Response | None] = None
         try:
             logger.debug("Fetching error dump")
             response = requests.request(method, url, data=data, headers=headers, timeout=(5, 30))
