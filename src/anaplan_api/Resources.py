@@ -14,7 +14,7 @@ class Resources:
     _resource: str
     _workspace: str
     _model: str
-    _base_url = f"https://api.anaplan.com/{AnaplanVersion.major}/{AnaplanVersion.minor}/workspaces/"
+    _base_url = f"https://api.anaplan.com/{AnaplanVersion().major}/{AnaplanVersion().minor}/workspaces/"
     _url: str
 
     def __init__(self, conn: AnaplanConnection, resource: str):

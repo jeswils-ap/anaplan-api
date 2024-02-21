@@ -51,7 +51,7 @@ class Action(object):
     retry_count: int
     mapping_params: Optional[dict]
 
-    base_url = f"https://api.anaplan.com/{AnaplanVersion.major}/{AnaplanVersion.minor}/workspaces/"
+    base_url = f"https://api.anaplan.com/{AnaplanVersion().major}/{AnaplanVersion().minor}/workspaces/"
     post_body = {
         "localeName": "en_US"
     }
@@ -118,7 +118,7 @@ class Action(object):
                 [self.base_url, self.workspace, "/models/", self.model, self._action_type[self.action_id[:3]],
                  self.action_id, "/tasks"])
 
-        if url is not "":
+        if url != "":
             task_id = self.post_task(url, post_header)
             return self.check_status(url, task_id)
         else:

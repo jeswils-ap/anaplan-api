@@ -33,7 +33,9 @@ class ProcessParser(Parser):
         return ProcessParser.results
 
     @staticmethod
-    def parse_response(conn: AnaplanConnection, results: dict, url: str) -> List[ParserResponse]:
+    def parse_response(
+        conn: AnaplanConnection, results: dict, url: str
+    ) -> List[ParserResponse]:
         """Parse process task results to friendly format
 
         :param conn: Object with authentication, workspace, and model details
@@ -46,30 +48,44 @@ class ProcessParser(Parser):
         :rtype: List[ParserResponse]
         """
 
-        job_status = results['currentStep']
+        job_status = results["currentStep"]
 
         # If process failed, return generic failure response.
         if job_status == "Failed.":
-            logger.error("The task has failed to run due to an error, please check process definition in Anaplan")
-            return [ParserResponse("The task has failed, check process definition in Anaplan", "",
-                                   False, pd.DataFrame())]
+            logger.error(
+                "The task has failed to run due to an error, please check process definition in Anaplan"
+            )
+            return [
+                ParserResponse(
+                    "The task has failed, check process definition in Anaplan",
+                    "",
+                    False,
+                    pd.DataFrame(),
+                )
+            ]
         else:
             logger.info("Process completed.")
             # nestedResults key only present in process task results
-            if 'nestedResults' in results['result']:
+            if "nestedResults" in results["result"]:
                 nested_details = [ParserResponse]
 
                 logger.debug("Parsing nested results.")
-                for nestedResults in results['result']['nestedResults']:
-                    object_id = str(nestedResults['objectId'])
+                for nestedResults in results["result"]["nestedResults"]:
+                    object_id = str(nestedResults["objectId"])
 
                     logger.debug(f"Fetching details for object {object_id}")
-                    nested_details.append(ProcessParser.sub_process_parser(conn, object_id, nestedResults, url))
+                    nested_details.append(
+                        ProcessParser.sub_process_parser(
+                            conn, object_id, nestedResults, url
+                        )
+                    )
 
                 return nested_details
 
     @staticmethod
-    def sub_process_parser(conn: AnaplanConnection, object_id: str, results: dict, url: str) -> ParserResponse:
+    def sub_process_parser(
+        conn: AnaplanConnection, object_id: str, results: dict, url: str
+    ) -> ParserResponse:
         """Parser for sub-tasks that occur when executing an Anaplan process
 
         :param conn: Object with authentication, workspace, and model details
@@ -89,33 +105,35 @@ class ProcessParser(Parser):
         export_file = ""
 
         # Regex pattern for hierarchy parsing
-        regex = re.compile('hierarchyRows.+')
+        regex = re.compile("hierarchyRows.+")
 
         # Check whether the sub-task generated a failure dump
-        failure_dump = bool(strtobool(str(results['failureDumpAvailable']).lower()))
-        successful = results['successful']  # Sub-task successful status
+        failure_dump = bool(strtobool(str(results["failureDumpAvailable"]).lower()))
+        successful = results["successful"]  # Sub-task successful status
 
         if failure_dump:
-            edf = super().get_dump(''.join([url, '/dumps/', object_id]))
+            edf = super().get_dump("".join([url, "/dumps/", object_id]))
 
-        if 'details' in results:
-            for i in range(0, len(results['details'])):
+        if "details" in results:
+            for i in range(0, len(results["details"])):
                 # Import specific parsing
-                if 'localMessageText' in results['details'][i]:
-                    msg.append(results['details'][i]['localMessageText'])
+                if "localMessageText" in results["details"][i]:
+                    msg.append(results["details"][i]["localMessageText"])
                     # Parsing module imports with failures
-                    if 'values' in results['details'][i]:
-                        for j in range(0, len(results['details'][i]['values'])):
-                            msg.append(results['details'][i]['values'][j])
-                if 'type' in results['details'][i]:
+                    if "values" in results["details"][i]:
+                        for j in range(0, len(results["details"][i]["values"])):
+                            msg.append(results["details"][i]["values"][j])
+                if "type" in results["details"][i]:
                     # Parsing hierarchy import nested details
-                    if bool(re.match(regex, results['details'][i]['type'])):
-                        if 'values' in results['details'][i]:
-                            for j in range(0, len(results['details'][i]['values'])):
-                                msg.append(results['details'][i]['values'][j])
+                    if bool(re.match(regex, results["details"][i]["type"])):
+                        if "values" in results["details"][i]:
+                            for j in range(0, len(results["details"][i]["values"])):
+                                msg.append(results["details"][i]["values"][j])
                     # Export specific parsing
-                    if results['details'][i]['type'] == "exportSucceeded":
+                    if results["details"][i]["type"] == "exportSucceeded":
                         export_file = anaplan.get_file(conn, object_id)
 
-        logger.debug(f"Error dump available: {failure_dump}, Sub-task {object_id} successful: {successful}")
-        return ParserResponse('\n'.join(msg), export_file, failure_dump, edf)
+        logger.debug(
+            f"Error dump available: {failure_dump}, Sub-task {object_id} successful: {successful}"
+        )
+        return ParserResponse("\n".join(msg), export_file, failure_dump, edf)

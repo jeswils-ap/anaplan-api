@@ -29,7 +29,7 @@ class File:
 
     _conn: AnaplanConnection
     _file_resources: AnaplanResourceFile
-    _base_url: str = f"https://api.anaplan.com/{AnaplanVersion.major}/{AnaplanVersion.minor}/workspaces/"
+    _base_url: str = f"https://api.anaplan.com/{AnaplanVersion().major}/{AnaplanVersion().minor}/workspaces/"
     _file_id: str
     _workspace: str
     _model: str
