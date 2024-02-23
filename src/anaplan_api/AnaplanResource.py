@@ -1,11 +1,13 @@
 from abc import ABC, abstractmethod
 
+
 class AnaplanResource(ABC):
     """Represents a list of a particular resource from Anaplan.
 
     :param _resource: List of items for a requested Anaplan resource
     :type _resource: dict
     """
+
     _resource: dict
 
     @abstractmethod

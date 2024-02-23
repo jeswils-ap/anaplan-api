@@ -6,17 +6,8 @@
 # Output:			Anaplan JWT and token expiry time
 # ===============================================================================
 import json
-import requests
 import re
 import logging
-from requests.exceptions import (
-    HTTPError,
-    ConnectionError,
-    SSLError,
-    Timeout,
-    ConnectTimeout,
-    ReadTimeout,
-)
 from .AuthToken import AuthToken
 from .util.Util import AuthenticationFailedError
 from .util.RequestHandler import RequestHandler
@@ -35,7 +26,7 @@ class AnaplanAuthentication(object):
     def auth_header(self, username: str, password: str):
         pass
 
-    def auth_request(self, header: dict, body: str = None) -> str:
+    def auth_request(self, header: dict, body: str = None) -> dict:
         """Sends authentication request to Anaplan auth server
 
         :param header: Authorization header for request to auth server
@@ -43,7 +34,7 @@ class AnaplanAuthentication(object):
         :param body: JSON body of auth request
         :type body: str
         :return: JSON string with auth token details
-        :rtype: str
+        :rtype: dict
         """
         anaplan_url = "https://auth.anaplan.com/token/authenticate"
 
@@ -51,8 +42,8 @@ class AnaplanAuthentication(object):
             logger.info("Authenticating via Basic.")
             try:
                 authenticate = self.handler.make_request(
-                    anaplan_url, "POST", headers=header
-                ).text
+                    "", "POST", headers=header, override_url=anaplan_url
+                ).json()
             except Exception as e:
                 logger.error(f"Error fetching auth token {e}", exc_info=True)
                 raise Exception(f"Error fetching auth token {e}")
@@ -60,8 +51,12 @@ class AnaplanAuthentication(object):
             logger.info("Authenticating via Certificate.")
             try:
                 authenticate = self.handler.make_request(
-                    anaplan_url, "POST", headers=header, data=json.dumps(body)
-                ).text
+                    "",
+                    "POST",
+                    headers=header,
+                    data=json.dumps(body),
+                    override_url=anaplan_url,
+                ).json()
             except Exception as e:
                 logger.error(f"Error fetching auth token {e}", exc_info=True)
                 raise Exception(f"Error fetching auth token {e}")
@@ -69,8 +64,7 @@ class AnaplanAuthentication(object):
         # Return the JSON array containing the authentication response, including AnaplanAuthToken
         return authenticate
 
-    @staticmethod
-    def authenticate(response: str) -> AuthToken:
+    def authenticate(self, response: dict) -> AuthToken:
         """Parses the authentication response
 
         :param response: JSON string with auth request response.
@@ -78,38 +72,29 @@ class AnaplanAuthentication(object):
         :return: AnaplanAuthToken and expiry in epoch
         :rtype: AuthToken
         """
-        try:
-            json_response = json.loads(response)
-        except ValueError as e:
-            logger.error(f"Error loading response JSON {e}", exc_info=True)
-            raise ValueError(f"Error loading JSON {response}")
-
-        # Check that the request was successful, is so extract the AnaplanAuthToken value
-        if "status" not in json_response:
+        if "status" not in response:
             logger.error(
                 "Error occurred processing response. Does not appear well formed"
             )
-            logger.error(f"Response contents:\n{json_response}")
+            logger.error(f"Response contents:\n{response}")
             raise AuthenticationFailedError(
                 "Error occurred processing response. Does not appear well formed"
             )
 
-        if isinstance(json_response["status"], dict):
-            logger.error(f"Unexpected status: {json_response['status']}")
-            raise AuthenticationFailedError(
-                f"Unexpected status: {json_response['status']}"
-            )
+        if not isinstance(response["status"], str):
+            logger.error(f"Unexpected status: {response['status']}")
+            raise AuthenticationFailedError(f"Unexpected status: {response['status']}")
 
         err_regex = re.compile("FAILURE.+")
-        if bool(re.match(err_regex, json_response["status"])):
-            logger.error(f"Error {json_response['statusMessage']}")
+        if bool(re.match(err_regex, response["status"])):
+            logger.error(f"Error {response['statusMessage']}")
             raise AuthenticationFailedError(
-                f"Error logging in {json_response['statusMessage']}"
+                f"Error logging in {response['statusMessage']}"
             )
 
-        token = json_response["tokenInfo"]["tokenValue"]
-        expires = json_response["tokenInfo"]["expiresAt"]
-        status = AnaplanAuthentication.verify_auth(token)
+        token = response["tokenInfo"]["tokenValue"]
+        expires = response["tokenInfo"]["expiresAt"]
+        status = self.verify_auth(token)
 
         if status != "Token validated":
             logger.error(f"Error {status}")
@@ -118,8 +103,7 @@ class AnaplanAuthentication(object):
         logger.info("User successfully authenticated.")
         return AuthToken(f"AnaplanAuthToken {token}", expires)
 
-    @staticmethod
-    def verify_auth(token: str) -> str:
+    def verify_auth(self, token: str) -> str:
         """Verifies the authentication request
 
         :param token: AnaplanAuthToken from authentication request.
@@ -133,28 +117,20 @@ class AnaplanAuthentication(object):
 
         try:
             logger.debug("Verifying auth token.")
-            validate = json.loads(
-                requests.get(anaplan_url, headers=header, timeout=(5, 30)).text
-            )
-        except (
-            HTTPError,
-            ConnectionError,
-            SSLError,
-            Timeout,
-            ConnectTimeout,
-            ReadTimeout,
-        ) as e:
+            validate = self.handler.make_request(
+                "", "GET", headers=header, override_url=anaplan_url
+            ).json()
+        except Exception as e:
             logger.error(f"Error verifying auth token {e}", exc_info=True)
             raise Exception(f"Error verifying auth token {e}")
-        except ValueError as e:
-            logger.error(f"Error loading response JSON {e}", exc_info=True)
-            raise ValueError(f"Error loading response JSON {e}")
 
-        if "statusMessage" in validate:
-            return validate["statusMessage"]
+        if "statusMessage" not in validate:
+            logger.error("Unable to find authentication status.")
+            raise ValueError("Unable to find authentication status.")
 
-    @staticmethod
-    def refresh_token(token: str, auth_object: AuthToken):
+        return validate["statusMessage"]
+
+    def refresh_token(self, token: str, auth_object: AuthToken):
         """Refreshes the authentication token and updates the token expiry time
 
         :param token: Token value that is nearing expiry
@@ -168,22 +144,12 @@ class AnaplanAuthentication(object):
         url = "https://auth.anaplan.com/token/refresh"
         header = {"Authorization": "".join(["AnaplanAuthToken ", token])}
         try:
-            refresh = json.loads(
-                requests.post(url, headers=header, timeout=(5, 30)).text
-            )
-        except (
-            HTTPError,
-            ConnectionError,
-            SSLError,
-            Timeout,
-            ConnectTimeout,
-            ReadTimeout,
-        ) as e:
+            refresh = self.handler.make_request(
+                "", "POST", headers=header, override_url=url
+            ).json()
+        except Exception as e:
             logger.error(f"Error verifying auth token {e}", exc_info=True)
             raise Exception(f"Error verifying auth token {e}")
-        except ValueError as e:
-            logger.error(f"Error loading response JSON {e}", exc_info=True)
-            raise ValueError(f"Error loading response JSON {e}")
 
         if "tokenInfo" in refresh:
             if "tokenValue" in refresh["tokenInfo"]:
@@ -191,5 +157,5 @@ class AnaplanAuthentication(object):
             if "expiresAt" in refresh["tokenInfo"]:
                 new_expiry = refresh["tokenInfo"]["expiresAt"]
 
-        auth_object.set_auth_token("".join(["AnaplanAuthToken ", new_token]))
-        auth_object.set_token_expiry(new_expiry)
+        auth_object.token_value = "".join(["AnaplanAuthToken ", new_token])
+        auth_object.token_expiry = new_expiry

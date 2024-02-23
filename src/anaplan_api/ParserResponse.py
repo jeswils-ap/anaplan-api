@@ -16,12 +16,19 @@ class ParserResponse:
     :param _error_dump_file: Error dump data
     :type _error_dump_file: Optional[DataFrame]
     """
+
     _task_detail: str
     _export_file: Optional[str]
     _error_dump: bool
     _error_dump_file: Optional[DataFrame]
 
-    def __init__(self, task_detail: str, export_file: str, error_dump: bool, error_dump_file: DataFrame):
+    def __init__(
+        self,
+        task_detail: str,
+        export_file: str,
+        error_dump: bool,
+        error_dump_file: DataFrame,
+    ):
         self._task_detail = task_detail
         self._export_file = export_file
         self._error_dump = error_dump

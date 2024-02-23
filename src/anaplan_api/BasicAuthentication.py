@@ -17,25 +17,34 @@ logger = logging.getLogger(__name__)
 
 
 class BasicAuthentication(AnaplanAuthentication):
-	"""
-	Represents a basic authentication header request
-	"""
+    """
+    Represents a basic authentication header request
+    """
 
-	# ===========================================================================
-	# This function takes in the Anaplan username and password, base64 encodes
-	# them, then returns the basic authorization header.
-	# ===========================================================================
-	@staticmethod
-	def auth_header(username: str, password: str, **kwargs) -> Dict[str, str]:
-		"""Takes an Anaplan username and password, encodes in base64 and creates an auth request header
+    # ===========================================================================
+    # This function takes in the Anaplan username and password, base64 encodes
+    # them, then returns the basic authorization header.
+    # ===========================================================================
+    @staticmethod
+    def auth_header(username: str, password: str, **kwargs) -> Dict[str, str]:
+        """Takes an Anaplan username and password, encodes in base64 and creates an auth request header
 
-		:param username: Anaplan username
-		:type username: str
-		:param password: Anaplan password
-		:type password: str
-		:return: Auth-API request authorization header
-		:rtype: dict
-		"""
+        :param username: Anaplan username
+        :type username: str
+        :param password: Anaplan password
+        :type password: str
+        :return: Auth-API request authorization header
+        :rtype: dict
+        """
 
-		logger.debug("Generating Authorization header")
-		return {'Authorization': ''.join(['Basic ', b64encode((username + ":" + password).encode('utf-8')).decode('utf-8')])}
+        logger.debug("Generating Authorization header")
+        return {
+            "Authorization": "".join(
+                [
+                    "Basic ",
+                    b64encode((username + ":" + password).encode("utf-8")).decode(
+                        "utf-8"
+                    ),
+                ]
+            )
+        }

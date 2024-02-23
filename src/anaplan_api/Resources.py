@@ -1,38 +1,68 @@
 import logging
-import requests
-import json
-from requests.exceptions import HTTPError, ConnectionError, SSLError, Timeout, ConnectTimeout, ReadTimeout
 from .AnaplanConnection import AnaplanConnection
 from .util.Util import ResourceNotFoundError, RequestFailedError
-from .util.AnaplanVersion import AnaplanVersion
+from util.RequestHandler import RequestHandler
 
 logger = logging.getLogger(__name__)
 
 
 class Resources:
+    """Fetches the list of request resource type from a specified Anaplan model
+    :param _handler: Class for sending API requests
+    :type _handler: RequestHandler
+    :param _authorization: AnaplanAuthToken value
+    :type _authorization: str
+    :param _resource: Name of the type of resource to fetch details from Anaplan model
+    :type _resource: str
+    :param _workspace: Anaplan model's workspace ID
+    :type _workspace: str
+    :param _model: Anaplan model ID
+    :type _model: str
+    :param _base_endpoint: Starting endpoint for all resource requests
+    :type _base_endpoint: str
+    :param _endpoint: API endpoint used to fetch the list of specified resources from an Anaplan model
+    :type _endpoint: str
+    """
+
+    _handler: RequestHandler
     _authorization: str
     _resource: str
     _workspace: str
     _model: str
-    _base_url = f"https://api.anaplan.com/{AnaplanVersion().major}/{AnaplanVersion().minor}/workspaces/"
-    _url: str
+    _base_endpoint = f"workspaces/"
+    _endpoint: str
 
-    def __init__(self, conn: AnaplanConnection, resource: str):
+    def __init__(self, handler: RequestHandler, conn: AnaplanConnection, resource: str):
         """
+        :param handler: Class for sending API requests
+        :type handler: RequestHandler
         :param conn: Object with authentication, workspace, and model details
         :type conn: AnaplanConnection
         :param resource: Type of resource to query the specified model for
         :type resource: str
         """
-        self._authorization = conn.get_auth().get_auth_token()
-        self._workspace = conn.get_workspace()
-        self._model = conn.get_model()
-        self._url = ''.join([self._base_url, self._workspace, "/models/", self._model, "/", resource])
-        valid_resources = ["imports", "exports", "actions", "processes", "files", "lists"]
-        if resource.lower() in valid_resources:
-            self._resource = resource.lower()
-        else:
-            raise ResourceNotFoundError(f"Invalid selection, resource must be one of {', '.join(valid_resources)}")
+        self._handler = handler
+        self._authorization = conn.authorization.token_value
+        self._workspace = conn.workspace
+        self._model = conn.model
+        self._endpoint = (
+            f"{self._base_endpoint}/{self._workspace}/models/{self._model}/{resource}"
+        )
+        valid_resources = [
+            "imports",
+            "exports",
+            "actions",
+            "processes",
+            "files",
+            "lists",
+        ]
+
+        if resource.lower() not in valid_resources:
+            raise ResourceNotFoundError(
+                f"Invalid selection, resource must be one of {', '.join(valid_resources)}"
+            )
+
+        self._resource = resource.lower()
 
     def get_resources(self) -> dict:
         """Get the list of items of the specified resource
@@ -50,27 +80,32 @@ class Resources:
         authorization = self._authorization
 
         get_header = {
-            'Authorization': authorization,
-            'Content-Type': 'application/json'
+            "Authorization": authorization,
+            "Content-Type": "application/json",
         }
 
         response = {}
 
         logger.debug(f"Fetching {self._resource}")
         try:
-            response = json.loads(requests.get(self._url, headers=get_header, timeout=(5, 30)).text)
-        except (HTTPError, ConnectionError, SSLError, Timeout, ConnectTimeout, ReadTimeout) as e:
-            logger.error(f"Error fetching resource {self._resource}, {e}", exc_info=True)
+            response = self._handler.make_request(
+                self._endpoint, headers=get_header
+            ).json()
+        except Exception as e:
+            logger.error(
+                f"Error fetching resource {self._resource}, {e}", exc_info=True
+            )
         logger.debug(f"Finished fetching {self._resource}")
 
-        if 'status' in response:
-            if 'code' in response['status']:
-                if response['status']['code'] == 200:
-                    if self._resource in response:  # If the specified resource is found in the response return the list
-                        return response[self._resource]
-                else:
-                    raise RequestFailedError(f"Request was unsuccessful, code: {response['status']['code']}")
-            else:
-                raise KeyError("code not found in response")
-        else:
-            raise KeyError("status not found in response")
+        if "status" not in response or "code" not in response["status"]:
+            raise KeyError(f"Status or code not found in response: {response}")
+
+        if response["status"]["code"] != 200:
+            raise RequestFailedError(
+                f"Request was unsuccessful, code: {response['status']['code']}"
+            )
+
+        if (
+            self._resource in response
+        ):  # If the specified resource is found in the response return the list
+            return response[self._resource]

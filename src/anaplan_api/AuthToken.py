@@ -17,12 +17,13 @@ class AuthToken(object):
     :param _token_expiry: Expiry time in epoch
     :type _token_expiry: float
     """
+
     _token_value: str
     _token_expiry: float
 
     def __post_init__(self):
         if not self._token_value[:7] == "Anaplan":
-            self._token_value = ''.join(['AnaplanAuthToken ', self._token_value])
+            self._token_value = "".join(["AnaplanAuthToken ", self._token_value])
 
     @property
     def token_value(self) -> str:

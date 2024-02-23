@@ -11,56 +11,57 @@ from .util.Util import ResourceNotFoundError
 
 
 class AnaplanResourceFile(AnaplanResource):
-	"""Represents a dictionary of Anaplan files by ID and corresponding number of chunks that make up the file
+    """Represents a dictionary of Anaplan files by ID and corresponding number of chunks that make up the file
 
     :param _resource: List of items for a requested Anaplan resource
     :type _resource: dict
     """
-	_resources: dict
 
-	def __init__(self, response: dict):
-		"""Build dictionary of files with ID as key and chunk count as value.
+    _resources: dict
 
-		:param response: JSON response containing all files in the Anaplan model
-		:type response: dict
-		"""
-		self._resources = {item['id']: item['chunkCount'] for item in response}
+    def __init__(self, response: dict):
+        """Build dictionary of files with ID as key and chunk count as value.
 
-	def __str__(self) -> str:
-		""" Get all values from the dictionary
+        :param response: JSON response containing all files in the Anaplan model
+        :type response: dict
+        """
+        self._resources = {item["id"]: item["chunkCount"] for item in response}
 
-		:return: JSON dictionary in string format.
-		:rtype: str
-		"""
-		return json.dumps(self._resources)
+    def __str__(self) -> str:
+        """Get all values from the dictionary
 
-	def __getitem__(self, resource_id: str) -> int:
-		"""
-		:param resource_id: ID of the file
-		:type resource_id: str
-		:raises ResourceNotFoundError: Error if the requested key does not exist
-		:return: Number of chunks for the requested file
-		:rtype: int
-		"""
-		try:
-			return self._resources[resource_id]
-		except ResourceNotFoundError:
-			raise ResourceNotFoundError(f"{resource_id} not found in dictionary")
+        :return: JSON dictionary in string format.
+        :rtype: str
+        """
+        return json.dumps(self._resources)
 
-	def __len__(self) -> int:
-		"""Get number of items in the dictionary
+    def __getitem__(self, resource_id: str) -> int:
+        """
+        :param resource_id: ID of the file
+        :type resource_id: str
+        :raises ResourceNotFoundError: Error if the requested key does not exist
+        :return: Number of chunks for the requested file
+        :rtype: int
+        """
+        try:
+            return self._resources[resource_id]
+        except ResourceNotFoundError:
+            raise ResourceNotFoundError(f"{resource_id} not found in dictionary")
 
-		:return: Number of items in the dictionary
-		:rtype: int
-		"""
-		return len(self._resources)
+    def __len__(self) -> int:
+        """Get number of items in the dictionary
 
-	def __contains__(self, resource_id: str) -> bool:
-		"""Check if the dictionary contains the specified ID
+        :return: Number of items in the dictionary
+        :rtype: int
+        """
+        return len(self._resources)
 
-		:param resource_id: ID of the resource to look for
-		:type resource_id: str
-		:return: True if requested resource ID exists in dictionary
-		:rtype: bool
-		"""
-		return True if resource_id in self._resources else False
+    def __contains__(self, resource_id: str) -> bool:
+        """Check if the dictionary contains the specified ID
+
+        :param resource_id: ID of the resource to look for
+        :type resource_id: str
+        :return: True if requested resource ID exists in dictionary
+        :rtype: bool
+        """
+        return True if resource_id in self._resources else False

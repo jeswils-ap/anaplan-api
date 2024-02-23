@@ -1,12 +1,29 @@
 """anaplan-api Package"""
+
 from .util.AnaplanVersion import AnaplanVersion
-from .util.Util import ResourceNotFoundError, UnknownTaskTypeError, TaskParameterError, InvalidTokenError,\
-	RequestFailedError, AuthenticationFailedError, InvalidAuthenticationError, MappingParameterError,\
-	InvalidUrlError, InvalidTaskTypeError, InvalidAuthenticationError
+from .util.Util import (
+    ResourceNotFoundError,
+    UnknownTaskTypeError,
+    TaskParameterError,
+    InvalidTokenError,
+    RequestFailedError,
+    AuthenticationFailedError,
+    InvalidAuthenticationError,
+    MappingParameterError,
+    InvalidUrlError,
+    InvalidTaskTypeError,
+    InvalidAuthenticationError,
+)
 from .Action import Action
 from .ActionParser import ActionParser
 from .ActionTask import ActionTask
-from ..anaplan_api.anaplan import (execute_action, file_upload, get_file, get_list, generate_authorization)
+from ..anaplan_api.anaplan import (
+    execute_action,
+    file_upload,
+    get_file,
+    get_list,
+    generate_authorization,
+)
 from .AnaplanAuthentication import AnaplanAuthentication
 from .AnaplanConnection import AnaplanConnection
 from .AnaplanResource import AnaplanResource
@@ -48,5 +65,5 @@ from .util.RequestHandler import RequestHandler
 from .util.strtobool import strtobool
 
 
-__version__ = '0.1.28'
-__author__ = 'Jesse Wilson'
+__version__ = "0.1.28"
+__author__ = "Jesse Wilson"

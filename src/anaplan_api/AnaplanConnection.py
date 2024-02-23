@@ -15,6 +15,7 @@ class AnaplanConnection(object):
     AnaplanConnection object stores AuthToken, workspace and model IDs.
     Model ID must be unique.
     """
+
     _authorization: AuthToken
     _workspace_id: str
     _model_id: str

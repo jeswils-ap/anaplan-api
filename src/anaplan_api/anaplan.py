@@ -28,11 +28,11 @@ logger = logging.getLogger(__name__)
 # the remaining variables to anaplan_auth to generate the authorization for Anaplan API
 # ===========================================================================
 def generate_authorization(
-        auth_type: str = "Basic",
-        email: str = None,
-        password: str = None,
-        private_key: Union[bytes, str] = None,
-        cert: Union[bytes, str] = None
+    auth_type: str = "Basic",
+    email: str = None,
+    password: str = None,
+    private_key: Union[bytes, str] = None,
+    cert: Union[bytes, str] = None,
 ) -> AuthToken:
     """Generate an Anaplan AuthToken object
 
@@ -45,11 +45,11 @@ def generate_authorization(
     :rtype: AuthToken
     """
 
-    if auth_type.lower() == 'basic' and email and password:
+    if auth_type.lower() == "basic" and email and password:
         basic = BasicAuthentication()
         header_string = basic.auth_header(email, password)
         return basic.authenticate(basic.auth_request(header_string))
-    elif auth_type.lower() == 'certificate' and cert and private_key:
+    elif auth_type.lower() == "certificate" and cert and private_key:
         cert_auth = CertificateAuthentication()
         header_string = cert_auth.auth_header(cert)
         post_data = cert_auth.generate_post_data(private_key)
@@ -57,13 +57,21 @@ def generate_authorization(
     else:
         if (email and password) or (cert and private_key):
             logger.error(f"Invalid authentication method: {auth_type}")
-            raise InvalidAuthenticationError(f"Invalid authentication method: {auth_type}")
+            raise InvalidAuthenticationError(
+                f"Invalid authentication method: {auth_type}"
+            )
         else:
-            logger.error("Email address and password or certificate and key must not be blank")
-            raise InvalidAuthenticationError("Email address and password or certificate and key must not be blank")
+            logger.error(
+                "Email address and password or certificate and key must not be blank"
+            )
+            raise InvalidAuthenticationError(
+                "Email address and password or certificate and key must not be blank"
+            )
 
 
-def file_upload(conn: AnaplanConnection, file_id: str, chunk_size: int, data: str) -> None:
+def file_upload(
+    conn: AnaplanConnection, file_id: str, chunk_size: int, data: str
+) -> None:
     """Upload a file to Anaplan model
 
     :param conn: AnaplanConnection object which contains AuthToken object, workspace ID, and model ID
@@ -77,8 +85,12 @@ def file_upload(conn: AnaplanConnection, file_id: str, chunk_size: int, data: st
     uploader.upload(chunk_size, data)
 
 
-def execute_action(conn: AnaplanConnection, action_id: str, retry_count: int, mapping_params: dict = None) \
-        -> List[ParserResponse]:
+def execute_action(
+    conn: AnaplanConnection,
+    action_id: str,
+    retry_count: int,
+    mapping_params: dict = None,
+) -> List[ParserResponse]:
     """Execute a specified Anaplan action
 
     :param conn: AnaplanConnection object which contains AuthToken object, workspace ID, and model ID
@@ -92,9 +104,16 @@ def execute_action(conn: AnaplanConnection, action_id: str, retry_count: int, ma
     generator = TaskFactoryGenerator(action_id[:3])
     factory = generator.get_factory()
 
-    action = factory.get_action(conn=conn, action_id=action_id, retry_count=retry_count, mapping_params=mapping_params)
+    action = factory.get_action(
+        conn=conn,
+        action_id=action_id,
+        retry_count=retry_count,
+        mapping_params=mapping_params,
+    )
     task = action.execute()
-    parser = factory.get_parser(conn=conn, results=task.get_results(), url=task.get_url())
+    parser = factory.get_parser(
+        conn=conn, results=task.get_results(), url=task.get_url()
+    )
     task_results = parser.get_results()
 
     return task_results
