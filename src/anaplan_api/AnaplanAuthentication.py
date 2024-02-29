@@ -5,6 +5,7 @@
 # Input:			Username & Password, or SHA keypair
 # Output:			Anaplan JWT and token expiry time
 # ===============================================================================
+from typing import Tuple
 import json
 import re
 import logging
@@ -20,8 +21,8 @@ class AnaplanAuthentication(object):
     Represents an authentication attempt for Anaplan API
     """
 
-    def __init__(self, request_handler: RequestHandler, **kwargs):
-        self.handler = request_handler
+    def __init__(self, **kwargs):
+        self.handler = RequestHandler("https://auth.anaplan.com/token/")
 
     def auth_header(self, username: str, password: str):
         pass
@@ -36,13 +37,13 @@ class AnaplanAuthentication(object):
         :return: JSON string with auth token details
         :rtype: dict
         """
-        anaplan_url = "https://auth.anaplan.com/token/authenticate"
+        endpoint = "authenticate"
 
         if body is None:
             logger.info("Authenticating via Basic.")
             try:
                 authenticate = self.handler.make_request(
-                    "", "POST", headers=header, override_url=anaplan_url
+                    endpoint, "POST", headers=header
                 ).json()
             except Exception as e:
                 logger.error(f"Error fetching auth token {e}", exc_info=True)
@@ -51,11 +52,10 @@ class AnaplanAuthentication(object):
             logger.info("Authenticating via Certificate.")
             try:
                 authenticate = self.handler.make_request(
-                    "",
+                    endpoint,
                     "POST",
                     headers=header,
-                    data=json.dumps(body),
-                    override_url=anaplan_url,
+                    data=json.dumps(body)
                 ).json()
             except Exception as e:
                 logger.error(f"Error fetching auth token {e}", exc_info=True)
@@ -112,13 +112,13 @@ class AnaplanAuthentication(object):
         :rtype: str
         """
 
-        anaplan_url = "https://auth.anaplan.com/token/validate"
+        endpoint = "validate"
         header = {"Authorization": "".join(["AnaplanAuthToken ", token])}
 
         try:
             logger.debug("Verifying auth token.")
             validate = self.handler.make_request(
-                "", "GET", headers=header, override_url=anaplan_url
+                endpoint, "GET", headers=header
             ).json()
         except Exception as e:
             logger.error(f"Error verifying auth token {e}", exc_info=True)
@@ -130,32 +130,30 @@ class AnaplanAuthentication(object):
 
         return validate["statusMessage"]
 
-    def refresh_token(self, token: str, auth_object: AuthToken):
+    def refresh_token(self, token: str) -> Tuple[str, float]:
         """Refreshes the authentication token and updates the token expiry time
 
         :param token: Token value that is nearing expiry
         :type token: str
-        :param auth_object: AuthToken object to be updated.
-        :type auth_object: AuthToken
+        :return: New auth token and expiry
+        :rtype: Tuple[str, str}
         """
-        new_token = ""
-        new_expiry = ""
+        new_token: str = ""
+        new_expiry: float
 
-        url = "https://auth.anaplan.com/token/refresh"
+        endpoint = "refresh"
         header = {"Authorization": "".join(["AnaplanAuthToken ", token])}
         try:
             refresh = self.handler.make_request(
-                "", "POST", headers=header, override_url=url
+                endpoint, "POST", headers=header
             ).json()
         except Exception as e:
             logger.error(f"Error verifying auth token {e}", exc_info=True)
             raise Exception(f"Error verifying auth token {e}")
 
-        if "tokenInfo" in refresh:
-            if "tokenValue" in refresh["tokenInfo"]:
-                new_token = refresh["tokenInfo"]["tokenValue"]
-            if "expiresAt" in refresh["tokenInfo"]:
-                new_expiry = refresh["tokenInfo"]["expiresAt"]
+        if "tokenInfo" not in refresh or "tokenValue" not in refresh["tokenInfo"] or "expiresAt" not in refresh["tokenInfo"]:
+            raise AuthenticationFailedError("Authentication response missing token or expiry")
 
-        auth_object.token_value = "".join(["AnaplanAuthToken ", new_token])
-        auth_object.token_expiry = new_expiry
+        new_token, new_expiry = refresh["tokenInfo"]["tokenValue"], refresh["tokenInfo"]["expiresAt"]
+
+        return new_token, new_expiry
