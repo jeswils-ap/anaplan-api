@@ -1,5 +1,9 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
 from abc import ABC, abstractmethod
-from .AnaplanResource import AnaplanResource
+
+if TYPE_CHECKING:
+    from .AnaplanResource import AnaplanResource
 
 
 class ResourceParserFactory(ABC):

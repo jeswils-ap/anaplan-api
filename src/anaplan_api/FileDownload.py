@@ -1,9 +1,13 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
 import logging
 from .File import File
-from .AnaplanConnection import AnaplanConnection
-from .AnaplanResourceFile import AnaplanResourceFile
 from .util.AnaplanVersion import AnaplanVersion
-from .util.RequestHandler import RequestHandler
+
+if TYPE_CHECKING:
+    from .AnaplanConnection import AnaplanConnection
+    from .AnaplanResourceFile import AnaplanResourceFile
+    from .util.RequestHandler import RequestHandler
 
 logger = logging.getLogger(__name__)
 

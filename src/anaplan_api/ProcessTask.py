@@ -1,9 +1,13 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
 from .TaskFactory import TaskFactory
-from .AnaplanConnection import AnaplanConnection
 from .Action import Action
-from .Parser import Parser
 from .ProcessParser import ProcessParser
 from .util.Util import TaskParameterError
+
+if TYPE_CHECKING:
+    from .AnaplanConnection import AnaplanConnection
+    from .Parser import Parser
 
 
 class ProcessTask(TaskFactory):

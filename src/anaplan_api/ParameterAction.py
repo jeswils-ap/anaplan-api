@@ -3,12 +3,16 @@
 # @author:        Jesse Wilson (Anaplan Asia Pte Ltd)
 # Description:    Base class responsible for running tasks in an Anaplan model
 # ===============================================================================
+from __future__ import annotations
+from typing import TYPE_CHECKING
 import json
 import logging
 from time import sleep
-from . import TaskResponse
 from .Action import Action
 from .util.Util import RequestFailedError, InvalidTaskTypeError
+
+if TYPE_CHECKING:
+    from . import TaskResponse
 
 logger = logging.getLogger(__name__)
 

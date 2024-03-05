@@ -2,14 +2,17 @@
 # This function reads the JSON results of the completed Anaplan task and returns
 # the job details.
 # ===========================================================================
+from __future__ import annotations
+from typing import List, TYPE_CHECKING
 import pandas as pd
 import logging
-from typing import List
 from .util.strtobool import strtobool
 from ..anaplan_api import anaplan
 from .Parser import Parser
-from .AnaplanConnection import AnaplanConnection
 from .ParserResponse import ParserResponse
+
+if TYPE_CHECKING:
+    from .AnaplanConnection import AnaplanConnection
 
 
 logger = logging.getLogger(__name__)
@@ -53,25 +56,27 @@ class ExportParser(Parser):
         edf = pd.DataFrame()
 
         if job_status == "Failed.":
-            """Should Never happen for Export type tasks"""
+            """Should never happen for Export type tasks"""
             return Parser.failure_message(results)
         else:
-            # IF failure dump is available download
+            """Should never happen for Export type tasks"""
             if failure_dump:
                 edf = Parser.get_dump("".join([url, "/dump"]))
 
             success_report = str(results["result"]["successful"])
 
+            if "objectId" not in results["result"]:
+                raise KeyError("'objectId' could not be found in response.")
+
             # details key only present in import task results
-            if "objectId" in results["result"]:
-                object_id = results["result"]["objectId"]
-                file_contents = anaplan.get_file(conn, object_id)
+            object_id = results["result"]["objectId"]
+            file_contents = anaplan.get_file(conn, object_id)
 
-                logger.info(f"The requested job is {job_status}")
-                logger.info(
-                    f"Failure Dump Available: {failure_dump}, Successful: {success_report}"
-                )
+            logger.info(f"The requested job is {job_status}")
+            logger.info(
+                f"Failure Dump Available: {failure_dump}, Successful: {success_report}"
+            )
 
-                return ParserResponse(
-                    "File export completed.", file_contents, False, edf
-                )
+            return ParserResponse(
+                "File export completed.", file_contents, False, edf
+            )

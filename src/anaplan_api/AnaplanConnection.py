@@ -5,8 +5,12 @@
 # Input:          Authorization header string, workspace ID string, and model ID string
 # Output:         None
 # ===============================================================================
+from __future__ import annotations
+from typing import TYPE_CHECKING
 from dataclasses import dataclass
-from .AuthToken import AuthToken
+
+if TYPE_CHECKING:
+    from .AuthToken import AuthToken
 
 
 @dataclass()

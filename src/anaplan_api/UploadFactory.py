@@ -1,9 +1,12 @@
+from __future__ import annotations
+from typing import Union, TYPE_CHECKING
 import os
-from typing import Union
-from .AnaplanConnection import AnaplanConnection
 from .FileUpload import FileUpload
 from .StreamUpload import StreamUpload
-from .util.RequestHandler import RequestHandler
+
+if TYPE_CHECKING:
+    from .AnaplanConnection import AnaplanConnection
+    from .util.RequestHandler import RequestHandler
 
 
 class UploadFactory:

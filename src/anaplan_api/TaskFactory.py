@@ -1,7 +1,11 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
 from abc import ABC, abstractmethod
-from .AnaplanConnection import AnaplanConnection
-from .Action import Action
-from .Parser import Parser
+
+if TYPE_CHECKING:
+    from .AnaplanConnection import AnaplanConnection
+    from .Action import Action
+    from .Parser import Parser
 
 
 class TaskFactory(ABC):

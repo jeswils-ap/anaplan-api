@@ -2,15 +2,18 @@
 # This function reads the JSON results of the completed Anaplan task and returns
 # the job details.
 # ===========================================================================
+from __future__ import annotations
+from typing import List, TYPE_CHECKING
 import logging
 import re
 import pandas as pd
 from .util.strtobool import strtobool
-from typing import List
 from ..anaplan_api import anaplan
-from .AnaplanConnection import AnaplanConnection
 from .Parser import Parser
 from .ParserResponse import ParserResponse
+
+if TYPE_CHECKING:
+    from .AnaplanConnection import AnaplanConnection
 
 logger = logging.getLogger(__name__)
 

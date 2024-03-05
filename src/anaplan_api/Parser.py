@@ -7,15 +7,18 @@
 # Output:			Array containing overall task results string, details results string,
 # 					error dump dataframe.
 # ===============================================================================
+from __future__ import annotations
+from typing import List, Optional, TYPE_CHECKING
 import logging
 import pandas as pd
 from io import StringIO
-from typing import List, Optional
 from pandas import DataFrame
 from pandas.errors import EmptyDataError, ParserError, ParserWarning
-from .AnaplanConnection import AnaplanConnection
 from .ParserResponse import ParserResponse
-from .util.RequestHandler import RequestHandler
+
+if TYPE_CHECKING:
+    from .AnaplanConnection import AnaplanConnection
+    from .util.RequestHandler import RequestHandler
 
 logger = logging.getLogger(__name__)
 

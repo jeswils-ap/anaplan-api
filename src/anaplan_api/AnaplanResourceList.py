@@ -6,7 +6,6 @@
 # Output:         Key-value dictionary object, resource name, or resource ID
 # ===============================================================================
 import json
-from collections import namedtuple
 from .AnaplanResource import AnaplanResource
 from .util.Util import ResourceNotFoundError
 

@@ -1,7 +1,11 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
 import logging
-from .AnaplanConnection import AnaplanConnection
-from .util.RequestHandler import RequestHandler
 from .UserDetails import UserDetails
+
+if TYPE_CHECKING:
+    from .AnaplanConnection import AnaplanConnection
+    from .util.RequestHandler import RequestHandler
 
 logger = logging.getLogger(__name__)
 
