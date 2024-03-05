@@ -1,7 +1,7 @@
 import logging
 from .AnaplanConnection import AnaplanConnection
 from .util.Util import ResourceNotFoundError, RequestFailedError
-from util.RequestHandler import RequestHandler
+from .util.RequestHandler import RequestHandler
 
 logger = logging.getLogger(__name__)
 

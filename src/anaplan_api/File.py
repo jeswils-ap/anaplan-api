@@ -52,17 +52,7 @@ class File:
         self._file_id = file_id
         self._workspace = conn.workspace
         self._model = conn.model
-        self._endpoint = "".join(
-            [
-                AnaplanVersion().base_url,
-                "workspaces/",
-                self._workspace,
-                "/models/",
-                self._model,
-                "/files/",
-                file_id,
-            ]
-        )
+        self._endpoint = f"workspaces/{self._workspace}/models/{self._model}/files/{self._file_id}/"
 
         self.get_metadata()
         self.set_file_details()

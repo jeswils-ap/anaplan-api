@@ -14,19 +14,9 @@ class FileUpload(Upload):
         :param file: Path to the local file to be uploaded to Anaplan
         :type file: str
         """
+        endpoint = f"{super().endpoint}"
 
-        url = "".join(
-            [
-                super().endpoint,
-                super().workspace,
-                "/models/",
-                super().model,
-                "/files/",
-                super().file_id,
-            ]
-        )
-
-        metadata_update = super().file_metadata(url)
+        metadata_update = super().file_metadata(endpoint)
         # Confirm that the metadata update for the requested file was OK before proceeding with file upload
         if metadata_update:
             logger.info(f"Starting upload of file {super().file_id}.")
@@ -37,7 +27,7 @@ class FileUpload(Upload):
                     iter(partial(file.read, chunk_size * (1024**2)), "")
                 ):
                     complete = super().file_data(
-                        "".join([url, "/chunks/", str(chunk_num)]),
+                        f"{endpoint}/chunks/{str(chunk_num)}",
                         chunk_num,
                         data.encode("utf-8"),
                     )

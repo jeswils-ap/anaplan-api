@@ -5,13 +5,16 @@
 # Input:			Username & Password, or SHA keypair
 # Output:			Anaplan JWT and token expiry time
 # ===============================================================================
-from typing import Tuple
+from __future__ import annotations
+from typing import Tuple, TYPE_CHECKING
 import json
 import re
 import logging
-from .AuthToken import AuthToken
 from .util.Util import AuthenticationFailedError
 from .util.RequestHandler import RequestHandler
+
+if TYPE_CHECKING:
+    from .AuthToken import AuthToken
 
 logger = logging.getLogger(__name__)
 

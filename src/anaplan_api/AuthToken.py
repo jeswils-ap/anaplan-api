@@ -7,7 +7,7 @@
 # ===============================================================================
 import threading
 from dataclasses import dataclass
-from AnaplanAuthentication import AnaplanAuthentication
+from .AnaplanAuthentication import AnaplanAuthentication
 
 
 @dataclass

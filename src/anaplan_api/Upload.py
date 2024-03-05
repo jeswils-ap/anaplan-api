@@ -6,6 +6,8 @@
 # Output:			Anaplan JWT and token expiry time
 # ===============================================================================
 import logging
+import io
+import gzip
 from .File import File
 
 logger = logging.getLogger(__name__)
@@ -32,7 +34,7 @@ class Upload(File):
         return super().workspace
 
     @property
-    def get_model(self) -> str:
+    def model(self) -> str:
         """Get the model ID
 
         :return: ID of the specified model
@@ -41,7 +43,7 @@ class Upload(File):
         return super().model
 
     @property
-    def get_file_id(self) -> str:
+    def file_id(self) -> str:
         """Get the ID of the specified file
 
         :return: ID of the specified file
@@ -52,16 +54,11 @@ class Upload(File):
     def upload(self, chunk_size: int, file: str):
         pass
 
-    def file_metadata(self, url: str) -> bool:
+    def file_metadata(self, endpoint: str) -> bool:
         """Update file metadata in Anaplan model as first step in file upload process
 
-        :param url: URL of the specified file
-        :raises HTTPError: HTTP error code
-        :raises ConnectionError: Network-related errors
-        :raises SSLError: Server-side SSL certificate errors
-        :raises Timeout: Request timeout errors
-        :raises ConnectTimeout: Timeout error when attempting to connect
-        :raises ReadTimeout: Timeout error waiting for server response
+        :param endpoint: URL of the specified file
+        :raises Exception: Exception from RequestHandler exception group
         :return: Whether metadata was successfully updated
         :rtype: bool
         """
@@ -79,7 +76,7 @@ class Upload(File):
         try:
             logger.debug("Updating file metadata.")
             meta_post = super().handler.make_request(
-                url, "POST", headers=post_header, data=stream_metadata
+                endpoint, "POST", headers=post_header, data=stream_metadata
             )
             logger.debug("Complete!")
         except Exception as e:
@@ -97,12 +94,7 @@ class Upload(File):
         :type chunk_num: int
         :param data: Data to upload
         :type data: str
-        :raises HTTPError: HTTP error code
-        :raises ConnectionError: Network-related errors
-        :raises SSLError: Server-side SSL certificate errors
-        :raises Timeout: Request timeout errors
-        :raises ConnectTimeout: Timeout error when attempting to connect
-        :raises ReadTimeout: Timeout error waiting for server response
+        :raises Exception: Exception from RequestHandler exception group
         :return: Whether file data upload was successful
         :rtype: bool
         """
@@ -117,7 +109,7 @@ class Upload(File):
         try:
             logger.debug(f"Attempting to upload chunk {chunk_num + 1}")
             stream_upload = super().handler.make_request(
-                url, "POST", headers=put_header, data=data
+                url, "PUT", headers=put_header, data=data
             )
             logger.debug(f"Chunk {chunk_num + 1} uploaded successfully.")
         except Exception as e:
@@ -125,3 +117,12 @@ class Upload(File):
             raise Exception(f"Error uploading chunk {chunk_num + 1}, {e}")
 
         return stream_upload.ok
+
+    @staticmethod
+    def compress_data(upload_data: bytes):
+        output = io.BytesIO()
+        with gzip.GzipFile(fileobj=output, mode='wb') as gz_stream:
+            gz_stream.write(upload_data)
+        compressed_data = output.getvalue()
+        return compressed_data
+
