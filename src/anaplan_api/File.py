@@ -2,12 +2,13 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 from .Resources import Resources
 from .ResourceParserFile import ResourceParserFile
+from .util.RequestHandler import RequestHandler
+from .util.AnaplanVersion import AnaplanVersion
 from .util.Util import ResourceNotFoundError
 
 if TYPE_CHECKING:
     from .AnaplanConnection import AnaplanConnection
     from .AnaplanResourceFile import AnaplanResourceFile
-    from .util.RequestHandler import RequestHandler
 
 
 class File:
@@ -31,7 +32,7 @@ class File:
     :type _chunk_count: int
     """
 
-    _handler: RequestHandler
+    _handler: RequestHandler = RequestHandler(AnaplanVersion().base_url)
     _conn: AnaplanConnection
     _file_resources: AnaplanResourceFile
     _endpoint: str
@@ -42,7 +43,7 @@ class File:
     _chunk_count: int
 
     def __init__(
-        self, handler: RequestHandler, conn: AnaplanConnection, file_id: str, **kwargs
+        self, conn: AnaplanConnection, file_id: str, **kwargs
     ):
         """
         :param conn: Object with authentication, workspace, and model details
@@ -50,7 +51,6 @@ class File:
         :param file_id: ID of the specified file in the Anaplan model
         :type file_id: str
         """
-        self._handler = handler
         self._conn = conn
         self._file_id = file_id
         self._workspace = conn.workspace

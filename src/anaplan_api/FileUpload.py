@@ -33,6 +33,6 @@ class FileUpload(Upload):
                     )
 
             if complete:
-                complete_upload = super().file_metadata("".join([url, "/complete"]))
+                complete_upload = super().file_metadata(f"{endpoint}/complete")
                 if complete_upload:
                     logger.info(f"Upload of file {super().file_id} complete.")

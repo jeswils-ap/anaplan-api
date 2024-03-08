@@ -7,12 +7,13 @@ from __future__ import annotations
 from typing import Optional, TYPE_CHECKING
 import logging
 from time import sleep
+from .util.RequestHandler import RequestHandler
 from .TaskResponse import TaskResponse
+from .util.AnaplanVersion import AnaplanVersion
 from .util.Util import MappingParameterError, UnknownTaskTypeError, RequestFailedError
 
 if TYPE_CHECKING:
     from .AnaplanConnection import AnaplanConnection
-    from .util.RequestHandler import RequestHandler
 
 logger = logging.getLogger(__name__)
 
@@ -48,7 +49,7 @@ class Action(object):
         "118": "/processes/",
     }
 
-    _handler: RequestHandler
+    _handler: RequestHandler = RequestHandler(AnaplanVersion().base_url)
     _authorization: str
     _workspace: str
     _model: str
@@ -59,13 +60,11 @@ class Action(object):
 
     def __init__(
         self,
-        handler: RequestHandler,
         conn: AnaplanConnection,
         action_id: str,
         retry_count: int,
         mapping_params: Optional[dict],
     ):
-        self._handler = handler
         self._authorization = conn.authorization.token_value
         self._workspace = conn.workspace
         self._model = conn.model
@@ -204,4 +203,4 @@ class Action(object):
                 break
             sleep(1)  # Wait 1 second before continuing loop
 
-        return TaskResponse(results=results, url=status_url)
+        return TaskResponse(results, status_url)

@@ -5,16 +5,13 @@
 # Input:			Username & Password, or SHA keypair
 # Output:			Anaplan JWT and token expiry time
 # ===============================================================================
-from __future__ import annotations
-from typing import Tuple, TYPE_CHECKING
+from typing import Tuple
 import json
 import re
 import logging
 from .util.Util import AuthenticationFailedError
 from .util.RequestHandler import RequestHandler
 
-if TYPE_CHECKING:
-    from .AuthToken import AuthToken
 
 logger = logging.getLogger(__name__)
 
@@ -67,7 +64,7 @@ class AnaplanAuthentication(object):
         # Return the JSON array containing the authentication response, including AnaplanAuthToken
         return authenticate
 
-    def authenticate(self, response: dict) -> AuthToken:
+    def authenticate(self, response: dict) -> Tuple[str, float]:
         """Parses the authentication response
 
         :param response: JSON string with auth request response.
@@ -104,7 +101,7 @@ class AnaplanAuthentication(object):
             raise AuthenticationFailedError(f"Error getting authentication {status}")
 
         logger.info("User successfully authenticated.")
-        return AuthToken(f"AnaplanAuthToken {token}", expires)
+        return f"AnaplanAuthToken {token}", expires
 
     def verify_auth(self, token: str) -> str:
         """Verifies the authentication request
@@ -139,7 +136,7 @@ class AnaplanAuthentication(object):
         :param token: Token value that is nearing expiry
         :type token: str
         :return: New auth token and expiry
-        :rtype: Tuple[str, str}
+        :rtype: Tuple[str, float]
         """
         new_token: str = ""
         new_expiry: float

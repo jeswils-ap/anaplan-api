@@ -4,21 +4,23 @@
 # Description:    Library to implement Anaplan API to get lists of model resources, upload files to Anaplan server,
 #                 download files from Anaplan server, and execute actions.
 # ===============================================================================
+from __future__ import annotations
 import logging
-from typing import List, Union
-from .AnaplanConnection import AnaplanConnection
-from .ParserResponse import ParserResponse
+from typing import List, Union, TYPE_CHECKING
 from .BasicAuthentication import BasicAuthentication
 from .CertificateAuthentication import CertificateAuthentication
-from .FileDownload import FileDownload
+from .UploadFactory import UploadFactory
 from .TaskFactoryGenerator import TaskFactoryGenerator
 from .Resources import Resources
 from .ResourceParserList import ResourceParserList
-from .AnaplanResourceList import AnaplanResource
+from .FileDownload import FileDownload
 from .AuthToken import AuthToken
-from .UploadFactory import UploadFactory
-
 from .util.Util import InvalidAuthenticationError
+
+if TYPE_CHECKING:
+    from .AnaplanConnection import AnaplanConnection
+    from .ParserResponse import ParserResponse
+    from .AnaplanResourceList import AnaplanResource
 
 logger = logging.getLogger(__name__)
 
@@ -48,12 +50,14 @@ def generate_authorization(
     if auth_type.lower() == "basic" and email and password:
         basic = BasicAuthentication()
         header_string = basic.auth_header(email, password)
-        return basic.authenticate(basic.auth_request(header_string))
+        token, expiry = basic.authenticate(basic.auth_request(header_string))
+        return AuthToken(token, expiry)
     elif auth_type.lower() == "certificate" and cert and private_key:
         cert_auth = CertificateAuthentication()
         header_string = cert_auth.auth_header(cert)
         post_data = cert_auth.generate_post_data(private_key)
-        return cert_auth.authenticate(cert_auth.auth_request(header_string, post_data))
+        token, expiry = cert_auth.authenticate(cert_auth.auth_request(header_string, post_data))
+        return AuthToken(token, expiry)
     else:
         if (email and password) or (cert and private_key):
             logger.error(f"Invalid authentication method: {auth_type}")
@@ -112,7 +116,7 @@ def execute_action(
     )
     task = action.execute()
     parser = factory.get_parser(
-        conn=conn, results=task.get_results(), url=task.get_url()
+        conn=conn, results=task.results, url=task.url
     )
     task_results = parser.get_results()
 

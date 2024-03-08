@@ -15,10 +15,11 @@ from io import StringIO
 from pandas import DataFrame
 from pandas.errors import EmptyDataError, ParserError, ParserWarning
 from .ParserResponse import ParserResponse
+from .util.RequestHandler import RequestHandler
+from .util.AnaplanVersion import AnaplanVersion
 
 if TYPE_CHECKING:
     from .AnaplanConnection import AnaplanConnection
-    from .util.RequestHandler import RequestHandler
 
 logger = logging.getLogger(__name__)
 
@@ -34,13 +35,12 @@ class Parser(object):
     :type _authorization: str
     """
 
-    _handler: RequestHandler
+    _handler: RequestHandler = RequestHandler(AnaplanVersion().base_url)
     _results: List[ParserResponse]
     _authorization: str
 
     def __init__(
         self,
-        handler: RequestHandler,
         conn: Optional[AnaplanConnection],
         results: dict,
         url: str,
@@ -53,7 +53,6 @@ class Parser(object):
         :param url: URL of the Anaplan action task
         :type url: str
         """
-        self._handler = handler
         self._authorization = conn.authorization.token_value
         Parser._results = Parser.parse_response(conn, results, url)
 

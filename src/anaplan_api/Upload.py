@@ -125,4 +125,3 @@ class Upload(File):
             gz_stream.write(upload_data)
         compressed_data = output.getvalue()
         return compressed_data
-

@@ -1,11 +1,12 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 import logging
+from .util.RequestHandler import RequestHandler
+from .util.AnaplanVersion import AnaplanVersion
 from .util.Util import ResourceNotFoundError, RequestFailedError
 
 if TYPE_CHECKING:
     from .AnaplanConnection import AnaplanConnection
-    from .util.RequestHandler import RequestHandler
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +29,7 @@ class Resources:
     :type _endpoint: str
     """
 
-    _handler: RequestHandler
+    _handler: RequestHandler = RequestHandler(AnaplanVersion().base_url)
     _authorization: str
     _resource: str
     _workspace: str
@@ -36,16 +37,13 @@ class Resources:
     _base_endpoint = f"workspaces/"
     _endpoint: str
 
-    def __init__(self, handler: RequestHandler, conn: AnaplanConnection, resource: str):
+    def __init__(self, conn: AnaplanConnection, resource: str):
         """
-        :param handler: Class for sending API requests
-        :type handler: RequestHandler
         :param conn: Object with authentication, workspace, and model details
         :type conn: AnaplanConnection
         :param resource: Type of resource to query the specified model for
         :type resource: str
         """
-        self._handler = handler
         self._authorization = conn.authorization.token_value
         self._workspace = conn.workspace
         self._model = conn.model
