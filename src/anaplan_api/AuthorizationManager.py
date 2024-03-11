@@ -37,7 +37,7 @@ class AuthorizationManager:
     def __init__(self, method: str, **kwargs):
         self.authorizer = AnaplanAuthentication()
         self.timer = None
-        self.create_auth(method, **kwargs)
+        self.create_auth(method.lower(), **kwargs)
         self.start()
 
     def create_auth(self, method: str, **kwargs):
@@ -46,12 +46,20 @@ class AuthorizationManager:
         post_data = None
         if method != "basic":
             post_data = authenticator.generate_post_data(**kwargs)
-        token, expiry = authenticator.authenticate(authenticator.auth_request(header_string, post_data))
+        token, expiry = authenticator.authenticate(
+            authenticator.auth_request(header_string, post_data)
+        )
         self._auth_token = AuthToken(token, expiry)
+
+    @property
+    def auth_token(self) -> AuthToken:
+        return self._auth_token
 
     def _run(self):
         self.start()
-        new_token_value, new_token_expiry = self.authorizer.refresh_token(self._auth_token.token_value)
+        new_token_value, new_token_expiry = self.authorizer.refresh_token(
+            self._auth_token.token_value
+        )
         self._auth_token.token_value = new_token_value
         self._auth_token.token_expiry = new_token_expiry
 
