@@ -48,7 +48,7 @@ class Resources:
         self._workspace = conn.workspace
         self._model = conn.model
         self._endpoint = (
-            f"{self._base_endpoint}/{self._workspace}/models/{self._model}/{resource}"
+            f"{self._base_endpoint}{self._workspace}/models/{self._model}/{resource}"
         )
         valid_resources = [
             "imports",
