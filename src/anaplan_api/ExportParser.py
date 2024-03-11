@@ -9,10 +9,10 @@ import logging
 from .util.strtobool import strtobool
 from ..anaplan_api import anaplan
 from .Parser import Parser
-from .ParserResponse import ParserResponse
+from src.anaplan_api.models.ParserResponse import ParserResponse
 
 if TYPE_CHECKING:
-    from .AnaplanConnection import AnaplanConnection
+    from src.anaplan_api.models.AnaplanConnection import AnaplanConnection
 
 
 logger = logging.getLogger(__name__)

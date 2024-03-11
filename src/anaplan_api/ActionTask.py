@@ -6,7 +6,7 @@ from .ActionParser import ActionParser
 from .util.Util import TaskParameterError
 
 if TYPE_CHECKING:
-    from .AnaplanConnection import AnaplanConnection
+    from src.anaplan_api.models.AnaplanConnection import AnaplanConnection
     from .Parser import Parser
 
 

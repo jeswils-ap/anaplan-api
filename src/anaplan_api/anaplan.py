@@ -6,21 +6,17 @@
 # ===============================================================================
 from __future__ import annotations
 import logging
-from typing import List, Union, TYPE_CHECKING
+from typing import List, TYPE_CHECKING
 from .AuthorizationManager import AuthorizationManager
-from .BasicAuthentication import BasicAuthentication
-from .CertificateAuthentication import CertificateAuthentication
 from .UploadFactory import UploadFactory
 from .TaskFactoryGenerator import TaskFactoryGenerator
 from .Resources import Resources
 from .ResourceParserList import ResourceParserList
 from .FileDownload import FileDownload
-from .AuthToken import AuthToken
-from .util.Util import InvalidAuthenticationError
 
 if TYPE_CHECKING:
-    from .AnaplanConnection import AnaplanConnection
-    from .ParserResponse import ParserResponse
+    from src.anaplan_api.models.AnaplanConnection import AnaplanConnection
+    from src.anaplan_api.models.ParserResponse import ParserResponse
     from .AnaplanResourceList import AnaplanResource
 
 logger = logging.getLogger(__name__)

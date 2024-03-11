@@ -14,12 +14,12 @@ import pandas as pd
 from io import StringIO
 from pandas import DataFrame
 from pandas.errors import EmptyDataError, ParserError, ParserWarning
-from .ParserResponse import ParserResponse
+from src.anaplan_api.models.ParserResponse import ParserResponse
 from .util.RequestHandler import RequestHandler
-from .util.AnaplanVersion import AnaplanVersion
+from src.anaplan_api.models.AnaplanVersion import AnaplanVersion
 
 if TYPE_CHECKING:
-    from .AnaplanConnection import AnaplanConnection
+    from src.anaplan_api.models.AnaplanConnection import AnaplanConnection
 
 logger = logging.getLogger(__name__)
 

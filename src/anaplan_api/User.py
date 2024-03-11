@@ -1,10 +1,10 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 import logging
-from .UserDetails import UserDetails
+from src.anaplan_api.models.UserDetails import UserDetails
 
 if TYPE_CHECKING:
-    from .AnaplanConnection import AnaplanConnection
+    from src.anaplan_api.models.AnaplanConnection import AnaplanConnection
     from .util.RequestHandler import RequestHandler
 
 logger = logging.getLogger(__name__)

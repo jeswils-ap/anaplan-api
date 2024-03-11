@@ -7,7 +7,7 @@ import logging
 from typing import List
 from .util.strtobool import strtobool
 from .Parser import Parser
-from .ParserResponse import ParserResponse
+from src.anaplan_api.models.ParserResponse import ParserResponse
 
 logger = logging.getLogger(__name__)
 

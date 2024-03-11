@@ -1,7 +1,7 @@
 import logging
 from typing import List
 from .User import User
-from .ModelDetails import ModelDetails
+from src.anaplan_api.models.ModelDetails import ModelDetails
 
 logger = logging.getLogger(__name__)
 

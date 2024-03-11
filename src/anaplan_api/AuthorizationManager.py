@@ -9,7 +9,7 @@ import logging
 import threading
 from .AnaplanAuthentication import AnaplanAuthentication
 from .AuthenticationFactory import AuthenticationFactory
-from .AuthToken import AuthToken
+from src.anaplan_api.models.AuthToken import AuthToken
 
 logger = logging.getLogger(__name__)
 

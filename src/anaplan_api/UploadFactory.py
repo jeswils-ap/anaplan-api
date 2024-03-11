@@ -5,7 +5,7 @@ from .FileUpload import FileUpload
 from .StreamUpload import StreamUpload
 
 if TYPE_CHECKING:
-    from .AnaplanConnection import AnaplanConnection
+    from src.anaplan_api.models.AnaplanConnection import AnaplanConnection
 
 
 class UploadFactory:

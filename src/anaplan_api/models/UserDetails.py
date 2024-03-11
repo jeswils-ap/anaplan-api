@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from datetime import datetime
 
-from .util.strtobool import strtobool
+from src.anaplan_api.util.strtobool import strtobool
 
 
 @dataclass

@@ -1,6 +1,6 @@
 """anaplan-api Package"""
 
-from .util.AnaplanVersion import AnaplanVersion
+from src.anaplan_api.models.AnaplanVersion import AnaplanVersion
 from .util.Util import (
     ResourceNotFoundError,
     UnknownTaskTypeError,
@@ -25,11 +25,11 @@ from ..anaplan_api.anaplan import (
     authorize,
 )
 from .AnaplanAuthentication import AnaplanAuthentication
-from .AnaplanConnection import AnaplanConnection
+from src.anaplan_api.models.AnaplanConnection import AnaplanConnection
 from .AnaplanResource import AnaplanResource
 from .AnaplanResourceFile import AnaplanResourceFile
 from .AnaplanResourceList import AnaplanResourceList
-from .AuthToken import AuthToken
+from src.anaplan_api.models.AuthToken import AuthToken
 from .BasicAuthentication import BasicAuthentication
 from .CertificateAuthentication import CertificateAuthentication
 from .ExportParser import ExportParser
@@ -41,10 +41,10 @@ from .ImportParser import ImportParser
 from .ImportTask import ImportTask
 from .KeystoreManager import KeystoreManager
 from .Model import Model
-from .ModelDetails import ModelDetails
+from src.anaplan_api.models.ModelDetails import ModelDetails
 from .ParameterAction import ParameterAction
 from .Parser import Parser
-from .ParserResponse import ParserResponse
+from src.anaplan_api.models.ParserResponse import ParserResponse
 from .ProcessParser import ProcessParser
 from .ProcessTask import ProcessTask
 from .ResourceParserFactory import ResourceParserFactory
@@ -54,13 +54,13 @@ from .Resources import Resources
 from .StreamUpload import StreamUpload
 from .TaskFactory import TaskFactory
 from .TaskFactoryGenerator import TaskFactoryGenerator
-from .TaskResponse import TaskResponse
+from src.anaplan_api.models.TaskResponse import TaskResponse
 from .Upload import Upload
 from .UploadFactory import UploadFactory
 from .User import User
-from .UserDetails import UserDetails
+from src.anaplan_api.models.UserDetails import UserDetails
 from .Workspace import Workspace
-from .WorkspaceDetails import WorkspaceDetails
+from src.anaplan_api.models.WorkspaceDetails import WorkspaceDetails
 from .util.RequestHandler import RequestHandler
 from .util.strtobool import strtobool
 

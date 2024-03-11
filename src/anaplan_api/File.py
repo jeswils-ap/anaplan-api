@@ -3,11 +3,11 @@ from typing import TYPE_CHECKING
 from .Resources import Resources
 from .ResourceParserFile import ResourceParserFile
 from .util.RequestHandler import RequestHandler
-from .util.AnaplanVersion import AnaplanVersion
+from src.anaplan_api.models.AnaplanVersion import AnaplanVersion
 from .util.Util import ResourceNotFoundError
 
 if TYPE_CHECKING:
-    from .AnaplanConnection import AnaplanConnection
+    from src.anaplan_api.models.AnaplanConnection import AnaplanConnection
     from .AnaplanResourceFile import AnaplanResourceFile
 
 
