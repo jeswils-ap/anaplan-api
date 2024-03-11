@@ -17,6 +17,8 @@ logger = logging.getLogger(__name__)
 
 
 class BasicAuthentication(AnaplanAuthentication):
+    _required_params: set = {"email", "password"}
+
     """
     Represents a basic authentication header request
     """
@@ -26,11 +28,11 @@ class BasicAuthentication(AnaplanAuthentication):
     # them, then returns the basic authorization header.
     # ===========================================================================
     @staticmethod
-    def auth_header(username: str, password: str, **kwargs) -> Dict[str, str]:
+    def auth_header(email: str, password: str, **kwargs) -> Dict[str, str]:
         """Takes an Anaplan username and password, encodes in base64 and creates an auth request header
 
-        :param username: Anaplan username
-        :type username: str
+        :param email: Anaplan username
+        :type email: str
         :param password: Anaplan password
         :type password: str
         :return: Auth-API request authorization header
@@ -42,9 +44,13 @@ class BasicAuthentication(AnaplanAuthentication):
             "Authorization": "".join(
                 [
                     "Basic ",
-                    b64encode((username + ":" + password).encode("utf-8")).decode(
+                    b64encode((email + ":" + password).encode("utf-8")).decode(
                         "utf-8"
                     ),
                 ]
             )
         }
+
+    @property
+    def required_params(self) -> set:
+        return self._required_params

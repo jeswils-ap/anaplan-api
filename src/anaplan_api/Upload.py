@@ -83,7 +83,7 @@ class Upload(File):
             logger.error(f"Error setting metadata {e}", exc_info=True)
             raise Exception(f"Error setting metadata {e}")
 
-        return meta_post.ok
+        return True
 
     def file_data(self, url: str, chunk_num: int, data: str) -> bool:
         """Upload data chunk to the specified file

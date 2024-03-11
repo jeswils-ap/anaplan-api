@@ -24,24 +24,25 @@ class CertificateAuthentication(AnaplanAuthentication):
     """
     Represents a certificate authentication request
     """
+    _required_params: set = {"private_key", "certificate"}
 
     # ===========================================================================
     # This function reads a user's public certificate as a string, base64
     # encodes that value, then returns the certificate authorization header.
     # ===========================================================================
-    def auth_header(self, pub_cert: str, **kwargs) -> Dict[str, str]:
+    def auth_header(self, certificate: str, **kwargs) -> Dict[str, str]:
         """Create the Auth API request header
 
-        :param pub_cert: Path to public certificate or public certificate as a string
-        :type pub_cert: str
+        :param certificate: Path to public certificate or public certificate as a string
+        :type certificate: str
         :return: Auth-API request authorization header
         :rtype: dict
         """
 
-        if not os.path.isfile(pub_cert):
-            my_pem_text = pub_cert
+        if not os.path.isfile(certificate):
+            my_pem_text = certificate
         else:
-            with open(pub_cert, "r") as my_pem_file:
+            with open(certificate, "r") as my_pem_file:
                 my_pem_text = my_pem_file.read()
 
         header_string = {
@@ -61,16 +62,16 @@ class CertificateAuthentication(AnaplanAuthentication):
     # POST body value
     # ===========================================================================
     @staticmethod
-    def generate_post_data(priv_key: bytes) -> str:
+    def generate_post_data(private_key: bytes) -> str:
         """Create the body of the Auth-API request
 
-        :param priv_key: Private key text or path to key
-        :type priv_key: bytes
+        :param private_key: Private key text or path to key
+        :type private_key: bytes
         """
 
         unsigned_nonce = CertificateAuthentication.create_nonce()
         signed_nonce = str(
-            CertificateAuthentication.sign_string(unsigned_nonce, priv_key)
+            CertificateAuthentication.sign_string(unsigned_nonce, private_key)
         )
 
         json_string = "".join(
@@ -105,13 +106,13 @@ class CertificateAuthentication(AnaplanAuthentication):
     # with the private key.
     # ===========================================================================
     @staticmethod
-    def sign_string(message: bytes, priv_key: bytes) -> str:
+    def sign_string(message: bytes, private_key: bytes) -> str:
         """Signs a string with a private key
 
         :param message: 150-character pseudo-random byte-array of characters
         :type message: bytes
-        :param priv_key: Private key text, used to sign the message.
-        :type priv_key: bytes
+        :param private_key: Private key text, used to sign the message.
+        :type private_key: bytes
         :raises ValueError: Error loading the private or signing the message.
         :return: Base64 encoded signed string value
         :rtype: str
@@ -119,14 +120,14 @@ class CertificateAuthentication(AnaplanAuthentication):
 
         backend = default_backend()
         try:
-            if not os.path.isfile(priv_key):
+            if not os.path.isfile(private_key):
                 key = serialization.load_pem_private_key(
-                    priv_key, None, backend=backend
+                    private_key, None, backend=backend
                 )
             else:
-                with open(priv_key, "r") as key_file:
+                with open(private_key, "r") as key_file:
                     serialization.load_pem_private_key(
-                        open(priv_key, "r").read().encode("utf-8"),
+                        open(private_key, "r").read().encode("utf-8"),
                         None,
                         backend=backend,
                     )
@@ -139,3 +140,7 @@ class CertificateAuthentication(AnaplanAuthentication):
         except ValueError as e:
             logger.error(f"Error loading private key {e}", exc_info=True)
             raise ValueError(f"Error loading private key {e}")
+
+    @property
+    def required_params(self) -> set:
+        return self._required_params
