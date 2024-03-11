@@ -22,7 +22,7 @@ from ..anaplan_api.anaplan import (
     file_upload,
     get_file,
     get_list,
-    generate_authorization,
+    authorize,
 )
 from .AnaplanAuthentication import AnaplanAuthentication
 from .AnaplanConnection import AnaplanConnection

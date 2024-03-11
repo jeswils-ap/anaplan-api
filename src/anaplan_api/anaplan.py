@@ -7,6 +7,7 @@
 from __future__ import annotations
 import logging
 from typing import List, Union, TYPE_CHECKING
+from .AuthorizationManager import AuthorizationManager
 from .BasicAuthentication import BasicAuthentication
 from .CertificateAuthentication import CertificateAuthentication
 from .UploadFactory import UploadFactory
@@ -29,48 +30,16 @@ logger = logging.getLogger(__name__)
 # This function reads the authentication type, Basic or Certificate, then passes
 # the remaining variables to anaplan_auth to generate the authorization for Anaplan API
 # ===========================================================================
-def generate_authorization(
-    auth_type: str = "Basic",
-    email: str = None,
-    password: str = None,
-    private_key: Union[bytes, str] = None,
-    cert: Union[bytes, str] = None,
-) -> AuthToken:
-    """Generate an Anaplan AuthToken object
-
-    :param auth_type: Basic or Certificate authentication
-    :param email: Anaplan email address for Basic auth
-    :param password: Anaplan password for Basic auth
-    :param private_key: Private key string or path to key file
-    :param cert: Public certificate string or path to file
-    :return: AnaplanAuthToken value and expiry time in epoch
-    :rtype: AuthToken
+def authorize(method: str, **kwargs) -> AuthorizationManager:
     """
-
-    if auth_type.lower() == "basic" and email and password:
-        basic = BasicAuthentication()
-        header_string = basic.auth_header(email, password)
-        token, expiry = basic.authenticate(basic.auth_request(header_string))
-        return AuthToken(token, expiry)
-    elif auth_type.lower() == "certificate" and cert and private_key:
-        cert_auth = CertificateAuthentication()
-        header_string = cert_auth.auth_header(cert)
-        post_data = cert_auth.generate_post_data(private_key)
-        token, expiry = cert_auth.authenticate(cert_auth.auth_request(header_string, post_data))
-        return AuthToken(token, expiry)
-    else:
-        if (email and password) or (cert and private_key):
-            logger.error(f"Invalid authentication method: {auth_type}")
-            raise InvalidAuthenticationError(
-                f"Invalid authentication method: {auth_type}"
-            )
-        else:
-            logger.error(
-                "Email address and password or certificate and key must not be blank"
-            )
-            raise InvalidAuthenticationError(
-                "Email address and password or certificate and key must not be blank"
-            )
+    :param method: Authorization method
+    :type method: str
+    :param kwargs: Additional arguments for the authorization
+    :return: Class to manage authorization flow, hold the AuthToken object,
+            and handle automatic refresh of the token.
+    :rtype: AuthorizationManager
+    """
+    return AuthorizationManager(method, **kwargs)
 
 
 def file_upload(
