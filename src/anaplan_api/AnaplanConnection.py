@@ -13,7 +13,7 @@ if TYPE_CHECKING:
     from .AuthToken import AuthToken
 
 
-@dataclass()
+@dataclass
 class AnaplanConnection(object):
     """
     AnaplanConnection object stores AuthToken, workspace and model IDs.

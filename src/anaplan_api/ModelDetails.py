@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 
-@dataclass()
+@dataclass
 class ModelDetails(object):
     _model_details: dict
     _id: str

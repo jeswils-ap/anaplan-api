@@ -4,7 +4,7 @@ from datetime import datetime
 from .util.strtobool import strtobool
 
 
-@dataclass()
+@dataclass
 class UserDetails(object):
     _user_details: dict
     _email: str

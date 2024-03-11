@@ -107,7 +107,7 @@ class Resources:
                 f"Request was unsuccessful, code: {response['status']['code']}"
             )
 
-        if (
-            self._resource in response
-        ):  # If the specified resource is found in the response return the list
-            return response[self._resource]
+        if self._resource not in response:
+            raise KeyError(f"Resource {self._resource} not found in response")
+
+        return response[self._resource]

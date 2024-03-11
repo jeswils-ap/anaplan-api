@@ -12,11 +12,12 @@ from .util.Util import ResourceNotFoundError
 
 class AnaplanResourceList(AnaplanResource):
     """Represents a dictionary of Anaplan resources by name with ID as the value
-
+    :param _raw_response: Raw JSON response from the server
+    :type _raw_response: dict
     :param _resource: List of items for a requested Anaplan resource
     :type _resource: dict
     """
-
+    _raw_response: dict
     _resources: dict
 
     def __init__(self, response: dict):
@@ -25,6 +26,7 @@ class AnaplanResourceList(AnaplanResource):
         :param response: JSON response containing all items of a requested type in the Anaplan model
         :type response: dict
         """
+        self._raw_response = response
         self._resources = {item["name"]: item["id"] for item in response}
 
     def __str__(self) -> str:

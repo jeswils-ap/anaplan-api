@@ -12,11 +12,12 @@ from .util.Util import ResourceNotFoundError
 
 class AnaplanResourceFile(AnaplanResource):
     """Represents a dictionary of Anaplan files by ID and corresponding number of chunks that make up the file
-
+    :param _raw_response: Raw JSON response from the server
+    :type _raw_response: dict
     :param _resource: List of items for a requested Anaplan resource
     :type _resource: dict
     """
-
+    _raw_response: dict
     _resources: dict
 
     def __init__(self, response: dict):
@@ -25,6 +26,7 @@ class AnaplanResourceFile(AnaplanResource):
         :param response: JSON response containing all files in the Anaplan model
         :type response: dict
         """
+        self._raw_response = response
         self._resources = {item["id"]: item["chunkCount"] for item in response}
 
     def __str__(self) -> str:

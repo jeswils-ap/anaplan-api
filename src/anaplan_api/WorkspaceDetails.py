@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from .util.strtobool import strtobool
 
 
-@dataclass()
+@dataclass
 class WorkspaceDetails(object):
     _model_details: dict
     _id: str
