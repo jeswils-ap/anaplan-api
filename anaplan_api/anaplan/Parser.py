@@ -14,7 +14,7 @@ import pandas as pd
 from io import StringIO
 from pandas import DataFrame
 from pandas.errors import EmptyDataError, ParserError, ParserWarning
-from anaplan_api.anaplan.models.ParserResponse import ParserResponse
+from .models.ParserResponse import ParserResponse
 from .util.RequestHandler import RequestHandler
 from .models.AnaplanVersion import AnaplanVersion
 
