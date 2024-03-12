@@ -44,9 +44,7 @@ class BasicAuthentication(AnaplanAuthentication):
             "Authorization": "".join(
                 [
                     "Basic ",
-                    b64encode((email + ":" + password).encode("utf-8")).decode(
-                        "utf-8"
-                    ),
+                    b64encode((email + ":" + password).encode("utf-8")).decode("utf-8"),
                 ]
             )
         }

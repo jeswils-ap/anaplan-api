@@ -17,6 +17,7 @@ class AnaplanResourceList(AnaplanResource):
     :param _resource: List of items for a requested Anaplan resource
     :type _resource: dict
     """
+
     _raw_response: dict
     _resources: dict
 

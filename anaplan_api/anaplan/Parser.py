@@ -36,7 +36,7 @@ class Parser(object):
     """
 
     _handler: RequestHandler = RequestHandler(AnaplanVersion().base_url)
-    _results: List[ParserResponse]
+    _results: List[ParserResponse] = list()
     _authorization: str
 
     def __init__(
@@ -70,30 +70,35 @@ class Parser(object):
         pass
 
     @staticmethod
-    def failure_message(results: dict) -> ParserResponse:
+    def failure_message(results: dict) -> List[ParserResponse]:
         """Creates a ParserResponse in case of an Action failure
 
         :return: Generic response for failed tasks.
         :rtype: ParserResponse
         """
+
+        responses: List[ParserResponse] = list()
+
         if "result" not in results or "details" not in results["result"]:
             raise KeyError(f"Unable to find result or details in response: {results}")
+
         for i in range(0, len(results["result"]["details"])):
-            if (
-                "localMessageText"
-                not in results["result"]["details"][i]["localMessageText"]
-            ):
+            if "localMessageText" not in results["result"]["details"][i]:
                 continue
+
             error_message = str(results["result"]["details"][i]["localMessageText"])
             logger.warning(
                 f"The task has failed to run due to an error: {error_message}"
             )
-            return ParserResponse(
-                f"The task has failed to run due to an error: {error_message}",
-                "",
-                False,
-                pd.DataFrame(),
+            responses.append(
+                ParserResponse(
+                    f"The task has failed to run due to an error: {error_message}",
+                    "",
+                    False,
+                    pd.DataFrame(),
+                )
             )
+        return responses
 
     def get_dump(self, url: str) -> DataFrame:
         """Fetches the failure dump of an Anaplan Import action if available

@@ -24,6 +24,7 @@ class CertificateAuthentication(AnaplanAuthentication):
     """
     Represents a certificate authentication request
     """
+
     _required_params: set = {"private_key", "certificate"}
 
     # ===========================================================================

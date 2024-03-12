@@ -6,6 +6,7 @@
 from __future__ import annotations
 from typing import Optional, TYPE_CHECKING
 import logging
+import json
 from time import sleep
 from .util.RequestHandler import RequestHandler
 from .models.TaskResponse import TaskResponse
@@ -127,7 +128,10 @@ class Action(object):
                 f"Provided action ID {self._action_id} does not match any know action type"
             )
 
-        endpoint = f"workspaces/{self._workspace}/models/{self._model}/{self._action_type[self._action_id[:3]]}/{self._action_id}/tasks"
+        endpoint = (
+            f"workspaces/{self._workspace}/models/{self._model}"
+            f"{self._action_type[self._action_id[:3]]}{self._action_id}/tasks"
+        )
 
         task_id = self.post_task(endpoint, post_header)
         return self.check_status(endpoint, task_id)
@@ -148,8 +152,8 @@ class Action(object):
         while state < self.retry_count:
             try:
                 run_action = self._handler.make_request(
-                    url, "POST", data=self.post_body, headers=post_header
-                ).json()
+                    url, "POST", data=json.dumps(self.post_body), headers=post_header
+                )
             except Exception as e:
                 logger.error(f"Error running action {e}", exc_info=True)
             if run_action.status_code == 200:
@@ -160,6 +164,8 @@ class Action(object):
             state += 1
             sleep_time *= 1.5
             sleep(sleep_time)
+
+        run_action = run_action.json()
 
         if state > self.retry_count:
             raise RequestFailedError(f"Unable to execute {self.action_id}")
@@ -186,6 +192,8 @@ class Action(object):
         status = ""
         status_url = f"{url}/{task_id}"
 
+        logger.debug("Checking task status.")
+
         while True:
             try:
                 get_status = self._handler.make_request(
@@ -200,6 +208,7 @@ class Action(object):
 
             if status == "COMPLETE":
                 results = get_status["task"]
+                logger.info("Task completed")
                 break
             sleep(1)  # Wait 1 second before continuing loop
 

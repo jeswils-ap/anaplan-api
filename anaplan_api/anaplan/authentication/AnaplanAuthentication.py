@@ -52,10 +52,7 @@ class AnaplanAuthentication(object):
             logger.info("Authenticating via Certificate.")
             try:
                 authenticate = self.handler.make_request(
-                    endpoint,
-                    "POST",
-                    headers=header,
-                    data=json.dumps(body)
+                    endpoint, "POST", headers=header, data=json.dumps(body)
                 ).json()
             except Exception as e:
                 logger.error(f"Error fetching auth token {e}", exc_info=True)
@@ -117,9 +114,7 @@ class AnaplanAuthentication(object):
 
         try:
             logger.debug("Verifying auth token.")
-            validate = self.handler.make_request(
-                endpoint, "GET", headers=header
-            ).json()
+            validate = self.handler.make_request(endpoint, "GET", headers=header).json()
         except Exception as e:
             logger.error(f"Error verifying auth token {e}", exc_info=True)
             raise Exception(f"Error verifying auth token {e}")
@@ -144,16 +139,23 @@ class AnaplanAuthentication(object):
         endpoint = "refresh"
         header = {"Authorization": "".join(["AnaplanAuthToken ", token])}
         try:
-            refresh = self.handler.make_request(
-                endpoint, "POST", headers=header
-            ).json()
+            refresh = self.handler.make_request(endpoint, "POST", headers=header).json()
         except Exception as e:
             logger.error(f"Error verifying auth token {e}", exc_info=True)
             raise Exception(f"Error verifying auth token {e}")
 
-        if "tokenInfo" not in refresh or "tokenValue" not in refresh["tokenInfo"] or "expiresAt" not in refresh["tokenInfo"]:
-            raise AuthenticationFailedError("Authentication response missing token or expiry")
+        if (
+            "tokenInfo" not in refresh
+            or "tokenValue" not in refresh["tokenInfo"]
+            or "expiresAt" not in refresh["tokenInfo"]
+        ):
+            raise AuthenticationFailedError(
+                "Authentication response missing token or expiry"
+            )
 
-        new_token, new_expiry = refresh["tokenInfo"]["tokenValue"], refresh["tokenInfo"]["expiresAt"]
+        new_token, new_expiry = (
+            refresh["tokenInfo"]["tokenValue"],
+            refresh["tokenInfo"]["expiresAt"],
+        )
 
         return new_token, new_expiry
