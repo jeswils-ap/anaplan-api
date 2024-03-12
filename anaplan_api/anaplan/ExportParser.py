@@ -7,7 +7,7 @@ from typing import List, TYPE_CHECKING
 import pandas as pd
 import logging
 from .util.strtobool import strtobool
-import anaplan
+from . import anaplan
 from .Parser import Parser
 from .models.ParserResponse import ParserResponse
 

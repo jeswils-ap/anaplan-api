@@ -8,7 +8,7 @@ import logging
 import re
 import pandas as pd
 from .util.strtobool import strtobool
-import anaplan
+from . import anaplan
 from .Parser import Parser
 from .models.ParserResponse import ParserResponse
 
