@@ -27,7 +27,7 @@ share/python-wheels/
 *.egg
 MANIFEST
 setup.cfg
-pyproject.toml
+pyproject.toml.old
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -75,6 +75,9 @@ docs/_build/
 
 # PyBuilder
 target/
+
+# Pycharm Stuff
+.idea/*
 
 # Jupyter Notebook
 .ipynb_checkpoints
@@ -136,3 +139,4 @@ dmypy.json
 # Misc Files
 *.zip
 *.sh
+testing.py
