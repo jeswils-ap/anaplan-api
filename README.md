@@ -1,5 +1,3 @@
-*Note: This package is no longer actively maintained, and this repo has been publicly archived.*
-
 # anaplan-api
 
 Anaplan-API is a Python library wrapper for [Anaplan Bulk API](https://anaplanbulkapi20.docs.apiary.io/) and [Anaplan Authentication API](https://anaplanauthentication.docs.apiary.io/).
