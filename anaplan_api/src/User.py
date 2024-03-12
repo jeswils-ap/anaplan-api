@@ -2,10 +2,11 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 import logging
 from anaplan_api.src.models.UserDetails import UserDetails
+from anaplan_api.src.util.RequestHandler import RequestHandler
+from anaplan_api.src.models.AnaplanVersion import AnaplanVersion
 
 if TYPE_CHECKING:
     from anaplan_api.src.models.AnaplanConnection import AnaplanConnection
-    from .util.RequestHandler import RequestHandler
 
 logger = logging.getLogger(__name__)
 
@@ -16,13 +17,14 @@ class User:
     """
 
     _endpoint: str = f"users/"
-    _handler: RequestHandler
+    _handler: RequestHandler = RequestHandler(AnaplanVersion().base_url)
     _conn: AnaplanConnection
     _user_id: str
     _user_details: UserDetails
+    _raw_data: dict
 
     def __init__(
-        self, handler: RequestHandler, conn: AnaplanConnection, user_id: str = None
+        self, conn: AnaplanConnection, user_id: str = None
     ):
         """
         :param conn: Object containing Workspace and Model ID, and AuthToken object
@@ -30,7 +32,6 @@ class User:
         :param user_id: ID of specified user
         :type user_id: str
         """
-        self._handler = handler
         self._conn = conn
         self._user_id = user_id
 
@@ -49,8 +50,8 @@ class User:
         if self._user_id is not None:
             return
 
-        url = "".join([self._endpoint, "me"])
-        authorization = self._conn.authorization.token_value
+        url = f"{self.endpoint}me"
+        authorization = self.conn.authorization.token_value
 
         get_header = {"Authorization": authorization}
 
@@ -71,6 +72,7 @@ class User:
             raise KeyError("'id' not found in response")
 
         self._user_id = user_details["user"]["id"]
+        self._raw_data = user_details["user"]
         self._user_details = UserDetails(user_details["user"])
 
     def get_user_details(self):
@@ -82,8 +84,8 @@ class User:
         if self._user_id is not None:
             return
 
-        url = "".join([self._endpoint, self._user_id])
-        authorization = self._conn.authorization.token_value
+        url = f"{self.endpoint}{self.id}"
+        authorization = self.conn.authorization.token_value
 
         get_header = {"Authorization": authorization}
 

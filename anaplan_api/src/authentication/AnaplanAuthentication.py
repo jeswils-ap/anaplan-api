@@ -9,8 +9,8 @@ from typing import Tuple
 import json
 import re
 import logging
-from .util.Util import AuthenticationFailedError
-from .util.RequestHandler import RequestHandler
+from anaplan_api.src.util.Util import AuthenticationFailedError
+from anaplan_api.src.util.RequestHandler import RequestHandler
 
 
 logger = logging.getLogger(__name__)

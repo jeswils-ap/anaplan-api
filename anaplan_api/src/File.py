@@ -8,7 +8,7 @@ from .util.Util import ResourceNotFoundError
 
 if TYPE_CHECKING:
     from anaplan_api.src.models.AnaplanConnection import AnaplanConnection
-    from .AnaplanResourceFile import AnaplanResourceFile
+    from anaplan_api.src.models.AnaplanResourceFile import AnaplanResourceFile
 
 
 class File:

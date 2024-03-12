@@ -1,6 +1,6 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
-from .TaskFactory import TaskFactory
+from anaplan_api.src.bases.TaskFactory import TaskFactory
 from .Action import Action
 from .ExportParser import ExportParser
 from .util.Util import TaskParameterError

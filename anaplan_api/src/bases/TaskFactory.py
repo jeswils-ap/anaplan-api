@@ -4,8 +4,8 @@ from abc import ABC, abstractmethod
 
 if TYPE_CHECKING:
     from anaplan_api.src.models.AnaplanConnection import AnaplanConnection
-    from .Action import Action
-    from .Parser import Parser
+    from anaplan_api.src.Action import Action
+    from anaplan_api.src.Parser import Parser
 
 
 class TaskFactory(ABC):

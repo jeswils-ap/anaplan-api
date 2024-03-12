@@ -1,5 +1,5 @@
-from .ResourceParserFactory import ResourceParserFactory
-from .AnaplanResourceList import AnaplanResourceList
+from anaplan_api.src.bases.ResourceParserFactory import ResourceParserFactory
+from anaplan_api.src.models.AnaplanResourceList import AnaplanResourceList
 
 
 class ResourceParserList(ResourceParserFactory):

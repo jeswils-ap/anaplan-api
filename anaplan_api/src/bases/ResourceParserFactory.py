@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 from abc import ABC, abstractmethod
 
 if TYPE_CHECKING:
-    from .AnaplanResource import AnaplanResource
+    from anaplan_api.src.bases.AnaplanResource import AnaplanResource
 
 
 class ResourceParserFactory(ABC):

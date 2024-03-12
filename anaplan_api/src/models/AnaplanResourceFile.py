@@ -6,8 +6,8 @@
 # Output:         Key-value dictionary object, resource name, or resource ID
 # ===============================================================================
 import json
-from .AnaplanResource import AnaplanResource
-from .util.Util import ResourceNotFoundError
+from anaplan_api.src.bases.AnaplanResource import AnaplanResource
+from anaplan_api.src.util.Util import ResourceNotFoundError
 
 
 class AnaplanResourceFile(AnaplanResource):
