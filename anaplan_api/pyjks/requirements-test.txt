@@ -1,0 +1,6 @@
+-r requirements.txt
+py<1.6.0
+pytest==3.0.7
+tox==2.9.1
+virtualenv==15.0.2
+tox-virtualenv-no-download==1.0.2

@@ -139,3 +139,4 @@ dmypy.json
 # Misc Files
 *.zip
 *.sh
+testing.py
