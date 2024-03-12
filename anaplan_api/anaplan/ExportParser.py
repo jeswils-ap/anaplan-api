@@ -19,11 +19,11 @@ logger = logging.getLogger(__name__)
 
 
 class ExportParser(Parser):
-    results: List[ParserResponse]
+    _results: List[ParserResponse]
 
     def __init__(self, conn: AnaplanConnection, results: dict, url: str):
         super().__init__(conn=conn, results=results, url=url)
-        ExportParser.results.append(ExportParser.parse_response(conn, results, url))
+        ExportParser._results.extend(ExportParser.parse_response(conn, results, url))
 
     @staticmethod
     def get_results() -> List[ParserResponse]:
@@ -32,10 +32,10 @@ class ExportParser(Parser):
         :return: Formatted export task results
         :rtype: List[ParserResponse]
         """
-        return ExportParser.results
+        return ExportParser._results
 
     @staticmethod
-    def parse_response(conn, results, url) -> ParserResponse:
+    def parse_response(conn, results, url) -> List[ParserResponse]:
         """Parse the JSON response for a task into an object with standardized format.
 
         :param conn: AnaplanConnection object with authentication, workspace and model IDs
@@ -58,25 +58,23 @@ class ExportParser(Parser):
         if job_status == "Failed.":
             """Should never happen for Export type tasks"""
             return Parser.failure_message(results)
-        else:
-            """Should never happen for Export type tasks"""
-            if failure_dump:
-                edf = Parser.get_dump("".join([url, "/dump"]))
 
-            success_report = str(results["result"]["successful"])
+        """Should never happen for Export type tasks"""
+        if failure_dump:
+            edf = super().get_dump("".join([url, "/dump"]))
 
-            if "objectId" not in results["result"]:
-                raise KeyError("'objectId' could not be found in response.")
+        success_report = str(results["result"]["successful"])
 
-            # details key only present in import task results
-            object_id = results["result"]["objectId"]
-            file_contents = anaplan.get_file(conn, object_id)
+        if "objectId" not in results["result"]:
+            raise KeyError("'objectId' could not be found in response.")
 
-            logger.info(f"The requested job is {job_status}")
-            logger.info(
-                f"Failure Dump Available: {failure_dump}, Successful: {success_report}"
-            )
+        # details key only present in import task results
+        object_id = results["result"]["objectId"]
+        file_contents = anaplan.get_file(conn, object_id)
 
-            return ParserResponse(
-                "File export completed.", file_contents, False, edf
-            )
+        logger.info(f"The requested job is {job_status}")
+        logger.info(
+            f"Failure Dump Available: {failure_dump}, Successful: {success_report}"
+        )
+
+        return [ParserResponse("File export completed.", file_contents, False, edf)]
