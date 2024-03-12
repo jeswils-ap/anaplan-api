@@ -6,6 +6,7 @@ from .util import *
 SUN_JKS_ALGO_ID = (1,3,6,1,4,1,42,2,17,1,1) # JavaSoft proprietary key-protection algorithm
 SUN_JCE_ALGO_ID = (1,3,6,1,4,1,42,2,19,1)   # PBE_WITH_MD5_AND_DES3_CBC_OID (non-published, modified version of PKCS#5 PBEWithMD5AndDES)
 
+
 def jks_pkey_encrypt(key, password_str):
     """
     Encrypts the private key with password protection algorithm used by JKS keystores.
