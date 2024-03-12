@@ -3,9 +3,9 @@ from typing import TYPE_CHECKING
 from abc import ABC, abstractmethod
 
 if TYPE_CHECKING:
-    from anaplan_api.anaplan.models.AnaplanConnection import AnaplanConnection
-    from anaplan_api.anaplan.Action import Action
-    from anaplan_api.anaplan.Parser import Parser
+    from ..models.AnaplanConnection import AnaplanConnection
+    from ..Action import Action
+    from ..Parser import Parser
 
 
 class TaskFactory(ABC):

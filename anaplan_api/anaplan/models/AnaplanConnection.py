@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING
 from dataclasses import dataclass
 
 if TYPE_CHECKING:
-    from anaplan_api.anaplan.models.AuthToken import AuthToken
+    from .AuthToken import AuthToken
 
 
 @dataclass

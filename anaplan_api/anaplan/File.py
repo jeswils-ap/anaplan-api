@@ -3,12 +3,12 @@ from typing import TYPE_CHECKING
 from .Resources import Resources
 from .ResourceParserFile import ResourceParserFile
 from .util.RequestHandler import RequestHandler
-from anaplan_api.anaplan.models.AnaplanVersion import AnaplanVersion
+from .models.AnaplanVersion import AnaplanVersion
 from .util.Util import ResourceNotFoundError
 
 if TYPE_CHECKING:
-    from anaplan_api.anaplan.models.AnaplanConnection import AnaplanConnection
-    from anaplan_api.anaplan.models.AnaplanResourceFile import AnaplanResourceFile
+    from .models.AnaplanConnection import AnaplanConnection
+    from .models.AnaplanResourceFile import AnaplanResourceFile
 
 
 class File:

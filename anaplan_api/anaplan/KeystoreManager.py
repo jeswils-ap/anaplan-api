@@ -6,10 +6,10 @@
 # Input:		Java Keystore
 # Output:		Key pair as array of strings
 # ==============================================================================
-from anaplan_api.pyjks.jks import jks
+from .pyjks.jks import jks
 import logging
 from base64 import b64encode
-from anaplan_api.pyjks.jks import (
+from .pyjks.jks import (
     BadKeystoreFormatException,
     UnsupportedKeystoreVersionException,
     KeystoreSignatureException,

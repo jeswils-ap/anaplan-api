@@ -7,7 +7,7 @@
 from __future__ import annotations
 import logging
 from typing import List, TYPE_CHECKING
-from anaplan_api.anaplan.authentication.AuthorizationManager import AuthorizationManager
+from .authentication.AuthorizationManager import AuthorizationManager
 from .UploadFactory import UploadFactory
 from .TaskFactoryGenerator import TaskFactoryGenerator
 from .Resources import Resources
@@ -15,9 +15,9 @@ from .ResourceParserList import ResourceParserList
 from .FileDownload import FileDownload
 
 if TYPE_CHECKING:
-    from anaplan_api.anaplan.models.AnaplanConnection import AnaplanConnection
-    from anaplan_api.anaplan.models.ParserResponse import ParserResponse
-    from anaplan_api.anaplan.models.AnaplanResourceList import AnaplanResource
+    from .models.AnaplanConnection import AnaplanConnection
+    from .models.ParserResponse import ParserResponse
+    from .models.AnaplanResourceList import AnaplanResource
 
 logger = logging.getLogger(__name__)
 

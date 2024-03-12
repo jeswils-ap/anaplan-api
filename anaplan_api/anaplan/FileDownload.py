@@ -2,11 +2,11 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 import logging
 from .File import File
-from anaplan_api.anaplan.models.AnaplanVersion import AnaplanVersion
+from .models.AnaplanVersion import AnaplanVersion
 
 if TYPE_CHECKING:
-    from anaplan_api.anaplan.models.AnaplanConnection import AnaplanConnection
-    from anaplan_api.anaplan.models.AnaplanResourceFile import AnaplanResourceFile
+    from .models.AnaplanConnection import AnaplanConnection
+    from .models.AnaplanResourceFile import AnaplanResourceFile
     from .util.RequestHandler import RequestHandler
 
 logger = logging.getLogger(__name__)

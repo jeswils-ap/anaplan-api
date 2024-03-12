@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from anaplan_api.anaplan.util.strtobool import strtobool
+from ..util.strtobool import strtobool
 
 
 @dataclass

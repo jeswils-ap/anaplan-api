@@ -1,12 +1,12 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 import logging
-from anaplan_api.anaplan.models.UserDetails import UserDetails
-from anaplan_api.anaplan.util.RequestHandler import RequestHandler
-from anaplan_api.anaplan.models.AnaplanVersion import AnaplanVersion
+from .models.UserDetails import UserDetails
+from .util.RequestHandler import RequestHandler
+from .models.AnaplanVersion import AnaplanVersion
 
 if TYPE_CHECKING:
-    from anaplan_api.anaplan.models.AnaplanConnection import AnaplanConnection
+    from .models.AnaplanConnection import AnaplanConnection
 
 logger = logging.getLogger(__name__)
 

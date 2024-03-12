@@ -5,9 +5,9 @@
 import pandas as pd
 import logging
 from typing import List
-from anaplan_api.anaplan.util.strtobool import strtobool
+from .util.strtobool import strtobool
 from .Parser import Parser
-from anaplan_api.anaplan.models.ParserResponse import ParserResponse
+from .models.ParserResponse import ParserResponse
 
 logger = logging.getLogger(__name__)
 

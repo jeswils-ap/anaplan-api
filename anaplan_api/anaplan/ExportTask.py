@@ -1,12 +1,12 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
-from anaplan_api.anaplan.bases.TaskFactory import TaskFactory
+from .bases.TaskFactory import TaskFactory
 from .Action import Action
 from .ExportParser import ExportParser
 from .util.Util import TaskParameterError
 
 if TYPE_CHECKING:
-    from anaplan_api.anaplan.models.AnaplanConnection import AnaplanConnection
+    from .models.AnaplanConnection import AnaplanConnection
     from .Parser import Parser
 
 
