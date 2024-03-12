@@ -7,7 +7,6 @@
 # ===============================================================================
 import threading
 from dataclasses import dataclass
-from anaplan_api.anaplan.authentication.AnaplanAuthentication import AnaplanAuthentication
 
 
 @dataclass
@@ -24,33 +23,14 @@ class AuthToken(object):
 
     _token_value: str
     _token_expiry: float
-    _refresh_timeout: int = 60 * 60 * 29  # Refresh token after 29 minutes
 
     def __init__(self, token_value: str, token_expiry: float):
         self._token_value = token_value
         self._token_expiry = token_expiry
-        self.authorizer = AnaplanAuthentication()
-        self.timer = None
-        self.delay = self._refresh_timeout
-        self.start()
 
     def __post_init__(self):
         if not self._token_value[:7] == "Anaplan":
             self._token_value = "".join(["AnaplanAuthToken ", self._token_value])
-
-    def _run(self):
-        self.start()
-        self._token_value, self._token_expiry = self.authorizer.refresh_token(self.token_value)
-
-    def start(self):
-        self.timer = threading.Timer(self.delay, self._run)
-        self.timer.daemon = True
-        self.timer.name = "authorization_refresh"
-        self.timer.start()
-
-    def cancel(self):
-        if self.timer:
-            self.timer.cancel()
 
     @property
     def token_value(self) -> str:

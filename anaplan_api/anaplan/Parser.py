@@ -16,10 +16,10 @@ from pandas import DataFrame
 from pandas.errors import EmptyDataError, ParserError, ParserWarning
 from anaplan_api.anaplan.models.ParserResponse import ParserResponse
 from .util.RequestHandler import RequestHandler
-from anaplan_api.anaplan.models.AnaplanVersion import AnaplanVersion
+from .models.AnaplanVersion import AnaplanVersion
 
 if TYPE_CHECKING:
-    from anaplan_api.anaplan.models.AnaplanConnection import AnaplanConnection
+    from .models.AnaplanConnection import AnaplanConnection
 
 logger = logging.getLogger(__name__)
 

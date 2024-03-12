@@ -8,12 +8,12 @@ from typing import Optional, TYPE_CHECKING
 import logging
 from time import sleep
 from .util.RequestHandler import RequestHandler
-from anaplan_api.anaplan.models.TaskResponse import TaskResponse
-from anaplan_api.anaplan.models.AnaplanVersion import AnaplanVersion
+from .models.TaskResponse import TaskResponse
+from .models.AnaplanVersion import AnaplanVersion
 from .util.Util import MappingParameterError, UnknownTaskTypeError, RequestFailedError
 
 if TYPE_CHECKING:
-    from anaplan_api.anaplan.models.AnaplanConnection import AnaplanConnection
+    from .models.AnaplanConnection import AnaplanConnection
 
 logger = logging.getLogger(__name__)
 

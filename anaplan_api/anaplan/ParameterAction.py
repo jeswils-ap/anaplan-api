@@ -12,7 +12,7 @@ from .Action import Action
 from .util.Util import RequestFailedError, InvalidTaskTypeError
 
 if TYPE_CHECKING:
-    from anaplan_api.anaplan.models import TaskResponse
+    from .models import TaskResponse
 
 logger = logging.getLogger(__name__)
 

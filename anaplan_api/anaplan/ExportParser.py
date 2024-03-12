@@ -6,13 +6,13 @@ from __future__ import annotations
 from typing import List, TYPE_CHECKING
 import pandas as pd
 import logging
-from anaplan_api.anaplan.util.strtobool import strtobool
-from anaplan_api.anaplan import anaplan
+from .util.strtobool import strtobool
+from . import anaplan
 from .Parser import Parser
-from anaplan_api.anaplan.models.ParserResponse import ParserResponse
+from .models.ParserResponse import ParserResponse
 
 if TYPE_CHECKING:
-    from anaplan_api.anaplan.models.AnaplanConnection import AnaplanConnection
+    from .models.AnaplanConnection import AnaplanConnection
 
 
 logger = logging.getLogger(__name__)

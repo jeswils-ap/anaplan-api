@@ -2,11 +2,11 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 import logging
 from .util.RequestHandler import RequestHandler
-from anaplan_api.anaplan.models.AnaplanVersion import AnaplanVersion
+from .models.AnaplanVersion import AnaplanVersion
 from .util.Util import ResourceNotFoundError, RequestFailedError
 
 if TYPE_CHECKING:
-    from anaplan_api.anaplan.models.AnaplanConnection import AnaplanConnection
+    from .models.AnaplanConnection import AnaplanConnection
 
 logger = logging.getLogger(__name__)
 
