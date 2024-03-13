@@ -25,7 +25,7 @@ class FileDownload(File):
 
     def set_chunk_count(self):
         """Sets the chunk count of the specified file to download based on Anaplan metadata"""
-        _chunk_count = super().get_chunk_count()
+        self._chunk_count = super().chunk_count
 
     def download_file(self) -> str:
         """Download all chunks of the specified file from Anaplan
@@ -40,7 +40,7 @@ class FileDownload(File):
         :rtype: str
         """
         conn = self._conn
-        endpoint = "".join([super().get_endpoint(), "/chunks/"])
+        endpoint = f"{super().endpoint}chunks/"
         current_chunk = 0
 
         file_data = []

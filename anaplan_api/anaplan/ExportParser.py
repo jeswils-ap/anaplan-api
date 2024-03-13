@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 
 class ExportParser(Parser):
-    _results: List[ParserResponse]
+    _results: List[ParserResponse] = list()
 
     def __init__(self, conn: AnaplanConnection, results: dict, url: str):
         super().__init__(conn=conn, results=results, url=url)
