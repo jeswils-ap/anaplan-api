@@ -47,26 +47,27 @@ class Parser(object):
     ):
         """
         :param conn: AnaplanConnection object containing Workspace and Model ID, and AuthToken object
-        :type conn: AnaplanConnection, optional
+        :type conn: AnaplanConnection
         :param results: JSON task results of an executed Anaplan action
         :type results: dict
         :param url: URL of the Anaplan action task
         :type url: str
         """
         self._authorization = conn.authorization.token_value
-        Parser._results = Parser.parse_response(conn, results, url)
+        self._results.extend(self.parse_response(conn, results, url))
 
-    @staticmethod
-    def get_results() -> List[ParserResponse]:
+    @property
+    def results(self) -> List[ParserResponse]:
         """Get details of Anaplan action task
 
         :return: Friendly results of an executed task, including status, file and error dump if applicable
         :rtype: List[ParserResponse]
         """
-        return Parser._results
+        return self._results
 
-    @staticmethod
-    def parse_response(conn: AnaplanConnection, results: dict, url: str):
+    def parse_response(
+        self, conn: AnaplanConnection, results: dict, url: str
+    ) -> List[ParserResponse]:
         pass
 
     @staticmethod
@@ -124,9 +125,7 @@ class Parser(object):
 
         try:
             logger.debug("Fetching error dump")
-            dump = self._handler.make_request(
-                f"{url}/dump", "GET", headers=post_header
-            ).text
+            dump = self._handler.make_request(f"{url}", "GET", headers=post_header).text
             logger.debug("Error dump downloaded.")
         except Exception as e:
             logger.error(f"Error fetching error dump {e}", exc_info=True)

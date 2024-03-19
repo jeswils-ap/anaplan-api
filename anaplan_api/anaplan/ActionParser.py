@@ -2,12 +2,17 @@
 # This function reads the JSON results of the completed Anaplan task and returns
 # the job details.
 # ===========================================================================
+from __future__ import annotations
+from typing import List, Optional, TYPE_CHECKING
 import pandas as pd
 import logging
 from typing import List
 from .util.strtobool import strtobool
 from .Parser import Parser
 from .models.ParserResponse import ParserResponse
+
+if TYPE_CHECKING:
+    from .models.AnaplanConnection import AnaplanConnection
 
 logger = logging.getLogger(__name__)
 
@@ -19,32 +24,22 @@ class ActionParser(Parser):
     :type results: List[ParserResponse]
     """
 
-    results: List[ParserResponse]
+    _results: List[ParserResponse] = list()
 
-    def __init__(self, results: dict, url: str):
-        """This Parser class does not require a AnaplanConnection object because this action type does not generate
-        an error dump, nor output a file that would require further API calls.
-
-        :param results: JSON response object with the details of an executed action
-        :type results: dict
-        :param url: URL of the executed action
-        :type url: str
-        """
-        super().__init__(results=results, url=url)
-        ActionParser.results.append(ActionParser.parse_response(results, url))
-
-    @staticmethod
-    def get_results() -> List[ParserResponse]:
+    @property
+    def results(self) -> List[ParserResponse]:
         """Get the results of the Anaplan task
 
         :return: List of ParserResponse objects
         """
-        return ActionParser.results
+        return self._results
 
-    @staticmethod
-    def parse_response(results: dict, url: str) -> ParserResponse:
+    def parse_response(
+        self, conn: AnaplanConnection, results: dict, url: str
+    ) -> List[ParserResponse]:
         """Creates a ParserResponse object with JSON task results converted into a standardized response.
-
+        :param conn: AnaplanConnection object containing Workspace and Model ID, and AuthToken object
+        :type conn: AnaplanConnection
         :param results: JSON dump of the results of an Anaplan action
         :type results: dict
         :param url: URL of the Anaplan task
@@ -56,23 +51,24 @@ class ActionParser(Parser):
         failure_dump = strtobool(str(results["result"]["failureDumpAvailable"]).lower())
         edf = pd.DataFrame()
 
+        """Should never happen for Action type tasks"""
         if job_status == "Failed.":
-            return Parser.failure_message(results)
-        else:
-            # IF failure dump is available download
-            if failure_dump:
-                edf = Parser.get_dump("".join([url, "/dump"]))
+            return self.failure_message(results)
+        if failure_dump:
+            edf = self.get_dump(f"{url}/dump")
 
-            success_report = str(results["result"]["successful"])
+        success_report = str(results["result"]["successful"])
 
-            # details key only present in import task results
-            if "objectId" in results["result"]:
-                object_id = results["result"]["objectId"]
-                action_detail = f"{object_id} completed successfully: {success_report}"
+        # details key only present in import task results
+        if "objectId" not in results["result"]:
+            raise KeyError("'objectId' could not be found in response.")
 
-                logger.info(f"The requested job is {job_status}")
-                logger.info(
-                    f"Failure Dump Available: {failure_dump}, Successful: {success_report}"
-                )
+        object_id = results["result"]["objectId"]
+        action_detail = f"{object_id} completed successfully: {success_report}"
 
-                return ParserResponse(action_detail, "", failure_dump, edf)
+        logger.info(f"The requested job is {job_status}")
+        logger.info(
+            f"Failure Dump Available: {failure_dump}, Successful: {success_report}"
+        )
+
+        return [ParserResponse(action_detail, "", failure_dump, edf)]
