@@ -21,23 +21,17 @@ logger = logging.getLogger(__name__)
 class ExportParser(Parser):
     _results: List[ParserResponse] = list()
 
-    def __init__(self, conn: AnaplanConnection, results: dict, url: str):
-        super().__init__(conn=conn, results=results, url=url)
-        ExportParser._results.extend(ExportParser.parse_response(conn, results, url))
-
-    @staticmethod
-    def get_results() -> List[ParserResponse]:
+    @property
+    def results(self) -> List[ParserResponse]:
         """Get the list of task result details
 
         :return: Formatted export task results
         :rtype: List[ParserResponse]
         """
-        return ExportParser._results
+        return self._results
 
-    @staticmethod
-    def parse_response(conn, results, url) -> List[ParserResponse]:
+    def parse_response(self, conn, results, url) -> List[ParserResponse]:
         """Parse the JSON response for a task into an object with standardized format.
-
         :param conn: AnaplanConnection object with authentication, workspace and model IDs
         :type conn: AnaplanConnection
         :param results: JSON dict with task results.
@@ -55,13 +49,11 @@ class ExportParser(Parser):
         )
         edf = pd.DataFrame()
 
-        if job_status == "Failed.":
-            """Should never happen for Export type tasks"""
-            return Parser.failure_message(results)
-
         """Should never happen for Export type tasks"""
+        if job_status == "Failed.":
+            return self.failure_message(results)
         if failure_dump:
-            edf = super().get_dump("".join([url, "/dump"]))
+            edf = self.get_dump(f"{url}/dump")
 
         success_report = str(results["result"]["successful"])
 

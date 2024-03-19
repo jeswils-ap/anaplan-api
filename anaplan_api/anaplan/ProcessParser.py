@@ -22,22 +22,17 @@ class ProcessParser(Parser):
     _results: List[ParserResponse] = list()
     _authorization: str
 
-    def __init__(self, conn: AnaplanConnection, results: dict, url: str):
-        super().__init__(conn=conn, results=results, url=url)
-        ProcessParser._results = ProcessParser.parse_response(conn, results, url).copy()
-
-    @staticmethod
-    def get_results() -> List[ParserResponse]:
+    @property
+    def results(self) -> List[ParserResponse]:
         """Get task results
 
         :return: Process task results
         :rtype: List[ParserResponse]
         """
-        return ProcessParser._results
+        return self._results
 
-    @staticmethod
     def parse_response(
-        conn: AnaplanConnection, results: dict, url: str
+        self, conn: AnaplanConnection, results: dict, url: str
     ) -> List[ParserResponse]:
         """Parse process task results to friendly format
 
@@ -83,17 +78,15 @@ class ProcessParser(Parser):
 
             logger.debug(f"Fetching details for object {object_id}")
             nested_details.append(
-                ProcessParser.sub_process_parser(conn, object_id, nestedResults, url)
+                self.sub_process_parser(conn, object_id, nestedResults, url)
             )
 
         return nested_details
 
-    @staticmethod
     def sub_process_parser(
-        conn: AnaplanConnection, object_id: str, results: dict, url: str
+        self, conn: AnaplanConnection, object_id: str, results: dict, url: str
     ) -> ParserResponse:
         """Parser for sub-tasks that occur when executing an Anaplan process
-
         :param conn: Object with authentication, workspace, and model details
         :type conn: AnaplanConnection
         :param object_id: ID of the action within the Anaplan process
@@ -118,7 +111,7 @@ class ProcessParser(Parser):
         successful = results["successful"]  # Sub-task successful status
 
         if failure_dump:
-            edf = super().get_dump("".join([url, "/dumps/", object_id]))
+            edf = self.get_dump(f"{url}/dumps/{object_id}")
 
         if "details" not in results:
             raise KeyError("Unable to find details of task")
