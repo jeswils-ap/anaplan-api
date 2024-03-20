@@ -14,29 +14,30 @@ pip3 install anaplan_api
 
 ```python
 import logging
-from anaplan_api import anaplan
-from anaplan_api.AnaplanConnection import AnaplanConnection
-from anaplan_api.KeystoreManager import KeystoreManager
+from anaplan_api.anaplan import anaplan
+from anaplan_api.anaplan.models.AnaplanConnection import AnaplanConnection
+from anaplan_api.anaplan.KeystoreManager import KeystoreManager
 
 logging.basicConfig(format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
-					datefmt='%H:%M:%S',
-					level=logging.INFO)
+                    datefmt='%H:%M:%S',
+                    level=logging.INFO)
 
 logger = logging.getLogger(__name__)
 
 if __name__ == '__main__':
-	keys = KeystoreManager(path='/keystore.jks', passphrase='', alias='', key_pass='')
+    keys = KeystoreManager(path='/keystore.jks', passphrase='', alias='', key_pass='')
+    
+    auth = anaplan.authorize("Basic", email="user@mail.com", password="password")
+    auth = anaplan.authorize("Certificate", private_key=keys.get_key(), certificate=keys.get_cert())
+    conn = AnaplanConnection(auth, "WorkspaceID", "ModelID")
 
-	auth = anaplan.generate_authorization(auth_type='Certificate', cert=keys.get_cert(), private_key=keys.get_key())
-	conn = AnaplanConnection(authorization=auth, workspace_id='', model_id='')
+    anaplan.file_upload(conn=conn, file_id="", chunk_size=5, data='/Users.csv')
 
-	anaplan.file_upload(conn=conn, file_id="", chunk_size=5, data='/Users.csv')
+    results = anaplan.execute_action(conn=conn, action_id="", retry_count=3)
 
-	results = anaplan.execute_action(conn=conn, action_id="", retry_count=3)
-
-	for result in results:
-		if result: # Boolean check of ParserResponse object, true if failure dump is available
-			print(result.get_error_dump())
+    for result in results:
+        if result: # Boolean check of ParserResponse object, true if failure dump is available
+            print(result.error_dump)
 ```
 
 ## Contributing
