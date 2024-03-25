@@ -59,4 +59,4 @@ class ActionTask(TaskFactory):
         :return: Instantiated Parser object that parses and stores the results of an Anaplan task
         :rtype: Parser
         """
-        return ActionParser(results, url)
+        return ActionParser(conn, results, url)
