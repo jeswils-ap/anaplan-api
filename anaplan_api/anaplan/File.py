@@ -42,9 +42,7 @@ class File:
     _url: str
     _chunk_count: int
 
-    def __init__(
-        self, conn: AnaplanConnection, file_id: str, **kwargs
-    ):
+    def __init__(self, conn: AnaplanConnection, file_id: str, **kwargs):
         """
         :param conn: Object with authentication, workspace, and model details
         :type conn: AnaplanConnection
@@ -55,7 +53,9 @@ class File:
         self._file_id = file_id
         self._workspace = conn.workspace
         self._model = conn.model
-        self._endpoint = f"workspaces/{self._workspace}/models/{self._model}/files/{self._file_id}/"
+        self._endpoint = (
+            f"workspaces/{self._workspace}/models/{self._model}/files/{self._file_id}/"
+        )
 
         self.get_metadata()
         self.set_file_details()

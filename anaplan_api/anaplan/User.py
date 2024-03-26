@@ -23,9 +23,7 @@ class User:
     _user_details: UserDetails
     _raw_data: dict
 
-    def __init__(
-        self, conn: AnaplanConnection, user_id: str = None
-    ):
+    def __init__(self, conn: AnaplanConnection, user_id: str = None):
         """
         :param conn: Object containing Workspace and Model ID, and AuthToken object
         :type conn: AnaplanConnection

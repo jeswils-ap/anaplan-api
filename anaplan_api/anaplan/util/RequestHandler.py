@@ -7,7 +7,7 @@ from requests.exceptions import (
     Timeout,
     ConnectTimeout,
     ReadTimeout,
-    RequestException
+    RequestException,
 )
 from typing import Union
 
@@ -42,7 +42,7 @@ class RequestHandler:
             Timeout,
             ConnectTimeout,
             ReadTimeout,
-            RequestException
+            RequestException,
         ) as e:
             logger.error(f"Error with API request {e}", exc_info=True)
             raise Exception(f"Error with API request {e}")

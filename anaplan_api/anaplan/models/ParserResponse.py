@@ -1,54 +1,30 @@
 from dataclasses import dataclass
-from pandas import DataFrame
-from typing import Optional
 
 
-@dataclass
+@dataclass(frozen=True)
 class ParserResponse:
     """Represents a set of friendly task response data
 
+    :param _raw_response: Raw response from Anaplan server
+    :type _raw_response: dict
     :param _task_detail: Overall task information
     :type _task_detail: str
-    :param _export_file: File exported from Anaplan model
-    :type _export_file: Optional[str]
     :param _error_dump: Whether error dump was generated for a task
     :type _error_dump: bool
-    :param _error_dump_file: Error dump data
-    :type _error_dump_file: Optional[DataFrame]
+    :param _file_download: Whether an export file is available for download
+    :type _file_download: bool
     """
 
+    _raw_response: dict
     _task_detail: str
-    _export_file: Optional[str]
+    _task_endpoint: str
+    _file_id: str
     _error_dump: bool
-    _error_dump_file: Optional[DataFrame]
+    _file_download: bool
 
-    def __init__(
-        self,
-        task_detail: str,
-        export_file: str,
-        error_dump: bool,
-        error_dump_file: DataFrame,
-    ):
-        self._task_detail = task_detail
-        self._export_file = export_file
-        self._error_dump = error_dump
-        self._error_dump_file = error_dump_file
-
-    def __str__(self) -> str:
-        """Get overall task results
-
-        :return: Task details
-        :rtype: str
-        """
-        return self._task_detail
-
-    def __bool__(self) -> bool:
-        """Check whether error dump was generated
-
-        :return: Whether error dump exists
-        :rtype: bool
-        """
-        return self._error_dump
+    @property
+    def raw_response(self) -> dict:
+        return self._raw_response
 
     @property
     def task_detail(self) -> str:
@@ -60,28 +36,27 @@ class ParserResponse:
         return self._task_detail
 
     @property
-    def file_exists(self) -> bool:
+    def task_endpoint(self) -> str:
+        return self._task_endpoint
+
+    @property
+    def file_id(self) -> str:
+        return self._file_id
+
+    @property
+    def dump(self) -> bool:
         """Check whether Anaplan export file has data
 
         :return: Whether export file exists
         :rtype: bool
         """
-        return True if self._export_file is not None else False
+        return self._error_dump
 
     @property
-    def export_file(self) -> Optional[str]:
+    def file(self) -> bool:
         """Get downloaded file
 
         :return: Exported Anaplan file
         :rtype: Optional[str]
         """
-        return self._export_file
-
-    @property
-    def error_dump(self) -> Optional[DataFrame]:
-        """Get error dump
-
-        :return: Error dump
-        :rtype: Optional[DataFrame]
-        """
-        return self._error_dump_file
+        return self._file_download
