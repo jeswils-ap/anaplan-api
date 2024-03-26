@@ -30,13 +30,13 @@ class StreamUpload(Upload):
                 iter(partial(io_data.read, chunk_size * (1024**2)), "")
             ):
                 stream_upload = super().file_data(
-                    f"{endpoint}/chunks/{str(chunk_num)}",
+                    f"{endpoint}chunks/{str(chunk_num)}",
                     chunk_num,
                     data.encode("utf-8"),
                 )
 
             # Once all data is uploaded mark the file complete to indicate the file is ready for use
             if stream_upload:
-                complete_upload = super().file_metadata(f"{endpoint}/complete")
+                complete_upload = super().file_metadata(f"{endpoint}complete")
                 if complete_upload:
                     logger.info(f"Upload of file {super().file_id} complete.")

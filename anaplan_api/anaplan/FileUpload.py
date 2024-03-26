@@ -27,12 +27,12 @@ class FileUpload(Upload):
                     iter(partial(file.read, chunk_size * (1024**2)), "")
                 ):
                     complete = super().file_data(
-                        f"{endpoint}/chunks/{str(chunk_num)}",
+                        f"{endpoint}chunks/{str(chunk_num)}",
                         chunk_num,
                         data.encode("utf-8"),
                     )
 
             if complete:
-                complete_upload = super().file_metadata(f"{endpoint}/complete")
+                complete_upload = super().file_metadata(f"{endpoint}complete")
                 if complete_upload:
                     logger.info(f"Upload of file {super().file_id} complete.")

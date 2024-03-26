@@ -7,6 +7,7 @@ from requests.exceptions import (
     Timeout,
     ConnectTimeout,
     ReadTimeout,
+    RequestException
 )
 from typing import Union
 
@@ -31,8 +32,9 @@ class RequestHandler:
         response: Union[requests.Response | None] = None
         try:
             response = requests.request(
-                method, url, data=data, headers=headers, timeout=(5, 30)
+                method, url, data=data, headers=headers, timeout=(15, 30)
             )
+            response.raise_for_status()
         except (
             HTTPError,
             ConnectionError,
@@ -40,7 +42,9 @@ class RequestHandler:
             Timeout,
             ConnectTimeout,
             ReadTimeout,
+            RequestException
         ) as e:
             logger.error(f"Error with API request {e}", exc_info=True)
+            raise Exception(f"Error with API request {e}")
 
         return response

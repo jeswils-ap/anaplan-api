@@ -7,6 +7,7 @@
 # ===============================================================================
 import logging
 import io
+import json
 import gzip
 from .File import File
 
@@ -76,7 +77,7 @@ class Upload(File):
         try:
             logger.debug("Updating file metadata.")
             meta_post = super().handler.make_request(
-                endpoint, "POST", headers=post_header, data=stream_metadata
+                endpoint, "POST", headers=post_header, data=json.dumps(stream_metadata)
             )
             logger.debug("Complete!")
         except Exception as e:
@@ -116,7 +117,7 @@ class Upload(File):
             logger.error(f"Error uploading chunk {chunk_num + 1}, {e}", exc_info=True)
             raise Exception(f"Error uploading chunk {chunk_num + 1}, {e}")
 
-        return stream_upload.ok
+        return True
 
     @staticmethod
     def compress_data(upload_data: bytes):
