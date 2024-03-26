@@ -4,10 +4,8 @@
 # ===========================================================================
 from __future__ import annotations
 from typing import List, TYPE_CHECKING
-import pandas as pd
 import logging
 from .util.strtobool import strtobool
-from . import anaplan
 from .Parser import Parser
 from .models.ParserResponse import ParserResponse
 
@@ -47,13 +45,6 @@ class ExportParser(Parser):
         failure_dump = bool(
             strtobool(str(results["result"]["failureDumpAvailable"]).lower())
         )
-        edf = pd.DataFrame()
-
-        """Should never happen for Export type tasks"""
-        if job_status == "Failed.":
-            return self.failure_message(results)
-        if failure_dump:
-            edf = self.get_dump(f"{url}/dump")
 
         success_report = str(results["result"]["successful"])
 
@@ -62,11 +53,23 @@ class ExportParser(Parser):
 
         # details key only present in import task results
         object_id = results["result"]["objectId"]
-        file_contents = anaplan.get_file(conn, object_id)
+
+        """Should never happen for Export type tasks"""
+        if job_status == "Failed.":
+            return self.failure_message(results)
 
         logger.info(f"The requested job is {job_status}")
         logger.info(
             f"Failure Dump Available: {failure_dump}, Successful: {success_report}"
         )
 
-        return [ParserResponse("File export completed.", file_contents, False, edf)]
+        return [
+            ParserResponse(
+                results,
+                "File export completed.",
+                self.endpoint,
+                object_id,
+                failure_dump,
+                True,
+            )
+        ]

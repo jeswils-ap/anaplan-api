@@ -6,9 +6,7 @@ from __future__ import annotations
 from typing import List, TYPE_CHECKING
 import logging
 import re
-import pandas as pd
 from .util.strtobool import strtobool
-from . import anaplan
 from .Parser import Parser
 from .models.ParserResponse import ParserResponse
 
@@ -19,17 +17,6 @@ logger = logging.getLogger(__name__)
 
 
 class ProcessParser(Parser):
-    _results: List[ParserResponse] = list()
-    _authorization: str
-
-    @property
-    def results(self) -> List[ParserResponse]:
-        """Get task results
-
-        :return: Process task results
-        :rtype: List[ParserResponse]
-        """
-        return self._results
 
     def parse_response(
         self, conn: AnaplanConnection, results: dict, url: str
@@ -53,17 +40,7 @@ class ProcessParser(Parser):
             logger.error(
                 "The task has failed to run due to an error, please check process definition in Anaplan"
             )
-            for i in range(0, len(results["result"]["details"])):
-                error_message = results["result"]["details"][i]["localMessageText"]
-                ProcessParser._results.append(
-                    ParserResponse(
-                        error_message,
-                        "",
-                        False,
-                        pd.DataFrame(),
-                    )
-                )
-            return ProcessParser._results
+            return self.failure_message(results)
 
         logger.info("Process completed.")
         # nestedResults key only present in process task results
@@ -99,9 +76,9 @@ class ProcessParser(Parser):
         :rtype: ParserResponse
         """
         # Create placeholders objects
-        edf = pd.DataFrame()
         msg = []
-        export_file = ""
+        export_file_id: str = ""
+        file_download_available: bool = False
 
         # Regex pattern for hierarchy parsing
         regex = re.compile("hierarchyRows.+")
@@ -109,9 +86,6 @@ class ProcessParser(Parser):
         # Check whether the sub-task generated a failure dump
         failure_dump = bool(strtobool(str(results["failureDumpAvailable"]).lower()))
         successful = results["successful"]  # Sub-task successful status
-
-        if failure_dump:
-            edf = self.get_dump(f"{url}/dumps/{object_id}")
 
         if "details" not in results:
             raise KeyError("Unable to find details of task")
@@ -134,9 +108,17 @@ class ProcessParser(Parser):
                         msg.append(results["details"][i]["values"][j])
                 # Export specific parsing
                 if results["details"][i]["type"] == "exportSucceeded":
-                    export_file = anaplan.get_file(conn, object_id)
+                    export_file_id = object_id
+                    file_download_available = True if export_file_id else False
 
         logger.debug(
             f"Error dump available: {failure_dump}, Sub-task {object_id} successful: {successful}"
         )
-        return ParserResponse("\n".join(msg), export_file, failure_dump, edf)
+        return ParserResponse(
+            results,
+            "\n".join(msg),
+            self.endpoint,
+            export_file_id,
+            failure_dump,
+            file_download_available,
+        )

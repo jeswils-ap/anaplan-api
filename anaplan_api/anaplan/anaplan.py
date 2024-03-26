@@ -9,14 +9,14 @@ import logging
 from typing import List, TYPE_CHECKING
 from .authentication.AuthorizationManager import AuthorizationManager
 from .UploadFactory import UploadFactory
-from .TaskFactoryGenerator import TaskFactoryGenerator
+from .TaskController import TaskController
 from .Resources import Resources
 from .ResourceParserList import ResourceParserList
 from .FileDownload import FileDownload
 
 if TYPE_CHECKING:
+    from .models.ActionResponse import ActionResponse
     from .models.AnaplanConnection import AnaplanConnection
-    from .models.ParserResponse import ParserResponse
     from .models.AnaplanResourceList import AnaplanResource
 
 logger = logging.getLogger(__name__)
@@ -59,7 +59,7 @@ def execute_action(
     action_id: str,
     retry_count: int,
     mapping_params: dict = None,
-) -> List[ParserResponse]:
+) -> ActionResponse:
     """Execute a specified Anaplan action
 
     :param conn: AnaplanConnection object which contains AuthToken object, workspace ID, and model ID
@@ -67,25 +67,12 @@ def execute_action(
     :param retry_count: Number of times to attempt to retry if an error occurs executing an action
     :param mapping_params: Optional dictionary of import mapping parameters
     :return: Detailed results of the requested action task.
-    :rtype: List[ParserResponse]
+    :rtype: ActionResponse
     """
 
-    generator = TaskFactoryGenerator(action_id[:3])
-    factory = generator.get_factory()
+    controller = TaskController(conn, action_id, retry_count, mapping_params)
 
-    action = factory.get_action(
-        conn=conn,
-        action_id=action_id,
-        retry_count=retry_count,
-        mapping_params=mapping_params,
-    )
-    task = action.execute()
-    parser = factory.get_parser(
-        conn=conn, results=task.results, url=task.url
-    )
-    task_results = parser.get_results()
-
-    return task_results
+    return controller.response
 
 
 # ===========================================================================

@@ -122,7 +122,7 @@ class Upload(File):
     @staticmethod
     def compress_data(upload_data: bytes):
         output = io.BytesIO()
-        with gzip.GzipFile(fileobj=output, mode='wb') as gz_stream:
+        with gzip.GzipFile(fileobj=output, mode="wb") as gz_stream:
             gz_stream.write(upload_data)
         compressed_data = output.getvalue()
         return compressed_data

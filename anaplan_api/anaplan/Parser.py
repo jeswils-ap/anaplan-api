@@ -8,12 +8,8 @@
 # 					error dump dataframe.
 # ===============================================================================
 from __future__ import annotations
-from typing import List, Optional, TYPE_CHECKING
+from typing import List, TYPE_CHECKING
 import logging
-import pandas as pd
-from io import StringIO
-from pandas import DataFrame
-from pandas.errors import EmptyDataError, ParserError, ParserWarning
 from .models.ParserResponse import ParserResponse
 from .util.RequestHandler import RequestHandler
 from .models.AnaplanVersion import AnaplanVersion
@@ -30,7 +26,7 @@ class Parser(object):
     :param _handler: Class used to handle API requests
     :type _handler: RequestHandler
     :param _results: List of ParserResponse objects containing details of an Anaplan task
-    :type _results: List[ParserResponse]
+    :type _results: List[ParserResponseNew]
     :param _authorization: Header containing Authorization and Content-Type for API requests
     :type _authorization: str
     """
@@ -38,10 +34,11 @@ class Parser(object):
     _handler: RequestHandler = RequestHandler(AnaplanVersion().base_url)
     _results: List[ParserResponse] = list()
     _authorization: str
+    _endpoint: str
 
     def __init__(
         self,
-        conn: Optional[AnaplanConnection],
+        conn: AnaplanConnection,
         results: dict,
         url: str,
     ):
@@ -54,6 +51,7 @@ class Parser(object):
         :type url: str
         """
         self._authorization = conn.authorization.token_value
+        self._endpoint = url
         self._results.extend(self.parse_response(conn, results, url))
 
     @property
@@ -61,21 +59,25 @@ class Parser(object):
         """Get details of Anaplan action task
 
         :return: Friendly results of an executed task, including status, file and error dump if applicable
-        :rtype: List[ParserResponse]
+        :rtype: List[ParserResponseNew]
         """
         return self._results
+
+    @property
+    def endpoint(self) -> str:
+        return self._endpoint
 
     def parse_response(
         self, conn: AnaplanConnection, results: dict, url: str
     ) -> List[ParserResponse]:
         pass
 
-    @staticmethod
-    def failure_message(results: dict) -> List[ParserResponse]:
+    def failure_message(self, results: dict) -> List[ParserResponse]:
         """Creates a ParserResponse in case of an Action failure
-
+        :param results: JSON task results of an executed Anaplan action
+        :type results: dict
         :return: Generic response for failed tasks.
-        :rtype: ParserResponse
+        :rtype: List[ParserResponse]
         """
 
         responses: List[ParserResponse] = list()
@@ -93,48 +95,12 @@ class Parser(object):
             )
             responses.append(
                 ParserResponse(
+                    results,
                     f"The task has failed to run due to an error: {error_message}",
+                    self.endpoint,
                     "",
                     False,
-                    pd.DataFrame(),
+                    False,
                 )
             )
         return responses
-
-    def get_dump(self, url: str) -> DataFrame:
-        """Fetches the failure dump of an Anaplan Import action if available
-
-        :param url: URL of the Anaplan failure dump
-        :type url: str
-        :raises Exception: Error from RequestHandler exception group
-        :raises EmptyDataError: Error when data string is empty
-        :raises ParserError: Source data in incorrect format
-        :raises ParserWarning: Warning when parsing a file that doesn't use default parser
-        :return: Failure dump for an import action
-        :rtype: DataFrame
-        """
-        authorization = self._authorization
-
-        post_header = {
-            "Authorization": authorization,
-            "Content-Type": "application/json",
-        }
-
-        edf = pd.DataFrame()
-        dump = ""
-
-        try:
-            logger.debug("Fetching error dump")
-            dump = self._handler.make_request(f"{url}", "GET", headers=post_header).text
-            logger.debug("Error dump downloaded.")
-        except Exception as e:
-            logger.error(f"Error fetching error dump {e}", exc_info=True)
-
-        try:
-            edf = pd.read_csv(StringIO(dump))
-        except (EmptyDataError, ParserError) as e:
-            logger.error(f"Error loading error dump to dataframe {e}", exc_info=True)
-        except ParserWarning as w:
-            logger.warning(f"Warning raised while parsing csv {w}", exc_info=True)
-
-        return edf
