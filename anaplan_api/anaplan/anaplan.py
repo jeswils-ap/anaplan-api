@@ -6,7 +6,7 @@
 # ===============================================================================
 from __future__ import annotations
 import logging
-from typing import List, TYPE_CHECKING
+from typing import TYPE_CHECKING
 from .authentication.AuthorizationManager import AuthorizationManager
 from .UploadFactory import UploadFactory
 from .TaskController import TaskController

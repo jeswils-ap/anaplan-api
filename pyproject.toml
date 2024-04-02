@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "anaplan-api"
+version = "0.2.8"
+description = "A Python wrapper for the Anaplan Bulk API"
+authors = ["Jesse Wilson <jeswils@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+requests = "^2.31.0"
+cryptography = "^42.0.5"
+javaobj-py3 = "^0.4.3"
+pandas = "^2.2.1"
+pyasn1 = "^0.6.0"
+pyasn1-modules = "^0.4.0"

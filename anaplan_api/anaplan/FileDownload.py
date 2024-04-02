@@ -44,7 +44,6 @@ class FileDownload(File):
         current_chunk = 0
 
         file_data = []
-        file_contents = {}
 
         get_header = {
             "Authorization": conn.authorization.token_value,
