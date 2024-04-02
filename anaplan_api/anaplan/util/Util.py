@@ -36,7 +36,3 @@ class InvalidUrlError(ValueError):
 
 class InvalidTaskTypeError(ValueError):
     pass
-
-
-class InvalidAuthenticationError(ValueError):
-    pass
