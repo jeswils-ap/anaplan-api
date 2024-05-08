@@ -19,7 +19,7 @@ class AuthenticationFactory:
             )
 
         auth_class = AuthenticationFactory._auth_classes[method]
-        required_params = auth_class.required_params
+        required_params = set(auth_class.required_params)
 
         provided_params = set(kwargs.keys())
         missing_params = required_params - provided_params
