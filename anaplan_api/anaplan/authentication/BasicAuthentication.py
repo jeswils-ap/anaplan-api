@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 class BasicAuthentication(AnaplanAuthentication):
-    _required_params: set = {"email", "password"}
+    required_params: set = {"email", "password"}
 
     """
     Represents a basic authentication header request
@@ -48,7 +48,3 @@ class BasicAuthentication(AnaplanAuthentication):
                 ]
             )
         }
-
-    @property
-    def required_params(self) -> set:
-        return self._required_params
