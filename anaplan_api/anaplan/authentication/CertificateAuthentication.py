@@ -25,7 +25,7 @@ class CertificateAuthentication(AnaplanAuthentication):
     Represents a certificate authentication request
     """
 
-    _required_params: set = {"private_key", "certificate"}
+    required_params: set = {"private_key", "certificate"}
 
     # ===========================================================================
     # This function reads a user's public certificate as a string, base64
@@ -141,7 +141,3 @@ class CertificateAuthentication(AnaplanAuthentication):
         except ValueError as e:
             logger.error(f"Error loading private key {e}", exc_info=True)
             raise ValueError(f"Error loading private key {e}")
-
-    @property
-    def required_params(self) -> set:
-        return self._required_params
