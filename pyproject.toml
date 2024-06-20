@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "anaplan-api"
-version = "0.2.11"
+version = "0.2.13"
 description = "A Python wrapper for the Anaplan Bulk API"
 authors = ["Jesse Wilson <jeswils@gmail.com>"]
 readme = "README.md"
