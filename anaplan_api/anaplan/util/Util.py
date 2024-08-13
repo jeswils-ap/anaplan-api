@@ -41,6 +41,3 @@ class InvalidTaskTypeError(ValueError):
 class InvalidKeyError(ValueError):
     pass
 
-
-class InvalidKeyError(ValueError):
-    pass

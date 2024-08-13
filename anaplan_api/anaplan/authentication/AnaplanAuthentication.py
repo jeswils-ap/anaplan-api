@@ -51,8 +51,6 @@ class AnaplanAuthentication(object):
         else:
             logger.info("Authenticating via Certificate.")
             try:
-                logger.debug(f"Header {header}")
-                logger.debug(f"Body {body}")
                 authenticate = self.handler.make_request(
                     endpoint, "POST", headers=header, data=json.dumps(body)
                 ).json()
