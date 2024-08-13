@@ -36,3 +36,11 @@ class InvalidUrlError(ValueError):
 
 class InvalidTaskTypeError(ValueError):
     pass
+
+
+class InvalidKeyError(ValueError):
+    pass
+
+
+class InvalidKeyError(ValueError):
+    pass

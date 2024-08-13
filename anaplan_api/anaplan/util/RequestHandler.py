@@ -32,7 +32,7 @@ class RequestHandler:
         response: Union[requests.Response | None] = None
         try:
             response = requests.request(
-                method, url, data=data, headers=headers, timeout=(15, 30)
+                method, url, data=data, headers=headers, timeout=(15, 90)
             )
             response.raise_for_status()
         except (

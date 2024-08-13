@@ -86,7 +86,7 @@ class Upload(File):
 
         return True
 
-    def file_data(self, url: str, chunk_num: int, data: str) -> bool:
+    def file_data(self, url: str, chunk_num: int, data: bytes) -> bool:
         """Upload data chunk to the specified file
 
         :param url: URL of the  specified file
@@ -94,7 +94,7 @@ class Upload(File):
         :param chunk_num: ID of the chunk being uploaded
         :type chunk_num: int
         :param data: Data to upload
-        :type data: str
+        :type data: bytes
         :raises Exception: Exception from RequestHandler exception group
         :return: Whether file data upload was successful
         :rtype: bool
@@ -104,8 +104,14 @@ class Upload(File):
 
         put_header = {
             "Authorization": authorization,
-            "Content-Type": "application/octet-stream",
+            "Content-Type": "application/x-gzip",
         }
+
+        try:
+            data = Upload.compress_data(data)
+        except OSError as e:
+            logger.error(f"Error compressing data: {e}", exc_info=True)
+            raise OSError(f"Error compressing data: {e}")
 
         try:
             logger.debug(f"Attempting to upload chunk {chunk_num + 1}")

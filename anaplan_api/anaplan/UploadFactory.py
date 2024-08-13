@@ -1,6 +1,6 @@
 from __future__ import annotations
 from typing import Union, TYPE_CHECKING
-import os
+from pathlib import Path
 from .FileUpload import FileUpload
 from .StreamUpload import StreamUpload
 
@@ -15,7 +15,7 @@ class UploadFactory:
         """
         :param data: Filepath or data to upload
         """
-        self._is_file = os.path.isfile(data)
+        self._is_file = Path(data).is_file()
 
     def get_uploader(
         self, conn: AnaplanConnection, file_id: str
