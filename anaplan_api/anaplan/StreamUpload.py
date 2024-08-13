@@ -1,6 +1,6 @@
 import logging
 from functools import partial
-from io import StringIO
+from io import StringIO, BytesIO
 from .Upload import Upload
 
 logger = logging.getLogger(__name__)
@@ -19,6 +19,16 @@ class StreamUpload(Upload):
         stream_upload = False
         endpoint = f"{super().endpoint}"
         io_data = StringIO(data)  # Convert str to StingIO for enumeration
+
+        try:
+            io_bytes = BytesIO(data.encode('utf-8'))
+        except TypeError as e:
+            logger.error(f"Error converting data to bytes: {e}", exc_info=True)
+            raise TypeError(f"Error converting data to bytes: {e}")
+        except MemoryError as e:
+            logger.error(f"Error converting data to BytesIO: {e}", exc_info=True)
+            raise MemoryError(f"Error converting data to BytesIO: {e}")
+
         metadata_update = super().file_metadata(
             endpoint
         )  # Update file metadata to begin upload process
@@ -26,13 +36,15 @@ class StreamUpload(Upload):
         if metadata_update:
             logger.info(f"Starting upload of file {super().file_id}.")
             # Loop through enumerated data, sending chunks of the specified size to Anaplan until all data is uploaded
-            for chunk_num, data in enumerate(
-                iter(partial(io_data.read, chunk_size * (1024**2)), "")
+            for chunk_num, chunk in enumerate(
+                iter(partial(io_bytes.read, chunk_size * (1024**2)), b"")
             ):
+                if not chunk:
+                    break
                 stream_upload = super().file_data(
                     f"{endpoint}chunks/{str(chunk_num)}",
                     chunk_num,
-                    data.encode("utf-8"),
+                    chunk
                 )
 
             # Once all data is uploaded mark the file complete to indicate the file is ready for use

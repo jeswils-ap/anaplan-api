@@ -21,16 +21,22 @@ class FileUpload(Upload):
         if metadata_update:
             logger.info(f"Starting upload of file {super().file_id}.")
 
-            with open(file, "rt") as file:
-                # Enumerate the file contents in specified chunk size
-                for chunk_num, data in enumerate(
-                    iter(partial(file.read, chunk_size * (1024**2)), "")
-                ):
-                    complete = super().file_data(
-                        f"{endpoint}chunks/{str(chunk_num)}",
-                        chunk_num,
-                        data.encode("utf-8"),
-                    )
+            try:
+                with open(file, "rt") as file:
+                    # Enumerate the file contents in specified chunk size
+                    for chunk_num, data in enumerate(
+                        iter(partial(file.read, chunk_size * (1024**2)), "")
+                    ):
+                        if not data:
+                            break
+                        complete = super().file_data(
+                            f"{endpoint}chunks/{str(chunk_num)}",
+                            chunk_num,
+                            data.encode("utf-8"),
+                        )
+            except OSError as e:
+                logger.error(f"Error opening file {file}: {e}", exc_info=True)
+                raise OSError(f"Error opening file {file}: {e}")
 
             if complete:
                 complete_upload = super().file_metadata(f"{endpoint}complete")

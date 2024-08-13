@@ -44,8 +44,10 @@ class AuthorizationManager:
         authenticator = AuthenticationFactory().create_authentication(method, **kwargs)
         header_string = authenticator.auth_header(**kwargs)
         post_data = None
-        if method != "basic":
+
+        if method.lower() != "basic":
             post_data = authenticator.generate_post_data(**kwargs)
+
         token, expiry = authenticator.authenticate(
             authenticator.auth_request(header_string, post_data)
         )

@@ -14,8 +14,8 @@ from .models.AnaplanVersion import AnaplanVersion
 if TYPE_CHECKING:
     from .Action import Action
     from .Parser import Parser
-    from .models import AnaplanConnection
-    from .models import ParserResponse
+    from .models.AnaplanConnection import AnaplanConnection
+    from .models.ParserResponse import ParserResponse
     from pandas import DataFrame
 
 logger = logging.getLogger(__name__)
