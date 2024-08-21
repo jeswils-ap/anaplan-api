@@ -1,13 +1,13 @@
 [tool.poetry]
 name = "anaplan-api"
-version = "0.2.14"
+version = "0.3.2"
 description = "A Python wrapper for the Anaplan Bulk API"
 authors = ["Jesse Wilson <jeswils@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.9"
-requests = "^2.32.0"
+requests = "^2.32.3"
 cryptography = "^42.0.8"
 idna = "^3.7"
 javaobj-py3 = "^0.4.3"

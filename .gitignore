@@ -141,3 +141,10 @@ dmypy.json
 *.zip
 *.sh
 testing.py
+
+#Keys & Certificates
+*.key
+*.der
+*.crt
+*.pem
+*.p12
