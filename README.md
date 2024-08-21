@@ -27,17 +27,16 @@ logger = logging.getLogger(__name__)
 if __name__ == '__main__':
     keys = KeystoreManager(path='/keystore.jks', passphrase='', alias='', key_pass='')
     
-    auth = anaplan.authorize("Basic", email="user@mail.com", password="password")
-    auth = anaplan.authorize("Certificate", private_key=keys.get_key(), certificate=keys.get_cert())
-    conn = AnaplanConnection(auth, "WorkspaceID", "ModelID")
+    auth = anaplan.authorize("Basic", email="{user@mail.com}", password="{password}")
+    auth = anaplan.authorize("Certificate", certificate=keys.get_cert(), private_key=keys.get_key(), password=b"{key_password}")
+    conn = AnaplanConnection(auth.auth_token, "{workspace_id}", "{model_id}")
 
-    anaplan.file_upload(conn=conn, file_id="", chunk_size=5, data='/Users.csv')
+    anaplan.file_upload(conn=conn, file_id="{file_id}", chunk_size=5, data='/Users.csv')
 
     results = anaplan.execute_action(conn=conn, action_id="", retry_count=3)
 
-    for result in results:
-        if result: # Boolean check of ParserResponse object, true if failure dump is available
-            print(result.error_dump)
+    for result in results.responses:
+        print(result.task_details)
 ```
 
 ## Contributing
