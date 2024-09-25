@@ -61,8 +61,7 @@ class CertificateAuthentication(AnaplanAuthentication):
             "Authorization": "".join(
                 [
                     "CACertificate ",
-                    b64encode(self.certificate_details.header.encode("utf-8")).decode("utf-8"),
-                    # b64encode(my_pem_text.encode("utf-8")).decode("utf-8"),
+                    b64encode(self.certificate_details.header).decode("utf-8"),
                 ]
             )
         }
